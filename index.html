@@ -23,6 +23,8 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -363,6 +365,31 @@
         .permission-partial {
             background-color: #f59e0b;
             color: white;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            .print-section, .print-section * {
+                visibility: visible;
+            }
+            
+            .print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+                color: black;
+                padding: 20px;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -1417,6 +1444,38 @@
         </div>
     </div>
 
+    <!-- Print Report Section (Hidden until printing) -->
+    <div id="printReportSection" class="print-section hidden">
+        <div class="p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold">รายงานระบบจัดการสินค้า</h1>
+                <p class="text-gray-600">วันที่พิมพ์: <span id="printDate"></span></p>
+                <p class="text-gray-600">พิมพ์โดย: <span id="printUser"></span></p>
+            </div>
+            
+            <div class="mb-8">
+                <h2 class="text-xl font-bold mb-4">สรุปข้อมูลสินค้า</h2>
+                <div id="printProductSummary"></div>
+            </div>
+            
+            <div class="mb-8">
+                <h2 class="text-xl font-bold mb-4">สรุปข้อมูลผู้ใช้</h2>
+                <div id="printUserSummary"></div>
+            </div>
+            
+            <div class="mb-8">
+                <h2 class="text-xl font-bold mb-4">ข้อมูลสินค้าทั้งหมด</h2>
+                <div id="printProductsTable"></div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-gray-300">
+                <p class="text-gray-600 text-sm text-center">
+                    ระบบจัดการสินค้าพื้นฐานด้วย Firebase | เวอร์ชัน 3.0.0
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase Configuration Script -->
     <script id="firebaseConfigScript">
         // Firebase Configuration
@@ -1443,15 +1502,14 @@
         // ตัวแปรหลักของแอพพลิเคชัน
         let products = [];
         let users = [];
-        let productsDataTable = null;
-        let usersDataTable = null;
         let currentUser = null;
         let userToDelete = null;
         let productToDelete = null;
         let notifications = [];
         let recentActivities = [];
+        let autoRefreshInterval = null;
         
-        // สิทธิ์การใช้งานตามบทบาท (แก้ไขให้ admin มีสิทธิ์เต็ม)
+        // สิทธิ์การใช้งานตามบทบาท
         const rolePermissions = {
             'admin': {
                 canView: true,
@@ -1466,7 +1524,7 @@
                 canView: true,
                 canAdd: true,
                 canEdit: true,
-                canDelete: false,  // ผู้จัดการไม่สามารถลบได้
+                canDelete: false,
                 canManageUsers: false,
                 canViewReports: true,
                 canManageSettings: false
@@ -1475,7 +1533,7 @@
                 canView: true,
                 canAdd: true,
                 canEdit: true,
-                canDelete: false,  // ผู้ใช้ทั่วไปไม่สามารถลบได้
+                canDelete: false,
                 canManageUsers: false,
                 canViewReports: false,
                 canManageSettings: false
@@ -1691,16 +1749,6 @@
             loadingOverlay.classList.add('hidden');
         }
         
-        // ซ่อน Firebase Config เพื่อความปลอดภัย
-        function hideFirebaseConfig() {
-            const configScript = document.getElementById('firebaseConfigScript');
-            if (configScript) {
-                configScript.remove();
-                console.log("Firebase configuration hidden for security.");
-                showToast('Firebase configuration secured', 'success');
-            }
-        }
-        
         // ตรวจสอบผู้ใช้และสิทธิ์
         function checkUserAndPermissions() {
             const savedUser = localStorage.getItem('inventoryUser');
@@ -1743,6 +1791,9 @@
             
             // ตั้งค่าสิทธิ์ตามบทบาท
             setupPermissions();
+            
+            // ตั้งค่าเริ่มต้นจาก Local Storage
+            loadSettingsFromLocalStorage();
             
             // แสดง Dashboard เป็นหน้าแรก
             showPage('dashboardPage');
@@ -1835,6 +1886,16 @@
             const activePage = document.getElementById(pageId);
             if (activePage) {
                 activePage.classList.remove('hidden');
+                
+                // เมื่อแสดงหน้า Reports ให้โหลดรายงาน
+                if (pageId === 'reportsPage') {
+                    loadReports();
+                }
+                
+                // เมื่อแสดงหน้า Settings ให้โหลดการตั้งค่า
+                if (pageId === 'settingsPage') {
+                    loadSettings();
+                }
             }
             
             // อัพเดท Navigation
@@ -2018,26 +2079,6 @@
                 tableBody.appendChild(row);
             });
             
-            // DataTable initialization
-            if (!productsDataTable) {
-                productsDataTable = $('#productsTable').DataTable({
-                    pageLength: 10,
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json'
-                    },
-                    order: [[0, 'asc']]
-                });
-            } else {
-                productsDataTable.destroy();
-                productsDataTable = $('#productsTable').DataTable({
-                    pageLength: 10,
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json'
-                    },
-                    order: [[0, 'asc']]
-                });
-            }
-            
             // อัพเดทสถิติสินค้า
             updateProductStats();
         }
@@ -2159,26 +2200,6 @@
                 tableBody.appendChild(row);
             });
             
-            // DataTable initialization
-            if (!usersDataTable) {
-                usersDataTable = $('#usersTable').DataTable({
-                    pageLength: 10,
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json'
-                    },
-                    order: [[0, 'asc']]
-                });
-            } else {
-                usersDataTable.destroy();
-                usersDataTable = $('#usersTable').DataTable({
-                    pageLength: 10,
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json'
-                    },
-                    order: [[0, 'asc']]
-                });
-            }
-            
             // อัพเดทสถิติผู้ใช้
             updateUserStats();
         }
@@ -2289,6 +2310,415 @@
             }).catch(error => {
                 console.error('Error updating user in database:', error);
             });
+        }
+        
+        // ==================== SETTINGS FUNCTIONS ====================
+        
+        // โหลดการตั้งค่าจาก Local Storage
+        function loadSettingsFromLocalStorage() {
+            const settings = JSON.parse(localStorage.getItem('inventorySettings')) || {};
+            
+            // โหลดการตั้งค่า Toggles
+            const notificationToggle = document.getElementById('notificationToggle');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+            
+            if (notificationToggle) {
+                notificationToggle.checked = settings.notifications !== false;
+            }
+            
+            if (darkModeToggle) {
+                darkModeToggle.checked = settings.darkMode !== false;
+            }
+            
+            if (autoRefreshToggle) {
+                autoRefreshToggle.checked = settings.autoRefresh === true;
+                
+                // ถ้าเปิด Auto Refresh ให้ตั้งค่าช่วงเวลา
+                if (settings.autoRefresh) {
+                    setupAutoRefresh();
+                }
+            }
+        }
+        
+        // บันทึกการตั้งค่าไปยัง Local Storage
+        function saveSettingsToLocalStorage() {
+            const settings = {
+                notifications: document.getElementById('notificationToggle').checked,
+                darkMode: document.getElementById('darkModeToggle').checked,
+                autoRefresh: document.getElementById('autoRefreshToggle').checked
+            };
+            
+            localStorage.setItem('inventorySettings', JSON.stringify(settings));
+            showToast('บันทึกการตั้งค่าสำเร็จ', 'success');
+        }
+        
+        // โหลดการตั้งค่าสำหรับหน้า Settings
+        function loadSettings() {
+            // อัพเดทเวลาปัจจุบัน
+            updateSystemTime();
+            
+            // โหลดการตั้งค่าจาก Local Storage
+            loadSettingsFromLocalStorage();
+            
+            // อัพเดทสถานะการเชื่อมต่อ
+            updateConnectionStatus();
+        }
+        
+        // อัพเดทเวลาปัจจุบัน
+        function updateSystemTime() {
+            const systemTimeElement = document.getElementById('systemTime');
+            if (systemTimeElement) {
+                const now = new Date();
+                systemTimeElement.textContent = now.toLocaleString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+        }
+        
+        // อัพเดทสถานะการเชื่อมต่อ
+        function updateConnectionStatus() {
+            const statusElement = document.getElementById('systemConnectionStatus');
+            if (statusElement) {
+                statusElement.textContent = 'ออนไลน์';
+                statusElement.className = 'font-medium text-green-400';
+            }
+        }
+        
+        // ตั้งค่า Auto Refresh
+        function setupAutoRefresh() {
+            // ล้าง interval เดิมถ้ามี
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            
+            // ตั้งค่า interval ใหม่ทุก 30 วินาที
+            autoRefreshInterval = setInterval(() => {
+                loadProducts();
+                loadUsers();
+                showToast('รีเฟรชข้อมูลอัตโนมัติเรียบร้อย', 'info');
+            }, 30000); // 30 วินาที
+        }
+        
+        // ==================== REPORTS FUNCTIONS ====================
+        
+        // โหลดรายงาน
+        function loadReports() {
+            updateProductReport();
+            updateUserReport();
+        }
+        
+        // อัพเดทรายงานสินค้า
+        function updateProductReport() {
+            const productSummary = document.getElementById('productSummary');
+            const topProducts = document.getElementById('topProducts');
+            
+            if (!productSummary || !topProducts) return;
+            
+            // สรุปข้อมูลสินค้า
+            const totalProducts = products.length;
+            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
+            const outOfStock = products.filter(p => p.quantity <= 0).length;
+            const lowStock = products.filter(p => p.quantity > 0 && p.quantity <= 5).length;
+            const highValueProducts = products.filter(p => (p.quantity * p.price) > 10000).length;
+            
+            productSummary.innerHTML = `
+                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
+                    <span class="text-gray-400">จำนวนสินค้าทั้งหมด</span>
+                    <span class="font-bold text-lg">${totalProducts} รายการ</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
+                    <span class="text-gray-400">มูลค่ารวม</span>
+                    <span class="font-bold text-lg text-green-400">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
+                    <span class="text-gray-400">สินค้าหมดสต๊อก</span>
+                    <span class="font-bold text-lg text-red-400">${outOfStock} รายการ</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
+                    <span class="text-gray-400">สินค้าเหลือน้อย</span>
+                    <span class="font-bold text-lg text-yellow-400">${lowStock} รายการ</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
+                    <span class="text-gray-400">สินค้ามูลค่าสูง</span>
+                    <span class="font-bold text-lg text-purple-400">${highValueProducts} รายการ</span>
+                </div>
+            `;
+            
+            // สินค้าขายดี (เรียงตามมูลค่ารวม)
+            const sortedProducts = [...products].sort((a, b) => {
+                const valueA = a.quantity * a.price;
+                const valueB = b.quantity * b.price;
+                return valueB - valueA;
+            }).slice(0, 5); // เอา 5 อันดับแรก
+            
+            topProducts.innerHTML = '';
+            
+            if (sortedProducts.length === 0) {
+                topProducts.innerHTML = '<p class="text-gray-500 text-center">ไม่มีข้อมูลสินค้า</p>';
+                return;
+            }
+            
+            sortedProducts.forEach((product, index) => {
+                const totalValue = product.quantity * product.price;
+                const productElement = document.createElement('div');
+                productElement.className = 'flex justify-between items-center p-3 bg-gray-900/30 rounded-lg';
+                productElement.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs mr-3">${index + 1}</span>
+                        <div>
+                            <p class="font-medium">${product.productName}</p>
+                            <p class="text-gray-400 text-sm">${product.category}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-green-400">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
+                        <p class="text-gray-400 text-sm">${product.quantity} ชิ้น</p>
+                    </div>
+                `;
+                topProducts.appendChild(productElement);
+            });
+        }
+        
+        // อัพเดทรายงานผู้ใช้
+        function updateUserReport() {
+            const userSummary = document.getElementById('userSummary');
+            
+            if (!userSummary) return;
+            
+            const totalUsers = users.length;
+            const adminUsers = users.filter(u => u.role === 'admin').length;
+            const managerUsers = users.filter(u => u.role === 'manager').length;
+            const normalUsers = users.filter(u => u.role === 'user').length;
+            const activeUsers = users.filter(u => u.isActive !== false).length;
+            
+            userSummary.innerHTML = `
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-indigo-900/30 rounded-lg">
+                        <div class="text-3xl font-bold text-indigo-400">${totalUsers}</div>
+                        <div class="text-sm text-gray-300">ผู้ใช้ทั้งหมด</div>
+                    </div>
+                    <div class="text-center p-4 bg-purple-900/30 rounded-lg">
+                        <div class="text-3xl font-bold text-purple-400">${adminUsers}</div>
+                        <div class="text-sm text-gray-300">ผู้ดูแลระบบ</div>
+                    </div>
+                    <div class="text-center p-4 bg-blue-900/30 rounded-lg">
+                        <div class="text-3xl font-bold text-blue-400">${managerUsers}</div>
+                        <div class="text-sm text-gray-300">ผู้จัดการ</div>
+                    </div>
+                    <div class="text-center p-4 bg-green-900/30 rounded-lg">
+                        <div class="text-3xl font-bold text-green-400">${normalUsers}</div>
+                        <div class="text-sm text-gray-300">ผู้ใช้ทั่วไป</div>
+                    </div>
+                </div>
+                <div class="bg-gray-900/30 p-4 rounded-lg">
+                    <p class="font-medium mb-2">สถานะผู้ใช้</p>
+                    <div class="flex items-center">
+                        <div class="flex-1">
+                            <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500" style="width: ${(activeUsers / totalUsers) * 100}%"></div>
+                            </div>
+                        </div>
+                        <span class="ml-3 text-sm">${activeUsers}/${totalUsers} คน (ใช้งานได้)</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ส่งออกรายงานสินค้า
+        function exportProductReport() {
+            showLoading('กำลังสร้างรายงานสินค้า...');
+            
+            // สร้างข้อมูล CSV
+            let csvContent = "รหัสสินค้า,ชื่อสินค้า,ประเภท,จำนวน,ราคาต่อหน่วย,มูลค่ารวม,สถานะ\n";
+            
+            products.forEach(product => {
+                const totalValue = product.quantity * product.price;
+                const isLowStock = product.quantity <= 5 && product.quantity > 0;
+                const isOutOfStock = product.quantity <= 0;
+                
+                let status = 'พร้อมจำหน่าย';
+                if (isLowStock) status = 'เหลือน้อย';
+                if (isOutOfStock) status = 'หมดสต๊อก';
+                
+                csvContent += `"${product.productCode}","${product.productName}","${product.category}",${product.quantity},${product.price},${totalValue},"${status}"\n`;
+            });
+            
+            // สร้างไฟล์และดาวน์โหลด
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `รายงานสินค้า_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            hideLoading();
+            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกรายงานสินค้าเป็นไฟล์ CSV เรียบร้อยแล้ว');
+        }
+        
+        // ส่งออกรายงานผู้ใช้
+        function exportUserReport() {
+            showLoading('กำลังสร้างรายงานผู้ใช้...');
+            
+            // สร้างข้อมูล CSV
+            let csvContent = "ชื่อผู้ใช้,ชื่อ-นามสกุล,บทบาท,สถานะ,ล็อกอินล่าสุด\n";
+            
+            users.forEach(user => {
+                const status = user.isActive !== false ? 'ใช้งานได้' : 'ปิดใช้งาน';
+                const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('th-TH') : 'ไม่เคยล็อกอิน';
+                
+                csvContent += `"${user.username}","${user.fullName || ''}","${getRoleDisplay(user.role)}","${status}","${lastLogin}"\n`;
+            });
+            
+            // สร้างไฟล์และดาวน์โหลด
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `รายงานผู้ใช้_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            hideLoading();
+            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกรายงานผู้ใช้เป็นไฟล์ CSV เรียบร้อยแล้ว');
+        }
+        
+        // พิมพ์รายงาน
+        function printReport() {
+            showLoading('กำลังเตรียมรายงานสำหรับพิมพ์...');
+            
+            // อัพเดทข้อมูลสำหรับพิมพ์
+            document.getElementById('printDate').textContent = new Date().toLocaleString('th-TH');
+            document.getElementById('printUser').textContent = currentUser.username;
+            
+            // สรุปสินค้า
+            const totalProducts = products.length;
+            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
+            const outOfStock = products.filter(p => p.quantity <= 0).length;
+            const lowStock = products.filter(p => p.quantity > 0 && p.quantity <= 5).length;
+            
+            document.getElementById('printProductSummary').innerHTML = `
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">จำนวนสินค้าทั้งหมด</p>
+                        <p class="font-bold text-lg">${totalProducts} รายการ</p>
+                    </div>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">มูลค่ารวม</p>
+                        <p class="font-bold text-lg text-green-600">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
+                    </div>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">สินค้าหมดสต๊อก</p>
+                        <p class="font-bold text-lg text-red-600">${outOfStock} รายการ</p>
+                    </div>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">สินค้าเหลือน้อย</p>
+                        <p class="font-bold text-lg text-yellow-600">${lowStock} รายการ</p>
+                    </div>
+                </div>
+            `;
+            
+            // สรุปผู้ใช้
+            const totalUsers = users.length;
+            const adminUsers = users.filter(u => u.role === 'admin').length;
+            const managerUsers = users.filter(u => u.role === 'manager').length;
+            const normalUsers = users.filter(u => u.role === 'user').length;
+            
+            document.getElementById('printUserSummary').innerHTML = `
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">ผู้ใช้ทั้งหมด</p>
+                        <p class="font-bold text-lg">${totalUsers} คน</p>
+                    </div>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">ผู้ดูแลระบบ</p>
+                        <p class="font-bold text-lg">${adminUsers} คน</p>
+                    </div>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">ผู้จัดการ</p>
+                        <p class="font-bold text-lg">${managerUsers} คน</p>
+                    </div>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">ผู้ใช้ทั่วไป</p>
+                        <p class="font-bold text-lg">${normalUsers} คน</p>
+                    </div>
+                </div>
+            `;
+            
+            // ตารางสินค้า
+            let productsTableHtml = `
+                <table class="min-w-full border">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border p-2">รหัสสินค้า</th>
+                            <th class="border p-2">ชื่อสินค้า</th>
+                            <th class="border p-2">ประเภท</th>
+                            <th class="border p-2">จำนวน</th>
+                            <th class="border p-2">ราคา/หน่วย</th>
+                            <th class="border p-2">มูลค่ารวม</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            products.forEach(product => {
+                const totalValue = product.quantity * product.price;
+                productsTableHtml += `
+                    <tr>
+                        <td class="border p-2">${product.productCode}</td>
+                        <td class="border p-2">${product.productName}</td>
+                        <td class="border p-2">${product.category}</td>
+                        <td class="border p-2">${product.quantity}</td>
+                        <td class="border p-2">฿${product.price.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                        <td class="border p-2">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+            
+            productsTableHtml += '</tbody></table>';
+            document.getElementById('printProductsTable').innerHTML = productsTableHtml;
+            
+            // ซ่อน Loading และพิมพ์รายงาน
+            setTimeout(() => {
+                hideLoading();
+                
+                // แสดงส่วนที่จะพิมพ์
+                const printSection = document.getElementById('printReportSection');
+                printSection.classList.remove('hidden');
+                
+                // พิมพ์
+                window.print();
+                
+                // ซ่อนส่วนพิมพ์หลังพิมพ์เสร็จ
+                setTimeout(() => {
+                    printSection.classList.add('hidden');
+                }, 500);
+                
+            }, 1000);
+        }
+        
+        // ฟังก์ชันช่วยเหลือสำหรับแสดงบทบาท
+        function getRoleDisplay(role) {
+            switch(role) {
+                case 'admin': return 'ผู้ดูแลระบบ';
+                case 'manager': return 'ผู้จัดการ';
+                case 'user': return 'ผู้ใช้ทั่วไป';
+                default: return 'ไม่ระบุ';
+            }
         }
         
         // ==================== PRODUCT MANAGEMENT ====================
@@ -2498,13 +2928,12 @@
                 modalTitle.textContent = 'แก้ไขข้อมูลผู้ใช้';
                 userId.value = user.id;
                 newUsername.value = user.username;
-                newUsername.disabled = true; // ไม่สามารถเปลี่ยนชื่อผู้ใช้ได้
-                newPassword.required = false; // ไม่จำเป็นต้องกรอกรหัสผ่านเมื่อแก้ไข
+                newUsername.disabled = true;
+                newPassword.required = false;
                 newPassword.placeholder = 'เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน';
                 fullName.value = user.fullName || '';
                 userRole.value = user.role || 'user';
                 
-                // ตั้งค่าสิทธิ์ตามบทบาท
                 updatePermissions(user.role || 'user');
             } else {
                 modalTitle.textContent = 'เพิ่มผู้ใช้ใหม่';
@@ -2516,11 +2945,9 @@
                 fullName.value = '';
                 userRole.value = 'user';
                 
-                // ตั้งค่าสิทธิ์เริ่มต้นสำหรับผู้ใช้ทั่วไป
                 updatePermissions('user');
             }
             
-            // เมื่อเปลี่ยนบทบาท ให้อัพเดทสิทธิ์
             userRole.addEventListener('change', function() {
                 updatePermissions(this.value);
             });
@@ -2537,7 +2964,6 @@
         function saveUser(e) {
             e.preventDefault();
             
-            // ตรวจสอบสิทธิ์
             if (!checkPermission('canManageUsers')) {
                 showAlert('error', 'ไม่มีสิทธิ์', 'ขออภัย คุณไม่มีสิทธิ์จัดการผู้ใช้');
                 return;
@@ -2549,7 +2975,6 @@
             const fullName = document.getElementById('fullName').value.trim();
             const role = document.getElementById('userRole').value;
             
-            // ตรวจสอบข้อมูล
             if (!username || !role) {
                 showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกชื่อผู้ใช้และบทบาท');
                 return;
@@ -2569,9 +2994,7 @@
                 isActive: true
             };
             
-            // บันทึกลง Firebase
             if (userId) {
-                // อัพเดทข้อมูลที่มีอยู่
                 database.ref('users/' + userId).update(userData)
                     .then(() => {
                         hideUserModal();
@@ -2582,20 +3005,14 @@
                         showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการอัพเดทข้อมูลผู้ใช้');
                     });
             } else {
-                // เพิ่มข้อมูลใหม่
-                // ตรวจสอบว่ามีชื่อผู้ใช้ซ้ำหรือไม่
                 const isDuplicate = users.some(user => user.username === username);
                 if (isDuplicate) {
                     showAlert('error', 'ข้อมูลซ้ำ', 'ชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว กรุณาใช้ชื่ออื่น');
                     return;
                 }
                 
-                // เพิ่มข้อมูลการสร้าง
                 userData.createdAt = new Date().toISOString();
                 userData.createdBy = currentUser.username;
-                
-                // ในระบบจริง ควรเข้ารหัสรหัสผ่าน
-                // ระบบนี้ใช้เพื่อการเรียนรู้เท่านั้น
                 userData.password = password;
                 
                 database.ref('users/' + username).set(userData)
@@ -2620,13 +3037,11 @@
         
         // แสดง Confirmation สำหรับลบผู้ใช้
         function showDeleteUserConfirm(userId, userName) {
-            // ตรวจสอบสิทธิ์
             if (!checkPermission('canManageUsers')) {
                 showAlert('error', 'ไม่มีสิทธิ์', 'ขออภัย คุณไม่มีสิทธิ์จัดการผู้ใช้');
                 return;
             }
             
-            // ตรวจสอบว่าไม่ใช่ผู้ใช้ปัจจุบัน
             if (userId === currentUser.username) {
                 showAlert('error', 'ไม่สามารถดำเนินการได้', 'ไม่สามารถลบบัญชีผู้ใช้ปัจจุบันได้');
                 return;
@@ -2685,7 +3100,6 @@
             const profileLastLogin = document.getElementById('profileLastLogin');
             const profileCreatedAt = document.getElementById('profileCreatedAt');
             
-            // หาข้อมูลผู้ใช้จากฐานข้อมูล
             const userData = users.find(u => u.id === currentUser.username) || currentUser;
             
             profileUsername.textContent = userData.username;
@@ -2697,7 +3111,6 @@
             profileCreatedAt.textContent = userData.createdAt ? 
                 new Date(userData.createdAt).toLocaleDateString('th-TH') : 'ไม่ระบุ';
             
-            // สร้าง badge ตามบทบาท
             let badgeClass = '';
             let roleDisplay = '';
             
@@ -2721,16 +3134,6 @@
             modal.classList.remove('hidden');
         }
         
-        // ฟังก์ชันช่วยเหลือสำหรับแสดงบทบาท
-        function getRoleDisplay(role) {
-            switch(role) {
-                case 'admin': return 'ผู้ดูแลระบบ';
-                case 'manager': return 'ผู้จัดการ';
-                case 'user': return 'ผู้ใช้ทั่วไป';
-                default: return 'ไม่ระบุ';
-            }
-        }
-        
         // ออกจากระบบ
         function logout() {
             showConfirmation(
@@ -2741,17 +3144,16 @@
                 'ยกเลิก'
             ).then(confirmed => {
                 if (confirmed) {
-                    // ลบข้อมูลผู้ใช้จาก localStorage
-                    localStorage.removeItem('inventoryUser');
+                    // ล้าง Auto Refresh
+                    if (autoRefreshInterval) {
+                        clearInterval(autoRefreshInterval);
+                    }
                     
-                    // รีเซ็ตตัวแปร
+                    localStorage.removeItem('inventoryUser');
                     currentUser = null;
                     products = [];
                     users = [];
-                    
-                    // แสดงหน้าล็อกอิน
                     showLogin();
-                    
                     showAlert('success', 'ออกจากระบบสำเร็จ', 'คุณได้ออกจากระบบเรียบร้อยแล้ว');
                 }
             });
@@ -2761,7 +3163,6 @@
         function exportProducts() {
             showLoading('กำลังเตรียมข้อมูลสำหรับส่งออก...');
             
-            // สร้างข้อมูล CSV
             let csvContent = "รหัสสินค้า,ชื่อสินค้า,ประเภท,จำนวน,ราคาต่อหน่วย,มูลค่ารวม,สถานะ,วันที่สร้าง\n";
             
             products.forEach(product => {
@@ -2778,7 +3179,6 @@
                 csvContent += `"${product.productCode}","${product.productName}","${product.category}",${product.quantity},${product.price},${totalValue},"${status}","${createdDate}"\n`;
             });
             
-            // สร้างไฟล์และดาวน์โหลด
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
@@ -2800,8 +3200,6 @@
         // เริ่มต้นแอพพลิเคชันเมื่อโหลดหน้าเว็บเสร็จ
         document.addEventListener('DOMContentLoaded', function() {
             console.log('ระบบกำลังเริ่มต้น...');
-            
-            // ตรวจสอบผู้ใช้และสิทธิ์
             checkUserAndPermissions();
             
             // ========== LOGIN PAGE EVENT LISTENERS ==========
@@ -2809,7 +3207,6 @@
             if (loginForm) {
                 loginForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
                     const username = document.getElementById('username').value.trim();
                     const password = document.getElementById('password').value.trim();
                     
@@ -2823,177 +3220,93 @@
             }
             
             // ========== NAVIGATION EVENT LISTENERS ==========
-            // Dashboard
-            const navDashboard = document.getElementById('navDashboard');
-            if (navDashboard) {
-                navDashboard.addEventListener('click', () => showPage('dashboardPage'));
-            }
+            document.getElementById('navDashboard')?.addEventListener('click', () => showPage('dashboardPage'));
+            document.getElementById('navProducts')?.addEventListener('click', () => showPage('productsPage'));
+            document.getElementById('navUsers')?.addEventListener('click', () => {
+                if (checkPermission('canManageUsers')) {
+                    showPage('usersPage');
+                } else {
+                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เข้าถึงหน้าจัดการผู้ใช้');
+                }
+            });
+            document.getElementById('navReports')?.addEventListener('click', () => {
+                if (checkPermission('canViewReports')) {
+                    showPage('reportsPage');
+                } else {
+                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เข้าถึงหน้ารายงาน');
+                }
+            });
+            document.getElementById('navSettings')?.addEventListener('click', () => {
+                if (checkPermission('canManageSettings')) {
+                    showPage('settingsPage');
+                } else {
+                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เข้าถึงหน้าตั้งค่าระบบ');
+                }
+            });
             
-            // Products
-            const navProducts = document.getElementById('navProducts');
-            if (navProducts) {
-                navProducts.addEventListener('click', () => showPage('productsPage'));
-            }
+            document.getElementById('homeBtn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPage('dashboardPage');
+            });
             
-            // Users
-            const navUsers = document.getElementById('navUsers');
-            if (navUsers) {
-                navUsers.addEventListener('click', () => {
-                    if (checkPermission('canManageUsers')) {
-                        showPage('usersPage');
-                    } else {
-                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เข้าถึงหน้าจัดการผู้ใช้');
-                    }
-                });
-            }
-            
-            // Reports
-            const navReports = document.getElementById('navReports');
-            if (navReports) {
-                navReports.addEventListener('click', () => {
-                    if (checkPermission('canViewReports')) {
-                        showPage('reportsPage');
-                    } else {
-                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เข้าถึงหน้ารายงาน');
-                    }
-                });
-            }
-            
-            // Settings
-            const navSettings = document.getElementById('navSettings');
-            if (navSettings) {
-                navSettings.addEventListener('click', () => {
-                    if (checkPermission('canManageSettings')) {
-                        showPage('settingsPage');
-                    } else {
-                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เข้าถึงหน้าตั้งค่าระบบ');
-                    }
-                });
-            }
-            
-            // Home Button
-            const homeBtn = document.getElementById('homeBtn');
-            if (homeBtn) {
-                homeBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    showPage('dashboardPage');
-                });
-            }
-            
-            // User Info Button
-            const userInfoBtn = document.getElementById('userInfoBtn');
-            if (userInfoBtn) {
-                userInfoBtn.addEventListener('click', showUserProfile);
-            }
+            document.getElementById('userInfoBtn')?.addEventListener('click', showUserProfile);
             
             // ========== PRODUCTS PAGE EVENT LISTENERS ==========
-            // Add Product Button
-            const addProductMainBtn = document.getElementById('addProductMainBtn');
-            if (addProductMainBtn) {
-                addProductMainBtn.addEventListener('click', () => {
-                    if (checkPermission('canAdd')) {
-                        showProductModal();
-                    } else {
-                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มสินค้า');
-                    }
-                });
-            }
+            document.getElementById('addProductMainBtn')?.addEventListener('click', () => {
+                if (checkPermission('canAdd')) {
+                    showProductModal();
+                } else {
+                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มสินค้า');
+                }
+            });
             
-            const quickAddProductBtn = document.getElementById('quickAddProductBtn');
-            if (quickAddProductBtn) {
-                quickAddProductBtn.addEventListener('click', () => {
-                    if (checkPermission('canAdd')) {
-                        showProductModal();
-                    } else {
-                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มสินค้า');
-                    }
-                });
-            }
+            document.getElementById('quickAddProductBtn')?.addEventListener('click', () => {
+                if (checkPermission('canAdd')) {
+                    showProductModal();
+                } else {
+                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มสินค้า');
+                }
+            });
             
-            // Product Form
-            const productForm = document.getElementById('productForm');
-            if (productForm) {
-                productForm.addEventListener('submit', saveProduct);
-            }
-            
-            // Cancel Product Modal Button
-            const cancelProductModalBtn = document.getElementById('cancelProductModalBtn');
-            if (cancelProductModalBtn) {
-                cancelProductModalBtn.addEventListener('click', hideProductModal);
-            }
-            
-            // Export Products Button
-            const exportProductsBtn = document.getElementById('exportProductsBtn');
-            if (exportProductsBtn) {
-                exportProductsBtn.addEventListener('click', exportProducts);
-            }
-            
-            // Refresh Products Button
-            const refreshProductsBtn = document.getElementById('refreshProductsBtn');
-            if (refreshProductsBtn) {
-                refreshProductsBtn.addEventListener('click', () => {
-                    loadProducts();
-                    showToast('กำลังรีเฟรชข้อมูลสินค้า...', 'info');
-                });
-            }
+            document.getElementById('productForm')?.addEventListener('submit', saveProduct);
+            document.getElementById('cancelProductModalBtn')?.addEventListener('click', hideProductModal);
+            document.getElementById('exportProductsBtn')?.addEventListener('click', exportProducts);
+            document.getElementById('refreshProductsBtn')?.addEventListener('click', () => {
+                loadProducts();
+                showToast('กำลังรีเฟรชข้อมูลสินค้า...', 'info');
+            });
             
             // ========== USERS PAGE EVENT LISTENERS ==========
-            // Add User Button
-            const addUserBtn = document.getElementById('addUserBtn');
-            if (addUserBtn) {
-                addUserBtn.addEventListener('click', () => {
-                    if (checkPermission('canManageUsers')) {
-                        showUserModal();
-                    } else {
-                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มผู้ใช้');
-                    }
-                });
-            }
+            document.getElementById('addUserBtn')?.addEventListener('click', () => {
+                if (checkPermission('canManageUsers')) {
+                    showUserModal();
+                } else {
+                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มผู้ใช้');
+                }
+            });
             
-            const quickAddUserBtn = document.getElementById('quickAddUserBtn');
-            if (quickAddUserBtn) {
-                quickAddUserBtn.addEventListener('click', () => {
-                    if (checkPermission('canManageUsers')) {
-                        showUserModal();
-                    } else {
-                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มผู้ใช้');
-                    }
-                });
-            }
+            document.getElementById('quickAddUserBtn')?.addEventListener('click', () => {
+                if (checkPermission('canManageUsers')) {
+                    showUserModal();
+                } else {
+                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มผู้ใช้');
+                }
+            });
             
-            // User Form
-            const userForm = document.getElementById('userForm');
-            if (userForm) {
-                userForm.addEventListener('submit', saveUser);
-            }
-            
-            // Cancel User Modal Button
-            const cancelUserModalBtn = document.getElementById('cancelUserModalBtn');
-            if (cancelUserModalBtn) {
-                cancelUserModalBtn.addEventListener('click', hideUserModal);
-            }
-            
-            // Refresh Users Button
-            const refreshUsersBtn = document.getElementById('refreshUsersBtn');
-            if (refreshUsersBtn) {
-                refreshUsersBtn.addEventListener('click', () => {
-                    loadUsers();
-                    showToast('กำลังรีเฟรชข้อมูลผู้ใช้...', 'info');
-                });
-            }
+            document.getElementById('userForm')?.addEventListener('submit', saveUser);
+            document.getElementById('cancelUserModalBtn')?.addEventListener('click', hideUserModal);
+            document.getElementById('refreshUsersBtn')?.addEventListener('click', () => {
+                loadUsers();
+                showToast('กำลังรีเฟรชข้อมูลผู้ใช้...', 'info');
+            });
             
             // ========== REPORTS PAGE EVENT LISTENERS ==========
-            // Report Tabs
             const reportTabs = document.querySelectorAll('.tab');
             reportTabs.forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
-                    
-                    // อัพเดท Tab Active State
                     reportTabs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
-                    
-                    // แสดง Tab Content ที่เลือก
                     document.querySelectorAll('.tab-content').forEach(content => {
                         content.classList.add('hidden');
                     });
@@ -3001,148 +3314,140 @@
                 });
             });
             
+            document.getElementById('exportProductReportBtn')?.addEventListener('click', exportProductReport);
+            document.getElementById('exportUserReportBtn')?.addEventListener('click', exportUserReport);
+            document.getElementById('printReportBtn')?.addEventListener('click', printReport);
+            
             // ========== SETTINGS PAGE EVENT LISTENERS ==========
-            // Reset Demo Data Button
-            const resetDemoDataBtn = document.getElementById('resetDemoDataBtn');
-            if (resetDemoDataBtn) {
-                resetDemoDataBtn.addEventListener('click', () => {
-                    if (checkPermission('canManageSettings')) {
-                        showConfirmation(
-                            'รีเซ็ตข้อมูลตัวอย่าง',
-                            'การดำเนินการนี้จะลบข้อมูลสินค้าทั้งหมดและสร้างข้อมูลตัวอย่างใหม่\nคุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ?',
-                            'warning',
-                            'รีเซ็ตข้อมูล',
-                            'ยกเลิก'
-                        ).then(confirmed => {
-                            if (confirmed) {
-                                // รีเซ็ตข้อมูลสินค้า
-                                const demoProducts = [
-                                    {
-                                        productCode: "P001",
-                                        productName: "เมาส์ไร้สาย",
-                                        category: "อิเล็กทรอนิกส์",
-                                        quantity: 25,
-                                        price: 599.00,
-                                        createdBy: currentUser.username,
-                                        createdAt: new Date().toISOString()
-                                    },
-                                    {
-                                        productCode: "P002",
-                                        productName: "คีย์บอร์ดเกมมิ่ง",
-                                        category: "อิเล็กทรอนิกส์",
-                                        quantity: 12,
-                                        price: 1290.00,
-                                        createdBy: currentUser.username,
-                                        createdAt: new Date().toISOString()
-                                    },
-                                    {
-                                        productCode: "P003",
-                                        productName: "สมุดบันทึก",
-                                        category: "เครื่องเขียน",
-                                        quantity: 150,
-                                        price: 45.00,
-                                        createdBy: currentUser.username,
-                                        createdAt: new Date().toISOString()
-                                    }
-                                ];
-                                
-                                showLoading('กำลังรีเซ็ตข้อมูลตัวอย่าง...');
-                                
-                                // ลบข้อมูลเดิมทั้งหมดก่อน
-                                database.ref('products').remove()
-                                    .then(() => {
-                                        // เพิ่มข้อมูลตัวอย่างทั้งหมด
-                                        const promises = demoProducts.map(product => {
-                                            return database.ref('products').push(product);
-                                        });
-                                        
-                                        return Promise.all(promises);
-                                    })
-                                    .then(() => {
-                                        hideLoading();
-                                        showAlert('success', 'รีเซ็ตสำเร็จ', 'รีเซ็ตข้อมูลตัวอย่างสำเร็จแล้ว!');
-                                    })
-                                    .catch(error => {
-                                        console.error('Error resetting demo data:', error);
-                                        hideLoading();
-                                        showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการรีเซ็ตข้อมูลตัวอย่าง');
+            document.getElementById('backupDataBtn')?.addEventListener('click', () => {
+                showAlert('info', 'สำรองข้อมูล', 'ฟังก์ชันสำรองข้อมูลอยู่ระหว่างการพัฒนา');
+            });
+            
+            document.getElementById('resetDemoDataBtn')?.addEventListener('click', () => {
+                if (checkPermission('canManageSettings')) {
+                    showConfirmation(
+                        'รีเซ็ตข้อมูลตัวอย่าง',
+                        'การดำเนินการนี้จะลบข้อมูลสินค้าทั้งหมดและสร้างข้อมูลตัวอย่างใหม่\nคุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ?',
+                        'warning',
+                        'รีเซ็ตข้อมูล',
+                        'ยกเลิก'
+                    ).then(confirmed => {
+                        if (confirmed) {
+                            const demoProducts = [
+                                {
+                                    productCode: "P001",
+                                    productName: "เมาส์ไร้สาย",
+                                    category: "อิเล็กทรอนิกส์",
+                                    quantity: 25,
+                                    price: 599.00,
+                                    createdBy: currentUser.username,
+                                    createdAt: new Date().toISOString()
+                                },
+                                {
+                                    productCode: "P002",
+                                    productName: "คีย์บอร์ดเกมมิ่ง",
+                                    category: "อิเล็กทรอนิกส์",
+                                    quantity: 12,
+                                    price: 1290.00,
+                                    createdBy: currentUser.username,
+                                    createdAt: new Date().toISOString()
+                                },
+                                {
+                                    productCode: "P003",
+                                    productName: "สมุดบันทึก",
+                                    category: "เครื่องเขียน",
+                                    quantity: 150,
+                                    price: 45.00,
+                                    createdBy: currentUser.username,
+                                    createdAt: new Date().toISOString()
+                                }
+                            ];
+                            
+                            showLoading('กำลังรีเซ็ตข้อมูลตัวอย่าง...');
+                            
+                            database.ref('products').remove()
+                                .then(() => {
+                                    const promises = demoProducts.map(product => {
+                                        return database.ref('products').push(product);
                                     });
-                            }
-                        });
-                    } else {
-                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์รีเซ็ตข้อมูลตัวอย่าง');
+                                    
+                                    return Promise.all(promises);
+                                })
+                                .then(() => {
+                                    hideLoading();
+                                    showAlert('success', 'รีเซ็ตสำเร็จ', 'รีเซ็ตข้อมูลตัวอย่างสำเร็จแล้ว!');
+                                })
+                                .catch(error => {
+                                    console.error('Error resetting demo data:', error);
+                                    hideLoading();
+                                    showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการรีเซ็ตข้อมูลตัวอย่าง');
+                                });
+                        }
+                    });
+                } else {
+                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์รีเซ็ตข้อมูลตัวอย่าง');
+                }
+            });
+            
+            // Settings Toggles
+            document.getElementById('notificationToggle')?.addEventListener('change', function() {
+                showToast(this.checked ? 'เปิดการแจ้งเตือนแล้ว' : 'ปิดการแจ้งเตือนแล้ว', 'info');
+                saveSettingsToLocalStorage();
+            });
+            
+            document.getElementById('darkModeToggle')?.addEventListener('change', function() {
+                showToast(this.checked ? 'เปิดโหมดมืดแล้ว' : 'ปิดโหมดมืดแล้ว', 'info');
+                saveSettingsToLocalStorage();
+            });
+            
+            document.getElementById('autoRefreshToggle')?.addEventListener('change', function() {
+                if (this.checked) {
+                    setupAutoRefresh();
+                    showToast('เปิดรีเฟรชอัตโนมัติแล้ว', 'info');
+                } else {
+                    if (autoRefreshInterval) {
+                        clearInterval(autoRefreshInterval);
+                        autoRefreshInterval = null;
                     }
-                });
-            }
+                    showToast('ปิดรีเฟรชอัตโนมัติแล้ว', 'info');
+                }
+                saveSettingsToLocalStorage();
+            });
             
             // ========== GENERAL EVENT LISTENERS ==========
-            // Logout Button
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', logout);
-            }
+            document.getElementById('logoutBtn')?.addEventListener('click', logout);
+            document.getElementById('closeProfileBtn')?.addEventListener('click', () => {
+                document.getElementById('userProfileModal').classList.add('hidden');
+            });
             
-            // Close Profile Button
-            const closeProfileBtn = document.getElementById('closeProfileBtn');
-            if (closeProfileBtn) {
-                closeProfileBtn.addEventListener('click', () => {
-                    document.getElementById('userProfileModal').classList.add('hidden');
-                });
-            }
-            
-            // Quick Help Button
-            const quickHelpBtn = document.getElementById('quickHelpBtn');
-            if (quickHelpBtn) {
-                quickHelpBtn.addEventListener('click', () => {
-                    showAlert('info', 'วิธีใช้งานระบบ', 
-                        '📦 **จัดการสินค้า:**\n' +
-                        '- เพิ่มสินค้าใหม่: คลิกปุ่ม "เพิ่มสินค้าใหม่"\n' +
-                        '- แก้ไขสินค้า: คลิกปุ่ม "แก้ไข" ในตาราง\n' +
-                        '- ลบสินค้า: คลิกปุ่ม "ลบ" (เฉพาะ Admin)\n\n' +
-                        '👥 **จัดการผู้ใช้:**\n' +
-                        '- เพิ่มผู้ใช้ใหม่: คลิกปุ่ม "เพิ่มผู้ใช้ใหม่"\n' +
-                        '- แก้ไขสิทธิ์: คลิกปุ่ม "แก้ไข" ในตารางผู้ใช้\n' +
-                        '- ลบผู้ใช้: คลิกปุ่ม "ลบ" (เฉพาะ Admin)\n\n' +
-                        '📊 **สิทธิ์การใช้งาน:**\n' +
-                        '- Admin: สามารถใช้งานได้ทุกฟังก์ชัน\n' +
-                        '- Manager: ไม่สามารถลบสินค้าหรือจัดการผู้ใช้ได้\n' +
-                        '- User: ไม่สามารถลบสินค้า จัดการผู้ใช้ หรือดูรายงานได้'
-                    );
-                });
-            }
+            document.getElementById('quickHelpBtn')?.addEventListener('click', () => {
+                showAlert('info', 'วิธีใช้งานระบบ', 
+                    '📦 **จัดการสินค้า:**\n' +
+                    '- เพิ่มสินค้าใหม่: คลิกปุ่ม "เพิ่มสินค้าใหม่"\n' +
+                    '- แก้ไขสินค้า: คลิกปุ่ม "แก้ไข" ในตาราง\n' +
+                    '- ลบสินค้า: คลิกปุ่ม "ลบ" (เฉพาะ Admin)\n\n' +
+                    '👥 **จัดการผู้ใช้:**\n' +
+                    '- เพิ่มผู้ใช้ใหม่: คลิกปุ่ม "เพิ่มผู้ใช้ใหม่"\n' +
+                    '- แก้ไขสิทธิ์: คลิกปุ่ม "แก้ไข" ในตารางผู้ใช้\n' +
+                    '- ลบผู้ใช้: คลิกปุ่ม "ลบ" (เฉพาะ Admin)\n\n' +
+                    '📊 **สิทธิ์การใช้งาน:**\n' +
+                    '- Admin: สามารถใช้งานได้ทุกฟังก์ชัน\n' +
+                    '- Manager: ไม่สามารถลบสินค้าหรือจัดการผู้ใช้ได้\n' +
+                    '- User: ไม่สามารถลบสินค้า จัดการผู้ใช้ หรือดูรายงานได้'
+                );
+            });
             
             // ปิด Modal เมื่อคลิกพื้นหลัง
-            const productModal = document.getElementById('productModal');
-            if (productModal) {
-                productModal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        hideProductModal();
-                    }
-                });
-            }
+            document.getElementById('productModal')?.addEventListener('click', function(e) {
+                if (e.target === this) hideProductModal();
+            });
             
-            const userModal = document.getElementById('userModal');
-            if (userModal) {
-                userModal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        hideUserModal();
-                    }
-                });
-            }
+            document.getElementById('userModal')?.addEventListener('click', function(e) {
+                if (e.target === this) hideUserModal();
+            });
             
-            // อัพเดทเวลาปัจจุบันในหน้าตั้งค่าระบบ
-            function updateSystemTime() {
-                const systemTimeElement = document.getElementById('systemTime');
-                if (systemTimeElement) {
-                    systemTimeElement.textContent = new Date().toLocaleString('th-TH');
-                }
-            }
-            
-            // อัพเดทเวลาทุกวินาที
+            // อัพเดทเวลาปัจจุบันทุกวินาที
             setInterval(updateSystemTime, 1000);
-            
-            // ซ่อน Firebase Config หลังจากโหลดเสร็จ
-            setTimeout(hideFirebaseConfig, 3000);
             
             // แสดงข้อความต้อนรับ
             console.log('ระบบพร้อมใช้งานแล้ว!');
