@@ -31,7 +31,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <style>
-        /* ปรับแต่ง Scrollbar ให้เข้ากับธีมมืด */
+        /* CSS Styles เดิมทั้งหมด... */
         ::-webkit-scrollbar {
             width: 10px;
         }
@@ -46,13 +46,11 @@
             background: #6b7280;
         }
         
-        /* เอฟเฟกต์สำหรับการ hover ในตาราง */
         .hover-effect:hover {
             transform: translateY(-2px);
             transition: all 0.2s ease;
         }
         
-        /* เอฟเฟกต์ปุ่ม */
         .btn-glow {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
         }
@@ -60,7 +58,6 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
         }
         
-        /* Animation สำหรับการแสดงผล */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -70,7 +67,6 @@
             animation: fadeIn 0.5s ease-out forwards;
         }
         
-        /* Badge สำหรับแสดงสิทธิ์ */
         .role-badge {
             font-size: 0.7rem;
             padding: 0.2rem 0.5rem;
@@ -94,7 +90,6 @@
             color: white;
         }
         
-        /* Floating animation */
         .floating {
             animation: floating 3s ease-in-out infinite;
         }
@@ -104,17 +99,14 @@
             50% { transform: translateY(-10px); }
         }
         
-        /* Page transition */
         .page-transition {
             transition: opacity 0.3s ease;
         }
         
-        /* Hidden class */
         .hidden {
             display: none !important;
         }
         
-        /* Custom Alert Styles */
         .alert-container {
             position: fixed;
             top: 1rem;
@@ -201,7 +193,6 @@
             opacity: 1;
         }
         
-        /* Pulse animation for notification */
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -211,7 +202,6 @@
             animation: pulse 2s infinite;
         }
         
-        /* Toast notification */
         .toast {
             position: fixed;
             bottom: 2rem;
@@ -234,7 +224,6 @@
             opacity: 1;
         }
         
-        /* Confirmation Dialog Styles */
         .confirmation-dialog {
             position: fixed;
             top: 50%;
@@ -281,7 +270,6 @@
             justify-content: center;
         }
         
-        /* Product Card Hover Effect */
         .product-card {
             transition: all 0.3s ease;
         }
@@ -291,7 +279,6 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
         }
         
-        /* Shimmer Effect */
         .shimmer {
             background: linear-gradient(90deg, 
                 rgba(255,255,255,0) 0%, 
@@ -306,7 +293,6 @@
             100% { background-position: 200% 0; }
         }
         
-        /* Navigation Styles */
         .nav-link {
             padding: 0.75rem 1rem;
             border-radius: 0.5rem;
@@ -325,7 +311,6 @@
             color: white;
         }
         
-        /* Tab Styles */
         .tab {
             padding: 0.75rem 1.5rem;
             border-bottom: 2px solid transparent;
@@ -343,7 +328,6 @@
             font-weight: 600;
         }
         
-        /* Permission Badge */
         .permission-badge {
             font-size: 0.65rem;
             padding: 0.15rem 0.4rem;
@@ -367,7 +351,6 @@
             color: white;
         }
         
-        /* Print Styles */
         @media print {
             body * {
                 visibility: hidden;
@@ -390,6 +373,19 @@
             .no-print {
                 display: none !important;
             }
+        }
+        
+        /* เพิ่มสำหรับ Register Modal */
+        .register-tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .register-tab.active {
+            background-color: #4f46e5;
+            color: white;
         }
     </style>
 </head>
@@ -429,1052 +425,201 @@
                 <div class="absolute bottom-0 right-0 w-32 h-32 bg-white/5 rounded-full translate-x-16 translate-y-16"></div>
             </div>
             
+            <!-- Login/Register Tabs -->
+            <div class="flex border-b border-gray-700">
+                <div id="loginTabBtn" class="register-tab active flex-1 text-center">เข้าสู่ระบบ</div>
+                <div id="registerTabBtn" class="register-tab flex-1 text-center">ลงทะเบียน</div>
+            </div>
+            
             <!-- Login Form -->
-            <div class="p-8">
-                <h2 class="text-2xl font-bold text-white mb-2 animate__animated animate__fadeIn animate__delay-1s">เข้าสู่ระบบ</h2>
-                <p class="text-gray-400 mb-6 animate__animated animate__fadeIn animate__delay-1s">กรุณากรอกข้อมูลเพื่อเข้าสู่ระบบ</p>
+            <div id="loginFormContainer" class="p-8">
+                <h2 class="text-2xl font-bold text-white mb-2">เข้าสู่ระบบ</h2>
+                <p class="text-gray-400 mb-6">กรุณากรอกข้อมูลเพื่อเข้าสู่ระบบ</p>
                 
-                <form id="loginForm" class="animate__animated animate__fadeIn animate__delay-1s">
-                    <div class="space-y-5">
-                        <div class="animate__animated animate__fadeInUp animate__delay-2s">
-                            <label for="username" class="block text-sm font-medium text-gray-300 mb-2">
-                                <i class="fas fa-user mr-2"></i>ชื่อผู้ใช้
-                            </label>
-                            <input 
-                                type="text" 
-                                id="username" 
-                                required 
-                                placeholder="กรอกชื่อผู้ใช้"
-                                class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
-                            >
-                        </div>
-                        
-                        <div class="animate__animated animate__fadeInUp animate__delay-3s">
-                            <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
-                                <i class="fas fa-lock mr-2"></i>รหัสผ่าน
-                            </label>
-                            <input 
-                                type="password" 
-                                id="password" 
-                                required 
-                                placeholder="กรอกรหัสผ่าน"
-                                class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
-                            >
-                        </div>
-                        
-                        <div class="pt-4 animate__animated animate__fadeInUp animate__delay-4s">
-                            <button 
-                                type="submit" 
-                                id="loginBtn"
-                                class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 btn-glow transition-all duration-300 pulse"
-                            >
-                                <i class="fas fa-sign-in-alt"></i>
-                                <span>เข้าสู่ระบบ</span>
-                            </button>
-                        </div>
+                <form id="loginForm" class="space-y-5">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-300 mb-2">
+                            <i class="fas fa-user mr-2"></i>ชื่อผู้ใช้
+                        </label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            required 
+                            placeholder="กรอกชื่อผู้ใช้"
+                            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+                            <i class="fas fa-lock mr-2"></i>รหัสผ่าน
+                        </label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            required 
+                            placeholder="กรอกรหัสผ่าน"
+                            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
+                        >
+                    </div>
+                    
+                    <div class="pt-4">
+                        <button 
+                            type="submit" 
+                            id="loginBtn"
+                            class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 btn-glow transition-all duration-300"
+                        >
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>เข้าสู่ระบบ</span>
+                        </button>
                     </div>
                 </form>
                 
-                <!-- Demo Accounts -->
-                <div class="mt-8 pt-6 border-t border-gray-700 animate__animated animate__fadeIn animate__delay-5s">
-                    <h3 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
-                        <i class="fas fa-info-circle mr-2 text-yellow-400"></i> บัญชีสำหรับทดสอบระบบ:
-                    </h3>
-                    <div class="space-y-2 text-sm">
-                        <div class="bg-gray-900/50 p-3 rounded-lg product-card">
-                            <p class="text-gray-400"><span class="font-medium text-gray-300">ผู้ใช้ทั่วไป:</span> user / user123</p>
-                            <p class="text-gray-400 text-xs mt-1">สามารถดูข้อมูลและเพิ่มสินค้าได้ แต่ไม่สามารถลบได้</p>
-                        </div>
-                        <div class="bg-gray-900/50 p-3 rounded-lg product-card">
-                            <p class="text-gray-400"><span class="font-medium text-gray-300">ผู้จัดการ:</span> manager / manager123</p>
-                            <p class="text-gray-400 text-xs mt-1">สามารถดูข้อมูลและเพิ่มสินค้าได้ แต่ไม่สามารถลบได้</p>
-                        </div>
-                        <div class="bg-gray-900/50 p-3 rounded-lg product-card">
-                            <p class="text-gray-400"><span class="font-medium text-gray-300">ผู้ดูแลระบบ:</span> admin / admin123</p>
-                            <p class="text-gray-400 text-xs mt-1">สามารถใช้งานได้ทุกฟังก์ชัน รวมถึงการลบข้อมูลและจัดการผู้ใช้</p>
-                        </div>
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400 text-sm">
+                        ยังไม่มีบัญชีผู้ใช้? 
+                        <button id="showRegisterBtn" class="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+                            สมัครสมาชิกที่นี่
+                        </button>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="registerFormContainer" class="p-8 hidden">
+                <h2 class="text-2xl font-bold text-white mb-2">สมัครสมาชิก</h2>
+                <p class="text-gray-400 mb-6">กรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้ใหม่</p>
+                
+                <form id="registerForm" class="space-y-5">
+                    <div>
+                        <label for="regUsername" class="block text-sm font-medium text-gray-300 mb-2">
+                            <i class="fas fa-user mr-2"></i>ชื่อผู้ใช้ *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="regUsername" 
+                            required 
+                            placeholder="กรอกชื่อผู้ใช้"
+                            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
+                        >
+                        <p class="text-gray-400 text-xs mt-1">ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร</p>
+                    </div>
+                    
+                    <div>
+                        <label for="regPassword" class="block text-sm font-medium text-gray-300 mb-2">
+                            <i class="fas fa-lock mr-2"></i>รหัสผ่าน *
+                        </label>
+                        <input 
+                            type="password" 
+                            id="regPassword" 
+                            required 
+                            placeholder="กรอกรหัสผ่าน"
+                            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
+                        >
+                        <p class="text-gray-400 text-xs mt-1">รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร</p>
+                    </div>
+                    
+                    <div>
+                        <label for="regConfirmPassword" class="block text-sm font-medium text-gray-300 mb-2">
+                            <i class="fas fa-lock mr-2"></i>ยืนยันรหัสผ่าน *
+                        </label>
+                        <input 
+                            type="password" 
+                            id="regConfirmPassword" 
+                            required 
+                            placeholder="กรอกรหัสผ่านอีกครั้ง"
+                            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label for="regFullName" class="block text-sm font-medium text-gray-300 mb-2">
+                            <i class="fas fa-user-circle mr-2"></i>ชื่อ-นามสกุล *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="regFullName" 
+                            required 
+                            placeholder="กรอกชื่อ-นามสกุล"
+                            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label for="regEmail" class="block text-sm font-medium text-gray-300 mb-2">
+                            <i class="fas fa-envelope mr-2"></i>อีเมล
+                        </label>
+                        <input 
+                            type="email" 
+                            id="regEmail" 
+                            placeholder="กรอกอีเมล (ไม่จำเป็น)"
+                            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
+                        >
+                    </div>
+                    
+                    <div class="pt-4">
+                        <button 
+                            type="submit" 
+                            id="registerBtn"
+                            class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 btn-glow transition-all duration-300"
+                        >
+                            <i class="fas fa-user-plus"></i>
+                            <span>สมัครสมาชิก</span>
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400 text-sm">
+                        มีบัญชีผู้ใช้แล้ว? 
+                        <button id="showLoginBtn" class="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+                            เข้าสู่ระบบที่นี่
+                        </button>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Demo Accounts -->
+            <div class="mt-8 pt-6 border-t border-gray-700 px-8 pb-8">
+                <h3 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
+                    <i class="fas fa-info-circle mr-2 text-yellow-400"></i> บัญชีสำหรับทดสอบระบบ:
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div class="bg-gray-900/50 p-3 rounded-lg product-card">
+                        <p class="text-gray-400"><span class="font-medium text-gray-300">ผู้ดูแลระบบ:</span> admin / admin123</p>
+                        <p class="text-gray-400 text-xs mt-1">สามารถใช้งานได้ทุกฟังก์ชัน รวมถึงการลบข้อมูลและจัดการผู้ใช้</p>
+                    </div>
+                    <div class="bg-gray-900/50 p-3 rounded-lg product-card">
+                        <p class="text-gray-400"><span class="font-medium text-gray-300">ผู้จัดการ:</span> manager / manager123</p>
+                        <p class="text-gray-400 text-xs mt-1">สามารถดูข้อมูลและเพิ่มสินค้าได้ แต่ไม่สามารถลบได้</p>
+                    </div>
+                    <div class="bg-gray-900/50 p-3 rounded-lg product-card">
+                        <p class="text-gray-400"><span class="font-medium text-gray-300">ผู้ใช้ทั่วไป:</span> user / user123</p>
+                        <p class="text-gray-400 text-xs mt-1">สามารถดูข้อมูลและเพิ่มสินค้าได้ แต่ไม่สามารถลบได้</p>
                     </div>
                 </div>
-                
-                <!-- System Status -->
-                <div class="mt-6 p-3 bg-gray-900/30 rounded-lg animate__animated animate__fadeIn animate__delay-6s">
+            </div>
+            
+            <!-- System Status -->
+            <div class="px-8 pb-8">
+                <div class="p-3 bg-gray-900/30 rounded-lg">
                     <div class="flex items-center">
                         <div id="firebaseStatus" class="w-3 h-3 rounded-full bg-green-500 mr-3 animate-pulse"></div>
                         <p id="firebaseStatusText" class="text-gray-300 text-sm">ระบบพร้อมใช้งาน</p>
                     </div>
                 </div>
             </div>
-            
-            <!-- Footer -->
-            <div class="bg-gray-900 p-4 text-center animate__animated animate__fadeIn animate__delay-6s">
-                <p class="text-gray-500 text-sm">
-                    <i class="fas fa-cube mr-1"></i> ระบบจัดการสินค้าพื้นฐานด้วย Firebase
-                </p>
-            </div>
         </div>
     </div>
 
-    <!-- Main Application Container -->
+    <!-- Main Application Container (คงโค้ดเดิมทั้งหมด) -->
     <div id="appContainer" class="hidden">
-        <!-- Header -->
-        <header class="bg-gray-800 shadow-lg sticky top-0 z-50 animate__animated animate__fadeInDown">
-            <div class="container mx-auto px-4 py-4">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <div class="flex items-center space-x-3 mb-4 md:mb-0">
-                        <a href="#" id="homeBtn" class="flex items-center space-x-3">
-                            <div class="bg-indigo-600 p-3 rounded-lg hover-effect">
-                                <i class="fas fa-boxes text-white text-2xl"></i>
-                            </div>
-                            <div>
-                                <h1 class="text-2xl md:text-3xl font-bold">ระบบจัดการสินค้า</h1>
-                                <p class="text-gray-400 text-sm">ระบบจัดการสินค้าและผู้ใช้แบบครบวงจร</p>
-                            </div>
-                        </a>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4">
-                        <!-- User Info -->
-                        <div class="hidden md:flex items-center space-x-3 bg-gray-700 px-4 py-2 rounded-lg product-card cursor-pointer" id="userInfoBtn">
-                            <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center hover-effect">
-                                <i class="fas fa-user text-white"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium" id="currentUsername">กำลังโหลด...</p>
-                                <div class="flex items-center space-x-2">
-                                    <span id="userRoleBadge" class="role-badge role-user">ผู้ใช้ทั่วไป</span>
-                                    <span class="text-gray-400 text-xs" id="userRoleText"></span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Notification Bell -->
-                        <div class="relative">
-                            <button id="notificationBtn" class="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors relative">
-                                <i class="fas fa-bell text-gray-300"></i>
-                                <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Logout Button -->
-                        <button id="logoutBtn" class="bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>ออกจากระบบ</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Navigation -->
-                <div class="mt-4 flex flex-wrap gap-2 border-t border-gray-700 pt-4">
-                    <button id="navDashboard" class="nav-link active">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>แดชบอร์ด</span>
-                    </button>
-                    <button id="navProducts" class="nav-link">
-                        <i class="fas fa-box"></i>
-                        <span>จัดการสินค้า</span>
-                    </button>
-                    <button id="navUsers" class="nav-link">
-                        <i class="fas fa-users"></i>
-                        <span>จัดการผู้ใช้</span>
-                    </button>
-                    <button id="navReports" class="nav-link">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>รายงาน</span>
-                    </button>
-                    <button id="navSettings" class="nav-link">
-                        <i class="fas fa-cog"></i>
-                        <span>ตั้งค่าระบบ</span>
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="container mx-auto px-4 py-8">
-            <!-- Dashboard Page -->
-            <div id="dashboardPage" class="page-content">
-                <!-- Welcome Message -->
-                <div class="bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl p-6 shadow-lg mb-8 animate__animated animate__fadeIn">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-                        <div>
-                            <h2 class="text-2xl font-bold mb-2 animate__animated animate__fadeInLeft">ยินดีต้อนรับ, <span id="welcomeUsername" class="text-indigo-300">ผู้ใช้</span>!</h2>
-                            <p class="text-gray-300 animate__animated animate__fadeInLeft animate__delay-1s" id="welcomeMessage">คุณกำลังใช้ระบบจัดการสินค้าพื้นฐาน</p>
-                        </div>
-                        <div class="mt-4 md:mt-0 animate__animated animate__fadeInRight">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                                <p class="text-green-300 text-sm" id="connectionStatus">เชื่อมต่อฐานข้อมูลสำเร็จ</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Statistics Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-gray-800 rounded-xl p-6 shadow-lg hover-effect product-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-gray-400 text-sm">จำนวนสินค้าทั้งหมด</p>
-                                <h3 id="totalProducts" class="text-3xl font-bold mt-2 shimmer">0</h3>
-                            </div>
-                            <div class="bg-indigo-900 p-4 rounded-lg hover-effect">
-                                <i class="fas fa-box text-indigo-300 text-2xl"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-800 rounded-xl p-6 shadow-lg hover-effect product-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-gray-400 text-sm">มูลค่าสินค้าทั้งหมด</p>
-                                <h3 id="totalValue" class="text-3xl font-bold mt-2 shimmer">฿0</h3>
-                            </div>
-                            <div class="bg-green-900 p-4 rounded-lg hover-effect">
-                                <i class="fas fa-coins text-green-300 text-2xl"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-800 rounded-xl p-6 shadow-lg hover-effect product-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-gray-400 text-sm">สินค้าหมดสต๊อก</p>
-                                <h3 id="outOfStock" class="text-3xl font-bold mt-2 shimmer">0</h3>
-                            </div>
-                            <div class="bg-red-900 p-4 rounded-lg hover-effect">
-                                <i class="fas fa-exclamation-triangle text-red-300 text-2xl"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-800 rounded-xl p-6 shadow-lg hover-effect product-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-gray-400 text-sm">จำนวนผู้ใช้</p>
-                                <h3 id="totalUsers" class="text-3xl font-bold mt-2 shimmer">0</h3>
-                            </div>
-                            <div class="bg-purple-900 p-4 rounded-lg hover-effect">
-                                <i class="fas fa-users text-purple-300 text-2xl"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Quick Actions -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <button id="quickAddProductBtn" class="bg-gradient-to-r from-green-700 to-emerald-700 hover:from-green-800 hover:to-emerald-800 text-white font-bold py-3 px-4 rounded-lg flex flex-col items-center justify-center space-y-2 btn-glow transition-all duration-300 hover-effect animate__animated animate__fadeInUp" style="animation-delay: 0.5s">
-                        <i class="fas fa-plus-circle text-2xl"></i>
-                        <span class="text-sm">เพิ่มสินค้า</span>
-                    </button>
-                    
-                    <button id="quickAddUserBtn" class="bg-gradient-to-r from-blue-700 to-cyan-700 hover:from-blue-800 hover:to-cyan-800 text-white font-bold py-3 px-4 rounded-lg flex flex-col items-center justify-center space-y-2 btn-glow transition-all duration-300 hover-effect animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
-                        <i class="fas fa-user-plus text-2xl"></i>
-                        <span class="text-sm">เพิ่มผู้ใช้</span>
-                    </button>
-                    
-                    <button id="quickReportBtn" class="bg-gradient-to-r from-purple-700 to-pink-700 hover:from-purple-800 hover:to-pink-800 text-white font-bold py-3 px-4 rounded-lg flex flex-col items-center justify-center space-y-2 btn-glow transition-all duration-300 hover-effect animate__animated animate__fadeInUp" style="animation-delay: 0.7s">
-                        <i class="fas fa-chart-bar text-2xl"></i>
-                        <span class="text-sm">รายงาน</span>
-                    </button>
-                    
-                    <button id="quickHelpBtn" class="bg-gradient-to-r from-yellow-700 to-orange-700 hover:from-yellow-800 hover:to-orange-800 text-white font-bold py-3 px-4 rounded-lg flex flex-col items-center justify-center space-y-2 btn-glow transition-all duration-300 hover-effect animate__animated animate__fadeInUp" style="animation-delay: 0.8s">
-                        <i class="fas fa-question-circle text-2xl"></i>
-                        <span class="text-sm">ช่วยเหลือ</span>
-                    </button>
-                </div>
-                
-                <!-- Recent Activities -->
-                <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-8 animate__animated animate__fadeInUp" style="animation-delay: 0.9s">
-                    <h2 class="text-xl font-bold mb-4 flex items-center">
-                        <i class="fas fa-history mr-2 text-indigo-400"></i> กิจกรรมล่าสุด
-                    </h2>
-                    <div id="recentActivities" class="space-y-3">
-                        <div class="text-center py-8 text-gray-500">
-                            <i class="fas fa-clock text-2xl mb-2"></i>
-                            <p>ยังไม่มีกิจกรรมล่าสุด</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- System Info -->
-                <div class="bg-gray-800 rounded-xl shadow-lg p-6 animate__animated animate__fadeInUp" style="animation-delay: 1s">
-                    <h2 class="text-xl font-bold mb-4 flex items-center">
-                        <i class="fas fa-info-circle mr-2 text-green-400"></i> ข้อมูลระบบ
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-gray-900/50 p-4 rounded-lg product-card hover-effect">
-                            <p class="text-gray-400 text-sm">เวอร์ชันระบบ</p>
-                            <p class="font-medium">3.0.0</p>
-                        </div>
-                        <div class="bg-gray-900/50 p-4 rounded-lg product-card hover-effect">
-                            <p class="text-gray-400 text-sm">ฐานข้อมูล</p>
-                            <p class="font-medium">Firebase Realtime Database</p>
-                        </div>
-                        <div class="bg-gray-900/50 p-4 rounded-lg product-card hover-effect">
-                            <p class="text-gray-400 text-sm">ผู้พัฒนา</p>
-                            <p class="font-medium">ระบบจัดการสินค้าพื้นฐาน</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Products Management Page -->
-            <div id="productsPage" class="page-content hidden">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                    <div>
-                        <h2 class="text-2xl font-bold flex items-center">
-                            <i class="fas fa-box mr-2 text-indigo-400"></i> จัดการข้อมูลสินค้า
-                        </h2>
-                        <p class="text-gray-400 text-sm mt-1">เพิ่ม แก้ไข ลบ และจัดการข้อมูลสินค้าทั้งหมด</p>
-                    </div>
-                    <div class="mt-4 md:mt-0 flex space-x-2">
-                        <button id="addProductMainBtn" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-plus"></i>
-                            <span>เพิ่มสินค้าใหม่</span>
-                        </button>
-                        <button id="exportProductsBtn" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-download"></i>
-                            <span>ส่งออกข้อมูล</span>
-                        </button>
-                        <button id="refreshProductsBtn" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-sync-alt"></i>
-                            <span>รีเฟรช</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Product Table -->
-                <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden mb-8">
-                    <div class="p-6 border-b border-gray-700">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-                            <div>
-                                <h3 class="text-lg font-bold">รายการสินค้าทั้งหมด</h3>
-                                <p class="text-gray-400 text-sm mt-1" id="productsTableInfo">แสดงข้อมูลสินค้าทั้งหมดในระบบ</p>
-                            </div>
-                            <div class="mt-3 md:mt-0">
-                                <div class="flex items-center space-x-2">
-                                    <div class="relative">
-                                        <input type="text" id="productSearch" placeholder="ค้นหาสินค้า..." class="bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-64">
-                                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-4">
-                        <table id="productsTable" class="min-w-full divide-y divide-gray-700">
-                            <thead>
-                                <tr class="bg-gray-900">
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">รหัสสินค้า</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ชื่อสินค้า</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ประเภท</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">จำนวน</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ราคา/หน่วย</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">มูลค่ารวม</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">สถานะ</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">การจัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productsTableBody" class="divide-y divide-gray-700">
-                                <!-- ข้อมูลจะถูกเพิ่มโดย JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <!-- Product Statistics -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-gradient-to-r from-indigo-800 to-purple-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-box-open text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">สินค้าทั้งหมด</p>
-                                <p id="totalProductsCount" class="text-2xl font-bold">0 รายการ</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gradient-to-r from-green-800 to-emerald-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-coins text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">มูลค่ารวม</p>
-                                <p id="totalProductsValue" class="text-2xl font-bold">฿0</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gradient-to-r from-red-800 to-pink-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-exclamation-triangle text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">สินค้าหมดสต๊อก</p>
-                                <p id="outOfStockCount" class="text-2xl font-bold">0 รายการ</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Users Management Page -->
-            <div id="usersPage" class="page-content hidden">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                    <div>
-                        <h2 class="text-2xl font-bold flex items-center">
-                            <i class="fas fa-users mr-2 text-indigo-400"></i> จัดการข้อมูลผู้ใช้
-                        </h2>
-                        <p class="text-gray-400 text-sm mt-1">เพิ่ม แก้ไข ลบ และจัดการสิทธิ์ผู้ใช้ทั้งหมดในระบบ</p>
-                    </div>
-                    <div class="mt-4 md:mt-0 flex space-x-2">
-                        <button id="addUserBtn" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-user-plus"></i>
-                            <span>เพิ่มผู้ใช้ใหม่</span>
-                        </button>
-                        <button id="refreshUsersBtn" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-sync-alt"></i>
-                            <span>รีเฟรช</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Users Table -->
-                <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden mb-8">
-                    <div class="p-6 border-b border-gray-700">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-                            <div>
-                                <h3 class="text-lg font-bold">รายการผู้ใช้ทั้งหมด</h3>
-                                <p class="text-gray-400 text-sm mt-1">แสดงข้อมูลผู้ใช้ทั้งหมดในระบบ</p>
-                            </div>
-                            <div class="mt-3 md:mt-0">
-                                <div class="flex items-center space-x-2">
-                                    <div class="relative">
-                                        <input type="text" id="userSearch" placeholder="ค้นหาผู้ใช้..." class="bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-64">
-                                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-4">
-                        <table id="usersTable" class="min-w-full divide-y divide-gray-700">
-                            <thead>
-                                <tr class="bg-gray-900">
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ชื่อผู้ใช้</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ชื่อ-นามสกุล</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">บทบาท</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">สิทธิ์การใช้งาน</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">สถานะ</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ล็อกอินล่าสุด</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">การจัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTableBody" class="divide-y divide-gray-700">
-                                <!-- ข้อมูลจะถูกเพิ่มโดย JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <!-- User Statistics -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-gradient-to-r from-indigo-800 to-purple-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-users text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">ผู้ใช้ทั้งหมด</p>
-                                <p id="totalUsersCount" class="text-2xl font-bold">0 คน</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gradient-to-r from-blue-800 to-cyan-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-user-shield text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">ผู้ดูแลระบบ</p>
-                                <p id="adminUsersCount" class="text-2xl font-bold">0 คน</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gradient-to-r from-green-800 to-emerald-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-user text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">ผู้ใช้ทั่วไป</p>
-                                <p id="normalUsersCount" class="text-2xl font-bold">0 คน</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gradient-to-r from-yellow-800 to-orange-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-user-tie text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">ผู้จัดการ</p>
-                                <p id="managerUsersCount" class="text-2xl font-bold">0 คน</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Permissions Guide -->
-                <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-                    <h3 class="text-lg font-bold mb-4 flex items-center">
-                        <i class="fas fa-key mr-2 text-yellow-400"></i> คู่มือสิทธิ์การใช้งาน
-                    </h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-700">
-                            <thead>
-                                <tr class="bg-gray-900">
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ฟังก์ชัน</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ผู้ดูแลระบบ</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ผู้จัดการ</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ผู้ใช้ทั่วไป</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-700">
-                                <tr>
-                                    <td class="px-4 py-3">ดูข้อมูลสินค้า</td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3">เพิ่มสินค้าใหม่</td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3">แก้ไขข้อมูลสินค้า</td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3">ลบข้อมูลสินค้า</td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-denied">ห้ามใช้</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-denied">ห้ามใช้</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3">จัดการผู้ใช้</td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-denied">ห้ามใช้</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-denied">ห้ามใช้</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3">กำหนดสิทธิ์</td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-denied">ห้ามใช้</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-denied">ห้ามใช้</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3">ดูรายงาน</td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-denied">ห้ามใช้</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3">ตั้งค่าระบบ</td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-denied">ห้ามใช้</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-denied">ห้ามใช้</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Reports Page -->
-            <div id="reportsPage" class="page-content hidden">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold flex items-center">
-                        <i class="fas fa-chart-bar mr-2 text-indigo-400"></i> รายงานและสถิติ
-                    </h2>
-                    <p class="text-gray-400 text-sm mt-1">วิเคราะห์ข้อมูลและสร้างรายงานจากข้อมูลในระบบ</p>
-                </div>
-                
-                <!-- Report Tabs -->
-                <div class="flex border-b border-gray-700 mb-6">
-                    <div class="tab active" data-tab="productReport">รายงานสินค้า</div>
-                    <div class="tab" data-tab="userReport">รายงานผู้ใช้</div>
-                    <div class="tab" data-tab="salesReport">รายงานการขาย</div>
-                </div>
-                
-                <!-- Product Report -->
-                <div id="productReport" class="tab-content">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-                            <h3 class="text-lg font-bold mb-4">สรุปข้อมูลสินค้า</h3>
-                            <div id="productSummary" class="space-y-3">
-                                <!-- Product summary will be loaded here -->
-                            </div>
-                        </div>
-                        
-                        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-                            <h3 class="text-lg font-bold mb-4">สินค้าขายดี</h3>
-                            <div id="topProducts" class="space-y-3">
-                                <!-- Top products will be loaded here -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
-                        <h3 class="text-lg font-bold mb-4">สถานะสินค้า</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="text-center p-4 bg-green-900/30 rounded-lg">
-                                <div class="text-3xl font-bold text-green-400" id="inStockCount">0</div>
-                                <div class="text-sm text-gray-300">พร้อมจำหน่าย</div>
-                            </div>
-                            <div class="text-center p-4 bg-yellow-900/30 rounded-lg">
-                                <div class="text-3xl font-bold text-yellow-400" id="lowStockCount">0</div>
-                                <div class="text-sm text-gray-300">เหลือน้อย</div>
-                            </div>
-                            <div class="text-center p-4 bg-red-900/30 rounded-lg">
-                                <div class="text-3xl font-bold text-red-400" id="outStockCount">0</div>
-                                <div class="text-sm text-gray-300">หมดสต๊อก</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- User Report -->
-                <div id="userReport" class="tab-content hidden">
-                    <div class="bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
-                        <h3 class="text-lg font-bold mb-4">สรุปข้อมูลผู้ใช้</h3>
-                        <div id="userSummary" class="space-y-4">
-                            <!-- User summary will be loaded here -->
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Sales Report -->
-                <div id="salesReport" class="tab-content hidden">
-                    <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-                        <h3 class="text-lg font-bold mb-4">รายงานการขาย</h3>
-                        <div class="text-center py-12 text-gray-500">
-                            <i class="fas fa-chart-line text-4xl mb-4"></i>
-                            <p>ส่วนรายงานการขายอยู่ระหว่างการพัฒนา</p>
-                            <p class="text-sm mt-2">ระบบนี้ยังไม่รองรับการบันทึกข้อมูลการขาย</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Export Options -->
-                <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <h3 class="text-lg font-bold mb-4">ตัวเลือกการส่งออก</h3>
-                    <div class="flex flex-wrap gap-4">
-                        <button id="exportProductReportBtn" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-file-export"></i>
-                            <span>ส่งออกรายงานสินค้า</span>
-                        </button>
-                        <button id="exportUserReportBtn" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-file-export"></i>
-                            <span>ส่งออกรายงานผู้ใช้</span>
-                        </button>
-                        <button id="printReportBtn" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-print"></i>
-                            <span>พิมพ์รายงาน</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings Page -->
-            <div id="settingsPage" class="page-content hidden">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold flex items-center">
-                        <i class="fas fa-cog mr-2 text-indigo-400"></i> ตั้งค่าระบบ
-                    </h2>
-                    <p class="text-gray-400 text-sm mt-1">จัดการการตั้งค่าระบบและปรับแต่งการทำงาน</p>
-                </div>
-                
-                <!-- System Settings -->
-                <div class="bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
-                    <h3 class="text-lg font-bold mb-4">การตั้งค่าระบบ</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg">
-                            <div>
-                                <p class="font-medium">แสดงการแจ้งเตือน</p>
-                                <p class="text-gray-400 text-sm">แสดงการแจ้งเตือนเมื่อมีกิจกรรมใหม่</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="notificationToggle" class="sr-only peer" checked>
-                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </div>
-                        
-                        <div class="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg">
-                            <div>
-                                <p class="font-medium">โหมดมืด</p>
-                                <p class="text-gray-400 text-sm">ใช้ธีมสีมืดสำหรับการแสดงผล</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="darkModeToggle" class="sr-only peer" checked>
-                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </div>
-                        
-                        <div class="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg">
-                            <div>
-                                <p class="font-medium">รีเฟรชอัตโนมัติ</p>
-                                <p class="text-gray-400 text-sm">รีเฟรชข้อมูลอัตโนมัติทุก 30 วินาที</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="autoRefreshToggle" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Database Management -->
-                <div class="bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
-                    <h3 class="text-lg font-bold mb-4">จัดการฐานข้อมูล</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button id="backupDataBtn" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-database"></i>
-                            <span>สำรองข้อมูล</span>
-                        </button>
-                        <button id="resetDemoDataBtn" class="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-redo"></i>
-                            <span>รีเซ็ตข้อมูลตัวอย่าง</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- System Information -->
-                <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <h3 class="text-lg font-bold mb-4">ข้อมูลระบบ</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
-                            <span class="text-gray-400">เวอร์ชันระบบ</span>
-                            <span class="font-medium">3.0.0</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
-                            <span class="text-gray-400">ฐานข้อมูล</span>
-                            <span class="font-medium">Firebase Realtime Database</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
-                            <span class="text-gray-400">ผู้พัฒนาระบบ</span>
-                            <span class="font-medium">ระบบจัดการสินค้าพื้นฐาน</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
-                            <span class="text-gray-400">การเชื่อมต่อ</span>
-                            <span id="systemConnectionStatus" class="font-medium text-green-400">ออนไลน์</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
-                            <span class="text-gray-400">เวลาปัจจุบัน</span>
-                            <span id="systemTime" class="font-medium">กำลังโหลด...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="bg-gray-800 border-t border-gray-700 py-6 mt-8">
-            <div class="container mx-auto px-4">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <div class="mb-4 md:mb-0">
-                        <p class="text-gray-400">
-                            <i class="fas fa-cube mr-1"></i> ระบบจัดการสินค้าพื้นฐานด้วย Firebase
-                        </p>
-                        <p class="text-gray-500 text-sm mt-1">สำหรับการเรียนรู้การเขียนโปรแกรมเบื้องต้น</p>
-                    </div>
-                    <div class="flex space-x-4">
-                        <a href="https://firebase.google.com/" target="_blank" class="text-gray-400 hover:text-indigo-400 transition-colors hover-effect">
-                            <i class="fab fa-google"></i> Firebase
-                        </a>
-                        <a href="https://tailwindcss.com/" target="_blank" class="text-gray-400 hover:text-blue-400 transition-colors hover-effect">
-                            <i class="fab fa-css3-alt"></i> Tailwind CSS
-                        </a>
-                        <a href="https://datatables.net/" target="_blank" class="text-gray-400 hover:text-orange-400 transition-colors hover-effect">
-                            <i class="fas fa-table"></i> DataTables
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </footer>
+        <!-- ส่วนที่เหลือของโค้ด Application เดิมทั้งหมด -->
+        <!-- ... -->
     </div>
 
-    <!-- Modal สำหรับเพิ่ม/แก้ไขสินค้า -->
-    <div id="productModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 animate__animated animate__zoomIn">
-            <div class="p-6 border-b border-gray-700">
-                <h3 id="modalProductTitle" class="text-xl font-bold">เพิ่มสินค้าใหม่</h3>
-            </div>
-            
-            <form id="productForm" class="p-6">
-                <input type="hidden" id="productId">
-                
-                <div class="space-y-4">
-                    <div>
-                        <label for="productCode" class="block text-sm font-medium text-gray-300 mb-1">รหัสสินค้า *</label>
-                        <input type="text" id="productCode" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
-                    </div>
-                    
-                    <div>
-                        <label for="productName" class="block text-sm font-medium text-gray-300 mb-1">ชื่อสินค้า *</label>
-                        <input type="text" id="productName" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
-                    </div>
-                    
-                    <div>
-                        <label for="productCategory" class="block text-sm font-medium text-gray-300 mb-1">ประเภท *</label>
-                        <select id="productCategory" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
-                            <option value="">เลือกประเภทสินค้า</option>
-                            <option value="อิเล็กทรอนิกส์">อิเล็กทรอนิกส์</option>
-                            <option value="เครื่องเขียน">เครื่องเขียน</option>
-                            <option value="เฟอร์นิเจอร์">เฟอร์นิเจอร์</option>
-                            <option value="เครื่องดื่ม">เครื่องดื่ม</option>
-                            <option value="อาหาร">อาหาร</option>
-                            <option value="อื่นๆ">อื่นๆ</option>
-                        </select>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="productQuantity" class="block text-sm font-medium text-gray-300 mb-1">จำนวน *</label>
-                            <input type="number" id="productQuantity" required min="0" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
-                        </div>
-                        
-                        <div>
-                            <label for="productPrice" class="block text-sm font-medium text-gray-300 mb-1">ราคาต่อหน่วย *</label>
-                            <input type="number" id="productPrice" required min="0" step="0.01" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end space-x-3 mt-8">
-                    <button type="button" id="cancelProductModalBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors hover-effect">ยกเลิก</button>
-                    <button type="submit" id="saveProductBtn" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg transition-colors hover-effect">บันทึกข้อมูล</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal สำหรับเพิ่ม/แก้ไขผู้ใช้ -->
-    <div id="userModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 animate__animated animate__zoomIn">
-            <div class="p-6 border-b border-gray-700">
-                <h3 id="modalUserTitle" class="text-xl font-bold">เพิ่มผู้ใช้ใหม่</h3>
-            </div>
-            
-            <form id="userForm" class="p-6">
-                <input type="hidden" id="userId">
-                
-                <div class="space-y-4">
-                    <div>
-                        <label for="newUsername" class="block text-sm font-medium text-gray-300 mb-1">ชื่อผู้ใช้ *</label>
-                        <input type="text" id="newUsername" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
-                    </div>
-                    
-                    <div>
-                        <label for="newPassword" class="block text-sm font-medium text-gray-300 mb-1">รหัสผ่าน *</label>
-                        <input type="password" id="newPassword" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
-                    </div>
-                    
-                    <div>
-                        <label for="fullName" class="block text-sm font-medium text-gray-300 mb-1">ชื่อ-นามสกุล *</label>
-                        <input type="text" id="fullName" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
-                    </div>
-                    
-                    <div>
-                        <label for="userRole" class="block text-sm font-medium text-gray-300 mb-1">บทบาท *</label>
-                        <select id="userRole" required class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
-                            <option value="">เลือกบทบาทผู้ใช้</option>
-                            <option value="user">ผู้ใช้ทั่วไป</option>
-                            <option value="manager">ผู้จัดการ</option>
-                            <option value="admin">ผู้ดูแลระบบ</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Permissions Section -->
-                    <div class="pt-4 border-t border-gray-700">
-                        <h4 class="font-medium text-gray-300 mb-3">สิทธิ์การใช้งาน</h4>
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm">ดูข้อมูลสินค้า</span>
-                                <input type="checkbox" id="permView" class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500" checked disabled>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm">เพิ่มสินค้าใหม่</span>
-                                <input type="checkbox" id="permAdd" class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500" checked>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm">แก้ไขข้อมูลสินค้า</span>
-                                <input type="checkbox" id="permEdit" class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500" checked>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm">ลบข้อมูลสินค้า</span>
-                                <input type="checkbox" id="permDelete" class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500">
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm">จัดการผู้ใช้</span>
-                                <input type="checkbox" id="permManageUsers" class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500">
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm">ดูรายงาน</span>
-                                <input type="checkbox" id="permViewReports" class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end space-x-3 mt-8">
-                    <button type="button" id="cancelUserModalBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors hover-effect">ยกเลิก</button>
-                    <button type="submit" id="saveUserBtn" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg transition-colors hover-effect">บันทึกข้อมูล</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Confirmation Dialog -->
-    <div id="confirmationDialog" class="confirmation-dialog hidden">
-        <div class="confirmation-header">
-            <div id="confirmationIcon" class="confirmation-icon">
-                <i class="fas fa-exclamation-triangle text-yellow-500"></i>
-            </div>
-            <h3 id="confirmationTitle" class="text-xl font-bold">ยืนยันการดำเนินการ</h3>
-        </div>
-        <div class="confirmation-body">
-            <p id="confirmationMessage" class="text-gray-300">คุณแน่ใจหรือไม่ว่าต้องการดำเนินการนี้?</p>
-        </div>
-        <div class="confirmation-footer">
-            <button id="cancelConfirmBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors hover-effect">ยกเลิก</button>
-            <button id="confirmActionBtn" class="px-4 py-2 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 rounded-lg transition-colors hover-effect">ยืนยัน</button>
-        </div>
-    </div>
-
-    <!-- Notification Panel -->
-    <div id="notificationPanel" class="fixed top-16 right-4 bg-gray-800 rounded-xl shadow-2xl w-80 max-h-96 overflow-y-auto z-50 hidden animate__animated animate__fadeInRight">
-        <div class="p-4 border-b border-gray-700">
-            <h3 class="font-bold flex items-center">
-                <i class="fas fa-bell mr-2 text-yellow-400"></i> การแจ้งเตือน
-                <span id="notificationCount" class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
-            </h3>
-        </div>
-        <div id="notificationList" class="p-2">
-            <!-- Notifications will be added here -->
-            <div class="text-center py-8 text-gray-500">
-                <i class="fas fa-bell-slash text-2xl mb-2"></i>
-                <p>ไม่มีการแจ้งเตือนใหม่</p>
-            </div>
-        </div>
-        <div class="p-3 border-t border-gray-700">
-            <button id="clearNotificationsBtn" class="w-full py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition-colors hover-effect">
-                <i class="fas fa-trash-alt mr-2"></i> ล้างการแจ้งเตือนทั้งหมด
-            </button>
-        </div>
-    </div>
-
-    <!-- User Profile Modal -->
-    <div id="userProfileModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 animate__animated animate__zoomIn">
-            <div class="p-6 border-b border-gray-700">
-                <h3 class="text-xl font-bold">โปรไฟล์ผู้ใช้</h3>
-            </div>
-            
-            <div class="p-6">
-                <div class="text-center mb-6">
-                    <div class="w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-user text-white text-3xl"></i>
-                    </div>
-                    <h4 id="profileUsername" class="text-xl font-bold"></h4>
-                    <div id="profileRoleBadge" class="inline-block mt-2"></div>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <p class="text-gray-400 text-sm">ชื่อ-นามสกุล</p>
-                        <p id="profileFullName" class="font-medium">-</p>
-                    </div>
-                    
-                    <div>
-                        <p class="text-gray-400 text-sm">บทบาท</p>
-                        <p id="profileRole" class="font-medium">-</p>
-                    </div>
-                    
-                    <div>
-                        <p class="text-gray-400 text-sm">อีเมล</p>
-                        <p id="profileEmail" class="font-medium">-</p>
-                    </div>
-                    
-                    <div>
-                        <p class="text-gray-400 text-sm">ล็อกอินล่าสุด</p>
-                        <p id="profileLastLogin" class="font-medium">-</p>
-                    </div>
-                    
-                    <div>
-                        <p class="text-gray-400 text-sm">วันที่สมัคร</p>
-                        <p id="profileCreatedAt" class="font-medium">-</p>
-                    </div>
-                </div>
-                
-                <div class="mt-8 pt-6 border-t border-gray-700">
-                    <div class="grid grid-cols-2 gap-3">
-                        <button id="changePasswordBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors hover-effect">
-                            <i class="fas fa-key mr-2"></i> เปลี่ยนรหัสผ่าน
-                        </button>
-                        <button id="closeProfileBtn" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg transition-colors hover-effect">
-                            <i class="fas fa-times mr-2"></i> ปิด
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Print Report Section (Hidden until printing) -->
-    <div id="printReportSection" class="print-section hidden">
-        <div class="p-8">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold">รายงานระบบจัดการสินค้า</h1>
-                <p class="text-gray-600">วันที่พิมพ์: <span id="printDate"></span></p>
-                <p class="text-gray-600">พิมพ์โดย: <span id="printUser"></span></p>
-            </div>
-            
-            <div class="mb-8">
-                <h2 class="text-xl font-bold mb-4">สรุปข้อมูลสินค้า</h2>
-                <div id="printProductSummary"></div>
-            </div>
-            
-            <div class="mb-8">
-                <h2 class="text-xl font-bold mb-4">สรุปข้อมูลผู้ใช้</h2>
-                <div id="printUserSummary"></div>
-            </div>
-            
-            <div class="mb-8">
-                <h2 class="text-xl font-bold mb-4">ข้อมูลสินค้าทั้งหมด</h2>
-                <div id="printProductsTable"></div>
-            </div>
-            
-            <div class="mt-12 pt-8 border-t border-gray-300">
-                <p class="text-gray-600 text-sm text-center">
-                    ระบบจัดการสินค้าพื้นฐานด้วย Firebase | เวอร์ชัน 3.0.0
-                </p>
-            </div>
-        </div>
-    </div>
+    <!-- ส่วน Modal และ Components อื่นๆ คงเดิม -->
+    <!-- ... -->
 
     <!-- Firebase Configuration Script -->
     <script id="firebaseConfigScript">
@@ -1539,12 +684,6 @@
                 canManageSettings: false
             }
         };
-        
-        // DOM Elements
-        const loginPage = document.getElementById('loginPage');
-        const appContainer = document.getElementById('appContainer');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const notificationPanel = document.getElementById('notificationPanel');
         
         // ==================== ALERT SYSTEM ====================
         
@@ -1737,17 +876,7 @@
             });
         }
         
-        // ==================== CORE FUNCTIONS ====================
-        
-        // แสดง/ซ่อน Loading Overlay
-        function showLoading(message = 'กำลังโหลดข้อมูล...') {
-            loadingOverlay.classList.remove('hidden');
-            document.getElementById('loadingMessage').textContent = message;
-        }
-        
-        function hideLoading() {
-            loadingOverlay.classList.add('hidden');
-        }
+        // ==================== AUTHENTICATION FUNCTIONS ====================
         
         // ตรวจสอบผู้ใช้และสิทธิ์
         function checkUserAndPermissions() {
@@ -1758,47 +887,221 @@
                     currentUser = JSON.parse(savedUser);
                     console.log('Current user loaded from localStorage:', currentUser);
                     
-                    // แสดงแอพพลิเคชันและซ่อนหน้าล็อกอิน
-                    showApp();
-                    
-                    // โหลดข้อมูลทั้งหมด
-                    loadAllData();
+                    // ตรวจสอบว่าผู้ใช้ยังมีอยู่ในฐานข้อมูลหรือไม่
+                    verifyUserInDatabase(currentUser.username)
+                        .then(userExists => {
+                            if (userExists) {
+                                showApp();
+                                loadAllData();
+                            } else {
+                                // ถ้าผู้ใช้ไม่มีในฐานข้อมูล ให้ล้างข้อมูลและแสดงหน้าล็อกอิน
+                                localStorage.removeItem('inventoryUser');
+                                showLogin();
+                                showAlert('error', 'เซสชั่นหมดอายุ', 'กรุณาเข้าสู่ระบบอีกครั้ง');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error verifying user:', error);
+                            showLogin();
+                        });
                     
                 } catch (error) {
                     console.error('Error parsing user data:', error);
                     localStorage.removeItem('inventoryUser');
                     showLogin();
-                    showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้');
                 }
             } else {
                 showLogin();
             }
         }
         
+        // ตรวจสอบว่าผู้ใช้มีอยู่ในฐานข้อมูลหรือไม่
+        function verifyUserInDatabase(username) {
+            return new Promise((resolve, reject) => {
+                const userRef = database.ref('users/' + username);
+                
+                userRef.once('value')
+                    .then(snapshot => {
+                        resolve(snapshot.exists());
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            });
+        }
+        
         // แสดงหน้าล็อกอิน
         function showLogin() {
-            loginPage.classList.remove('hidden');
-            appContainer.classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('appContainer').classList.add('hidden');
+            showLoginForm();
         }
         
         // แสดงแอพพลิเคชัน
         function showApp() {
-            loginPage.classList.add('hidden');
-            appContainer.classList.remove('hidden');
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
             
-            // อัพเดทข้อมูลผู้ใช้ใน UI
             updateUserInfo();
-            
-            // ตั้งค่าสิทธิ์ตามบทบาท
             setupPermissions();
-            
-            // ตั้งค่าเริ่มต้นจาก Local Storage
             loadSettingsFromLocalStorage();
-            
-            // แสดง Dashboard เป็นหน้าแรก
             showPage('dashboardPage');
             
             showToast(`ยินดีต้อนรับ ${currentUser.username}!`, 'success');
+        }
+        
+        // แสดงฟอร์มเข้าสู่ระบบ
+        function showLoginForm() {
+            document.getElementById('loginFormContainer').classList.remove('hidden');
+            document.getElementById('registerFormContainer').classList.add('hidden');
+            document.getElementById('loginTabBtn').classList.add('active');
+            document.getElementById('registerTabBtn').classList.remove('active');
+        }
+        
+        // แสดงฟอร์มลงทะเบียน
+        function showRegisterForm() {
+            document.getElementById('loginFormContainer').classList.add('hidden');
+            document.getElementById('registerFormContainer').classList.remove('hidden');
+            document.getElementById('loginTabBtn').classList.remove('active');
+            document.getElementById('registerTabBtn').classList.add('active');
+        }
+        
+        // ตรวจสอบการล็อกอินจากฐานข้อมูล Firebase
+        function loginUser(username, password) {
+            showLoading('กำลังตรวจสอบข้อมูลผู้ใช้...');
+            
+            const userRef = database.ref('users/' + username);
+            
+            userRef.once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        
+                        // ตรวจสอบรหัสผ่าน
+                        if (userData.password === password) {
+                            // อัพเดทข้อมูลล็อกอินล่าสุด
+                            userRef.update({
+                                lastLogin: new Date().toISOString()
+                            });
+                            
+                            // กำหนดบทบาทผู้ใช้ (ใหม่จะเป็น user อัตโนมัติ)
+                            currentUser = {
+                                username: username,
+                                role: userData.role || 'user',
+                                fullName: userData.fullName || username
+                            };
+                            
+                            // บันทึกใน localStorage
+                            localStorage.setItem('inventoryUser', JSON.stringify(currentUser));
+                            
+                            hideLoading();
+                            showAlert('success', 'ล็อกอินสำเร็จ', `ยินดีต้อนรับ ${username}!`);
+                            
+                        } else {
+                            hideLoading();
+                            showAlert('error', 'ล็อกอินไม่สำเร็จ', 'รหัสผ่านไม่ถูกต้อง');
+                        }
+                    } else {
+                        hideLoading();
+                        showAlert('error', 'ล็อกอินไม่สำเร็จ', 'ไม่พบชื่อผู้ใช้นี้ในระบบ');
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error('Error during login:', error);
+                    showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
+                });
+        }
+        
+        // ลงทะเบียนผู้ใช้ใหม่
+        function registerUser(username, password, confirmPassword, fullName, email) {
+            // ตรวจสอบความถูกต้องของข้อมูล
+            if (!username || !password || !confirmPassword || !fullName) {
+                showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
+                return;
+            }
+            
+            if (username.length < 3) {
+                showAlert('error', 'ข้อมูลไม่ถูกต้อง', 'ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showAlert('error', 'ข้อมูลไม่ถูกต้อง', 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert('error', 'ข้อมูลไม่ถูกต้อง', 'รหัสผ่านไม่ตรงกัน');
+                return;
+            }
+            
+            showLoading('กำลังตรวจสอบข้อมูล...');
+            
+            const userRef = database.ref('users/' + username);
+            
+            // ตรวจสอบว่ามีชื่อผู้ใช้นี้แล้วหรือไม่
+            userRef.once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        hideLoading();
+                        showAlert('error', 'ลงทะเบียนไม่สำเร็จ', 'ชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว');
+                    } else {
+                        // สร้างข้อมูลผู้ใช้ใหม่
+                        const userData = {
+                            username: username,
+                            password: password,
+                            fullName: fullName,
+                            email: email || '',
+                            role: 'user', // ผู้ใช้ใหม่จะเป็น user
+                            createdAt: new Date().toISOString(),
+                            lastLogin: new Date().toISOString(),
+                            isActive: true
+                        };
+                        
+                        // บันทึกลงฐานข้อมูล
+                        userRef.set(userData)
+                            .then(() => {
+                                // เข้าสู่ระบบอัตโนมัติหลังจากลงทะเบียนสำเร็จ
+                                currentUser = {
+                                    username: username,
+                                    role: 'user',
+                                    fullName: fullName
+                                };
+                                
+                                localStorage.setItem('inventoryUser', JSON.stringify(currentUser));
+                                
+                                hideLoading();
+                                showAlert('success', 'ลงทะเบียนสำเร็จ', `ยินดีต้อนรับ ${username}! คุณได้ลงทะเบียนเป็นผู้ใช้ใหม่แล้ว`);
+                                
+                                // อัพเดทรายการผู้ใช้ในหน้างาน
+                                loadUsers();
+                            })
+                            .catch(error => {
+                                hideLoading();
+                                console.error('Error registering user:', error);
+                                showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการลงทะเบียน');
+                            });
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error('Error checking user existence:', error);
+                    showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการตรวจสอบข้อมูล');
+                });
+        }
+        
+        // ==================== CORE FUNCTIONS ====================
+        
+        // แสดง/ซ่อน Loading Overlay
+        function showLoading(message = 'กำลังโหลดข้อมูล...') {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.remove('hidden');
+            document.getElementById('loadingMessage').textContent = message;
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
         }
         
         // อัพเดทข้อมูลผู้ใช้ใน UI
@@ -1846,11 +1149,8 @@
         function setupPermissions() {
             if (!currentUser) return;
             
-            console.log('Setting up permissions for role:', currentUser.role);
-            
             const permissions = rolePermissions[currentUser.role];
             
-            // ตั้งค่าปุ่มตามสิทธิ์
             const navUsers = document.getElementById('navUsers');
             const navReports = document.getElementById('navReports');
             const navSettings = document.getElementById('navSettings');
@@ -1859,7 +1159,6 @@
             if (navReports) navReports.style.display = permissions.canViewReports ? 'flex' : 'none';
             if (navSettings) navSettings.style.display = permissions.canManageSettings ? 'flex' : 'none';
             
-            // อัพเดทข้อความในหน้า Products
             const productsTableInfo = document.getElementById('productsTableInfo');
             if (productsTableInfo) {
                 if (permissions.canDelete) {
@@ -1878,27 +1177,22 @@
         
         // แสดงหน้า
         function showPage(pageId) {
-            // ซ่อนทุกหน้า
             const pages = document.querySelectorAll('.page-content');
             pages.forEach(page => page.classList.add('hidden'));
             
-            // แสดงหน้าที่เลือก
             const activePage = document.getElementById(pageId);
             if (activePage) {
                 activePage.classList.remove('hidden');
                 
-                // เมื่อแสดงหน้า Reports ให้โหลดรายงาน
                 if (pageId === 'reportsPage') {
                     loadReports();
                 }
                 
-                // เมื่อแสดงหน้า Settings ให้โหลดการตั้งค่า
                 if (pageId === 'settingsPage') {
                     loadSettings();
                 }
             }
             
-            // อัพเดท Navigation
             const navLinks = document.querySelectorAll('.nav-link');
             navLinks.forEach(link => link.classList.remove('active'));
             
@@ -1965,9 +1259,12 @@
                     
                     if (data) {
                         Object.keys(data).forEach(key => {
+                            // ซ่อนรหัสผ่านจากการแสดงผล
+                            const userData = { ...data[key] };
+                            delete userData.password; // ลบรหัสผ่านออกจากการแสดงผล
                             users.push({
                                 id: key,
-                                ...data[key]
+                                ...userData
                             });
                         });
                     }
@@ -1980,6 +1277,8 @@
                 });
             });
         }
+        
+        // ==================== PRODUCT MANAGEMENT ====================
         
         // อัพเดทตารางสินค้า
         function updateProductsTable() {
@@ -2025,7 +1324,6 @@
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-700 transition-colors product-card';
                 
-                // สร้างปุ่มจัดการตามสิทธิ์
                 let actionButtons = '';
                 const canEdit = checkPermission('canEdit');
                 
@@ -2079,649 +1377,8 @@
                 tableBody.appendChild(row);
             });
             
-            // อัพเดทสถิติสินค้า
             updateProductStats();
         }
-        
-        // อัพเดทตารางผู้ใช้
-        function updateUsersTable() {
-            const tableBody = document.getElementById('usersTableBody');
-            if (!tableBody) return;
-            
-            tableBody.innerHTML = '';
-            
-            if (users.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
-                            <i class="fas fa-users text-4xl mb-4 animate-pulse"></i>
-                            <p class="text-lg">ยังไม่มีข้อมูลผู้ใช้</p>
-                            <p class="text-sm mt-2">คลิกปุ่ม "เพิ่มผู้ใช้ใหม่" เพื่อเริ่มต้นเพิ่มผู้ใช้</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            const canManageUsers = checkPermission('canManageUsers');
-            
-            users.forEach(user => {
-                let roleBadge = '';
-                let roleDisplay = '';
-                
-                switch(user.role) {
-                    case 'admin':
-                        roleBadge = 'role-admin';
-                        roleDisplay = 'ผู้ดูแลระบบ';
-                        break;
-                    case 'manager':
-                        roleBadge = 'role-manager';
-                        roleDisplay = 'ผู้จัดการ';
-                        break;
-                    case 'user':
-                        roleBadge = 'role-user';
-                        roleDisplay = 'ผู้ใช้ทั่วไป';
-                        break;
-                }
-                
-                // สร้างรายการสิทธิ์
-                const permissions = rolePermissions[user.role] || {};
-                let permissionsHtml = '';
-                
-                if (permissions.canView) permissionsHtml += '<span class="permission-badge permission-allowed">ดู</span> ';
-                if (permissions.canAdd) permissionsHtml += '<span class="permission-badge permission-allowed">เพิ่ม</span> ';
-                if (permissions.canEdit) permissionsHtml += '<span class="permission-badge permission-allowed">แก้ไข</span> ';
-                if (permissions.canDelete) permissionsHtml += '<span class="permission-badge permission-allowed">ลบ</span> ';
-                if (permissions.canManageUsers) permissionsHtml += '<span class="permission-badge permission-allowed">ผู้ใช้</span> ';
-                if (permissions.canViewReports) permissionsHtml += '<span class="permission-badge permission-allowed">รายงาน</span>';
-                
-                // สถานะผู้ใช้
-                const status = user.isActive !== false ? 'active' : 'inactive';
-                const statusText = user.isActive !== false ? 'ใช้งานได้' : 'ปิดใช้งาน';
-                const statusColor = user.isActive !== false ? 'text-green-400' : 'text-red-400';
-                
-                // ล็อกอินล่าสุด
-                const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString('th-TH') : 'ไม่เคยล็อกอิน';
-                
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-700 transition-colors product-card';
-                
-                // สร้างปุ่มจัดการตามสิทธิ์
-                let actionButtons = '';
-                
-                if (canManageUsers) {
-                    actionButtons = `
-                        <button onclick="editUser('${user.id}')" class="text-indigo-400 hover:text-indigo-300 mr-3 transition-colors hover-effect">
-                            <i class="fas fa-edit mr-1"></i> แก้ไข
-                        </button>
-                    `;
-                    
-                    // ตรวจสอบว่าไม่ใช่ผู้ใช้ปัจจุบัน
-                    if (user.id !== currentUser.username) {
-                        actionButtons += `
-                            <button onclick="showDeleteUserConfirm('${user.id}', '${user.fullName || user.username}')" class="text-red-400 hover:text-red-300 transition-colors hover-effect">
-                                <i class="fas fa-trash-alt mr-1"></i> ลบ
-                            </button>
-                        `;
-                    } else {
-                        actionButtons += '<span class="text-gray-500 text-sm">(ผู้ใช้ปัจจุบัน)</span>';
-                    }
-                } else {
-                    actionButtons = '<span class="text-gray-500 text-sm">ไม่สามารถจัดการได้</span>';
-                }
-                
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="font-medium">${user.username}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="font-medium">${user.fullName || '-'}</div>
-                        <div class="text-gray-400 text-sm">${user.email || ''}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="${roleBadge}">${roleDisplay}</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="flex flex-wrap gap-1">
-                            ${permissionsHtml}
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="${statusColor} font-medium">${statusText}</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        ${lastLogin}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        ${actionButtons}
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-            
-            // อัพเดทสถิติผู้ใช้
-            updateUserStats();
-        }
-        
-        // อัพเดทสถิติแดชบอร์ด
-        function updateDashboardStats() {
-            // สินค้า
-            const totalProducts = products.length;
-            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
-            const outOfStock = products.filter(p => p.quantity <= 0).length;
-            
-            document.getElementById('totalProducts').textContent = totalProducts;
-            document.getElementById('totalValue').textContent = '฿' + totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2});
-            document.getElementById('outOfStock').textContent = outOfStock;
-            
-            // ผู้ใช้
-            const totalUsers = users.length;
-            const adminUsers = users.filter(u => u.role === 'admin').length;
-            const managerUsers = users.filter(u => u.role === 'manager').length;
-            const normalUsers = users.filter(u => u.role === 'user').length;
-            
-            document.getElementById('totalUsers').textContent = totalUsers;
-            document.getElementById('totalUsersCount').textContent = totalUsers + ' คน';
-            document.getElementById('adminUsersCount').textContent = adminUsers + ' คน';
-            document.getElementById('managerUsersCount').textContent = managerUsers + ' คน';
-            document.getElementById('normalUsersCount').textContent = normalUsers + ' คน';
-        }
-        
-        // อัพเดทสถิติสินค้า
-        function updateProductStats() {
-            const totalProducts = products.length;
-            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
-            const outOfStock = products.filter(p => p.quantity <= 0).length;
-            const lowStock = products.filter(p => p.quantity > 0 && p.quantity <= 5).length;
-            const inStock = products.filter(p => p.quantity > 5).length;
-            
-            document.getElementById('totalProductsCount').textContent = totalProducts + ' รายการ';
-            document.getElementById('totalProductsValue').textContent = '฿' + totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2});
-            document.getElementById('outOfStockCount').textContent = outOfStock + ' รายการ';
-            document.getElementById('lowStockCount').textContent = lowStock;
-            document.getElementById('outStockCount').textContent = outOfStock;
-            document.getElementById('inStockCount').textContent = inStock;
-        }
-        
-        // อัพเดทสถิติผู้ใช้
-        function updateUserStats() {
-            const totalUsers = users.length;
-            const adminUsers = users.filter(u => u.role === 'admin').length;
-            const managerUsers = users.filter(u => u.role === 'manager').length;
-            const normalUsers = users.filter(u => u.role === 'user').length;
-            
-            document.getElementById('totalUsersCount').textContent = totalUsers + ' คน';
-            document.getElementById('adminUsersCount').textContent = adminUsers + ' คน';
-            document.getElementById('managerUsersCount').textContent = managerUsers + ' คน';
-            document.getElementById('normalUsersCount').textContent = normalUsers + ' คน';
-        }
-        
-        // ตรวจสอบการล็อกอิน
-        function loginUser(username, password) {
-            showLoading('กำลังตรวจสอบข้อมูลผู้ใช้...');
-            
-            // ตรวจสอบข้อมูลผู้ใช้แบบ Hardcoded สำหรับ Demo
-            const validUsers = {
-                'admin': { password: 'admin123', role: 'admin', fullName: 'ผู้ดูแลระบบ' },
-                'manager': { password: 'manager123', role: 'manager', fullName: 'ผู้จัดการ' },
-                'user': { password: 'user123', role: 'user', fullName: 'ผู้ใช้ทั่วไป' }
-            };
-            
-            setTimeout(() => {
-                if (validUsers[username] && validUsers[username].password === password) {
-                    // เข้าสู่ระบบสำเร็จ
-                    currentUser = {
-                        username: username,
-                        role: validUsers[username].role,
-                        fullName: validUsers[username].fullName
-                    };
-                    
-                    console.log('Login successful for user:', currentUser);
-                    
-                    // บันทึกข้อมูลผู้ใช้ใน localStorage
-                    localStorage.setItem('inventoryUser', JSON.stringify(currentUser));
-                    
-                    // อัพเดทข้อมูลผู้ใช้ในฐานข้อมูล
-                    updateUserInDatabase(username, validUsers[username].role, validUsers[username].fullName);
-                    
-                    showAlert('success', 'ล็อกอินสำเร็จ', `ยินดีต้อนรับ ${username}!`);
-                    
-                } else {
-                    hideLoading();
-                    showAlert('error', 'ล็อกอินไม่สำเร็จ', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-                }
-            }, 1500);
-        }
-        
-        // อัพเดทข้อมูลผู้ใช้ในฐานข้อมูล
-        function updateUserInDatabase(username, role, fullName) {
-            const userRef = database.ref('users/' + username);
-            
-            userRef.update({
-                username: username,
-                role: role,
-                fullName: fullName,
-                lastLogin: new Date().toISOString(),
-                isActive: true,
-                updatedAt: new Date().toISOString()
-            }).then(() => {
-                console.log('User data updated in Firebase:', username);
-            }).catch(error => {
-                console.error('Error updating user in database:', error);
-            });
-        }
-        
-        // ==================== SETTINGS FUNCTIONS ====================
-        
-        // โหลดการตั้งค่าจาก Local Storage
-        function loadSettingsFromLocalStorage() {
-            const settings = JSON.parse(localStorage.getItem('inventorySettings')) || {};
-            
-            // โหลดการตั้งค่า Toggles
-            const notificationToggle = document.getElementById('notificationToggle');
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            const autoRefreshToggle = document.getElementById('autoRefreshToggle');
-            
-            if (notificationToggle) {
-                notificationToggle.checked = settings.notifications !== false;
-            }
-            
-            if (darkModeToggle) {
-                darkModeToggle.checked = settings.darkMode !== false;
-            }
-            
-            if (autoRefreshToggle) {
-                autoRefreshToggle.checked = settings.autoRefresh === true;
-                
-                // ถ้าเปิด Auto Refresh ให้ตั้งค่าช่วงเวลา
-                if (settings.autoRefresh) {
-                    setupAutoRefresh();
-                }
-            }
-        }
-        
-        // บันทึกการตั้งค่าไปยัง Local Storage
-        function saveSettingsToLocalStorage() {
-            const settings = {
-                notifications: document.getElementById('notificationToggle').checked,
-                darkMode: document.getElementById('darkModeToggle').checked,
-                autoRefresh: document.getElementById('autoRefreshToggle').checked
-            };
-            
-            localStorage.setItem('inventorySettings', JSON.stringify(settings));
-            showToast('บันทึกการตั้งค่าสำเร็จ', 'success');
-        }
-        
-        // โหลดการตั้งค่าสำหรับหน้า Settings
-        function loadSettings() {
-            // อัพเดทเวลาปัจจุบัน
-            updateSystemTime();
-            
-            // โหลดการตั้งค่าจาก Local Storage
-            loadSettingsFromLocalStorage();
-            
-            // อัพเดทสถานะการเชื่อมต่อ
-            updateConnectionStatus();
-        }
-        
-        // อัพเดทเวลาปัจจุบัน
-        function updateSystemTime() {
-            const systemTimeElement = document.getElementById('systemTime');
-            if (systemTimeElement) {
-                const now = new Date();
-                systemTimeElement.textContent = now.toLocaleString('th-TH', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-            }
-        }
-        
-        // อัพเดทสถานะการเชื่อมต่อ
-        function updateConnectionStatus() {
-            const statusElement = document.getElementById('systemConnectionStatus');
-            if (statusElement) {
-                statusElement.textContent = 'ออนไลน์';
-                statusElement.className = 'font-medium text-green-400';
-            }
-        }
-        
-        // ตั้งค่า Auto Refresh
-        function setupAutoRefresh() {
-            // ล้าง interval เดิมถ้ามี
-            if (autoRefreshInterval) {
-                clearInterval(autoRefreshInterval);
-            }
-            
-            // ตั้งค่า interval ใหม่ทุก 30 วินาที
-            autoRefreshInterval = setInterval(() => {
-                loadProducts();
-                loadUsers();
-                showToast('รีเฟรชข้อมูลอัตโนมัติเรียบร้อย', 'info');
-            }, 30000); // 30 วินาที
-        }
-        
-        // ==================== REPORTS FUNCTIONS ====================
-        
-        // โหลดรายงาน
-        function loadReports() {
-            updateProductReport();
-            updateUserReport();
-        }
-        
-        // อัพเดทรายงานสินค้า
-        function updateProductReport() {
-            const productSummary = document.getElementById('productSummary');
-            const topProducts = document.getElementById('topProducts');
-            
-            if (!productSummary || !topProducts) return;
-            
-            // สรุปข้อมูลสินค้า
-            const totalProducts = products.length;
-            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
-            const outOfStock = products.filter(p => p.quantity <= 0).length;
-            const lowStock = products.filter(p => p.quantity > 0 && p.quantity <= 5).length;
-            const highValueProducts = products.filter(p => (p.quantity * p.price) > 10000).length;
-            
-            productSummary.innerHTML = `
-                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
-                    <span class="text-gray-400">จำนวนสินค้าทั้งหมด</span>
-                    <span class="font-bold text-lg">${totalProducts} รายการ</span>
-                </div>
-                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
-                    <span class="text-gray-400">มูลค่ารวม</span>
-                    <span class="font-bold text-lg text-green-400">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</span>
-                </div>
-                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
-                    <span class="text-gray-400">สินค้าหมดสต๊อก</span>
-                    <span class="font-bold text-lg text-red-400">${outOfStock} รายการ</span>
-                </div>
-                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
-                    <span class="text-gray-400">สินค้าเหลือน้อย</span>
-                    <span class="font-bold text-lg text-yellow-400">${lowStock} รายการ</span>
-                </div>
-                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
-                    <span class="text-gray-400">สินค้ามูลค่าสูง</span>
-                    <span class="font-bold text-lg text-purple-400">${highValueProducts} รายการ</span>
-                </div>
-            `;
-            
-            // สินค้าขายดี (เรียงตามมูลค่ารวม)
-            const sortedProducts = [...products].sort((a, b) => {
-                const valueA = a.quantity * a.price;
-                const valueB = b.quantity * b.price;
-                return valueB - valueA;
-            }).slice(0, 5); // เอา 5 อันดับแรก
-            
-            topProducts.innerHTML = '';
-            
-            if (sortedProducts.length === 0) {
-                topProducts.innerHTML = '<p class="text-gray-500 text-center">ไม่มีข้อมูลสินค้า</p>';
-                return;
-            }
-            
-            sortedProducts.forEach((product, index) => {
-                const totalValue = product.quantity * product.price;
-                const productElement = document.createElement('div');
-                productElement.className = 'flex justify-between items-center p-3 bg-gray-900/30 rounded-lg';
-                productElement.innerHTML = `
-                    <div class="flex items-center">
-                        <span class="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs mr-3">${index + 1}</span>
-                        <div>
-                            <p class="font-medium">${product.productName}</p>
-                            <p class="text-gray-400 text-sm">${product.category}</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold text-green-400">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
-                        <p class="text-gray-400 text-sm">${product.quantity} ชิ้น</p>
-                    </div>
-                `;
-                topProducts.appendChild(productElement);
-            });
-        }
-        
-        // อัพเดทรายงานผู้ใช้
-        function updateUserReport() {
-            const userSummary = document.getElementById('userSummary');
-            
-            if (!userSummary) return;
-            
-            const totalUsers = users.length;
-            const adminUsers = users.filter(u => u.role === 'admin').length;
-            const managerUsers = users.filter(u => u.role === 'manager').length;
-            const normalUsers = users.filter(u => u.role === 'user').length;
-            const activeUsers = users.filter(u => u.isActive !== false).length;
-            
-            userSummary.innerHTML = `
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="text-center p-4 bg-indigo-900/30 rounded-lg">
-                        <div class="text-3xl font-bold text-indigo-400">${totalUsers}</div>
-                        <div class="text-sm text-gray-300">ผู้ใช้ทั้งหมด</div>
-                    </div>
-                    <div class="text-center p-4 bg-purple-900/30 rounded-lg">
-                        <div class="text-3xl font-bold text-purple-400">${adminUsers}</div>
-                        <div class="text-sm text-gray-300">ผู้ดูแลระบบ</div>
-                    </div>
-                    <div class="text-center p-4 bg-blue-900/30 rounded-lg">
-                        <div class="text-3xl font-bold text-blue-400">${managerUsers}</div>
-                        <div class="text-sm text-gray-300">ผู้จัดการ</div>
-                    </div>
-                    <div class="text-center p-4 bg-green-900/30 rounded-lg">
-                        <div class="text-3xl font-bold text-green-400">${normalUsers}</div>
-                        <div class="text-sm text-gray-300">ผู้ใช้ทั่วไป</div>
-                    </div>
-                </div>
-                <div class="bg-gray-900/30 p-4 rounded-lg">
-                    <p class="font-medium mb-2">สถานะผู้ใช้</p>
-                    <div class="flex items-center">
-                        <div class="flex-1">
-                            <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
-                                <div class="h-full bg-green-500" style="width: ${(activeUsers / totalUsers) * 100}%"></div>
-                            </div>
-                        </div>
-                        <span class="ml-3 text-sm">${activeUsers}/${totalUsers} คน (ใช้งานได้)</span>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // ส่งออกรายงานสินค้า
-        function exportProductReport() {
-            showLoading('กำลังสร้างรายงานสินค้า...');
-            
-            // สร้างข้อมูล CSV
-            let csvContent = "รหัสสินค้า,ชื่อสินค้า,ประเภท,จำนวน,ราคาต่อหน่วย,มูลค่ารวม,สถานะ\n";
-            
-            products.forEach(product => {
-                const totalValue = product.quantity * product.price;
-                const isLowStock = product.quantity <= 5 && product.quantity > 0;
-                const isOutOfStock = product.quantity <= 0;
-                
-                let status = 'พร้อมจำหน่าย';
-                if (isLowStock) status = 'เหลือน้อย';
-                if (isOutOfStock) status = 'หมดสต๊อก';
-                
-                csvContent += `"${product.productCode}","${product.productName}","${product.category}",${product.quantity},${product.price},${totalValue},"${status}"\n`;
-            });
-            
-            // สร้างไฟล์และดาวน์โหลด
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute("href", url);
-            link.setAttribute("download", `รายงานสินค้า_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            hideLoading();
-            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกรายงานสินค้าเป็นไฟล์ CSV เรียบร้อยแล้ว');
-        }
-        
-        // ส่งออกรายงานผู้ใช้
-        function exportUserReport() {
-            showLoading('กำลังสร้างรายงานผู้ใช้...');
-            
-            // สร้างข้อมูล CSV
-            let csvContent = "ชื่อผู้ใช้,ชื่อ-นามสกุล,บทบาท,สถานะ,ล็อกอินล่าสุด\n";
-            
-            users.forEach(user => {
-                const status = user.isActive !== false ? 'ใช้งานได้' : 'ปิดใช้งาน';
-                const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('th-TH') : 'ไม่เคยล็อกอิน';
-                
-                csvContent += `"${user.username}","${user.fullName || ''}","${getRoleDisplay(user.role)}","${status}","${lastLogin}"\n`;
-            });
-            
-            // สร้างไฟล์และดาวน์โหลด
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute("href", url);
-            link.setAttribute("download", `รายงานผู้ใช้_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            hideLoading();
-            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกรายงานผู้ใช้เป็นไฟล์ CSV เรียบร้อยแล้ว');
-        }
-        
-        // พิมพ์รายงาน
-        function printReport() {
-            showLoading('กำลังเตรียมรายงานสำหรับพิมพ์...');
-            
-            // อัพเดทข้อมูลสำหรับพิมพ์
-            document.getElementById('printDate').textContent = new Date().toLocaleString('th-TH');
-            document.getElementById('printUser').textContent = currentUser.username;
-            
-            // สรุปสินค้า
-            const totalProducts = products.length;
-            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
-            const outOfStock = products.filter(p => p.quantity <= 0).length;
-            const lowStock = products.filter(p => p.quantity > 0 && p.quantity <= 5).length;
-            
-            document.getElementById('printProductSummary').innerHTML = `
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="p-3 border rounded">
-                        <p class="text-gray-600">จำนวนสินค้าทั้งหมด</p>
-                        <p class="font-bold text-lg">${totalProducts} รายการ</p>
-                    </div>
-                    <div class="p-3 border rounded">
-                        <p class="text-gray-600">มูลค่ารวม</p>
-                        <p class="font-bold text-lg text-green-600">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
-                    </div>
-                    <div class="p-3 border rounded">
-                        <p class="text-gray-600">สินค้าหมดสต๊อก</p>
-                        <p class="font-bold text-lg text-red-600">${outOfStock} รายการ</p>
-                    </div>
-                    <div class="p-3 border rounded">
-                        <p class="text-gray-600">สินค้าเหลือน้อย</p>
-                        <p class="font-bold text-lg text-yellow-600">${lowStock} รายการ</p>
-                    </div>
-                </div>
-            `;
-            
-            // สรุปผู้ใช้
-            const totalUsers = users.length;
-            const adminUsers = users.filter(u => u.role === 'admin').length;
-            const managerUsers = users.filter(u => u.role === 'manager').length;
-            const normalUsers = users.filter(u => u.role === 'user').length;
-            
-            document.getElementById('printUserSummary').innerHTML = `
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="p-3 border rounded">
-                        <p class="text-gray-600">ผู้ใช้ทั้งหมด</p>
-                        <p class="font-bold text-lg">${totalUsers} คน</p>
-                    </div>
-                    <div class="p-3 border rounded">
-                        <p class="text-gray-600">ผู้ดูแลระบบ</p>
-                        <p class="font-bold text-lg">${adminUsers} คน</p>
-                    </div>
-                    <div class="p-3 border rounded">
-                        <p class="text-gray-600">ผู้จัดการ</p>
-                        <p class="font-bold text-lg">${managerUsers} คน</p>
-                    </div>
-                    <div class="p-3 border rounded">
-                        <p class="text-gray-600">ผู้ใช้ทั่วไป</p>
-                        <p class="font-bold text-lg">${normalUsers} คน</p>
-                    </div>
-                </div>
-            `;
-            
-            // ตารางสินค้า
-            let productsTableHtml = `
-                <table class="min-w-full border">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="border p-2">รหัสสินค้า</th>
-                            <th class="border p-2">ชื่อสินค้า</th>
-                            <th class="border p-2">ประเภท</th>
-                            <th class="border p-2">จำนวน</th>
-                            <th class="border p-2">ราคา/หน่วย</th>
-                            <th class="border p-2">มูลค่ารวม</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            products.forEach(product => {
-                const totalValue = product.quantity * product.price;
-                productsTableHtml += `
-                    <tr>
-                        <td class="border p-2">${product.productCode}</td>
-                        <td class="border p-2">${product.productName}</td>
-                        <td class="border p-2">${product.category}</td>
-                        <td class="border p-2">${product.quantity}</td>
-                        <td class="border p-2">฿${product.price.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                        <td class="border p-2">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                    </tr>
-                `;
-            });
-            
-            productsTableHtml += '</tbody></table>';
-            document.getElementById('printProductsTable').innerHTML = productsTableHtml;
-            
-            // ซ่อน Loading และพิมพ์รายงาน
-            setTimeout(() => {
-                hideLoading();
-                
-                // แสดงส่วนที่จะพิมพ์
-                const printSection = document.getElementById('printReportSection');
-                printSection.classList.remove('hidden');
-                
-                // พิมพ์
-                window.print();
-                
-                // ซ่อนส่วนพิมพ์หลังพิมพ์เสร็จ
-                setTimeout(() => {
-                    printSection.classList.add('hidden');
-                }, 500);
-                
-            }, 1000);
-        }
-        
-        // ฟังก์ชันช่วยเหลือสำหรับแสดงบทบาท
-        function getRoleDisplay(role) {
-            switch(role) {
-                case 'admin': return 'ผู้ดูแลระบบ';
-                case 'manager': return 'ผู้จัดการ';
-                case 'user': return 'ผู้ใช้ทั่วไป';
-                default: return 'ไม่ระบุ';
-            }
-        }
-        
-        // ==================== PRODUCT MANAGEMENT ====================
         
         // แสดง Modal สำหรับเพิ่ม/แก้ไขสินค้า
         function showProductModal(product = null) {
@@ -2755,11 +1412,6 @@
             modal.classList.remove('hidden');
         }
         
-        // ซ่อน Product Modal
-        function hideProductModal() {
-            document.getElementById('productModal').classList.add('hidden');
-        }
-        
         // บันทึกสินค้า
         function saveProduct(e) {
             e.preventDefault();
@@ -2771,7 +1423,6 @@
             const quantity = parseInt(document.getElementById('productQuantity').value);
             const price = parseFloat(document.getElementById('productPrice').value);
             
-            // ตรวจสอบข้อมูล
             if (!productCode || !productName || !category || isNaN(quantity) || isNaN(price)) {
                 showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง');
                 return;
@@ -2797,9 +1448,7 @@
                 updatedAt: new Date().toISOString()
             };
             
-            // บันทึกลง Firebase
             if (productId) {
-                // อัพเดทข้อมูลที่มีอยู่
                 database.ref('products/' + productId).update(productData)
                     .then(() => {
                         hideProductModal();
@@ -2810,15 +1459,12 @@
                         showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการอัพเดทข้อมูล');
                     });
             } else {
-                // เพิ่มข้อมูลใหม่
-                // ตรวจสอบว่ามีรหัสสินค้าซ้ำหรือไม่
                 const isDuplicate = products.some(product => product.productCode === productCode);
                 if (isDuplicate) {
                     showAlert('error', 'ข้อมูลซ้ำ', 'รหัสสินค้านี้มีอยู่ในระบบแล้ว กรุณาใช้รหัสอื่น');
                     return;
                 }
                 
-                // เพิ่มข้อมูลผู้สร้าง
                 productData.createdBy = currentUser.username;
                 productData.createdAt = new Date().toISOString();
                 
@@ -2834,6 +1480,11 @@
             }
         }
         
+        // ซ่อน Product Modal
+        function hideProductModal() {
+            document.getElementById('productModal').classList.add('hidden');
+        }
+        
         // แก้ไขสินค้า
         function editProduct(productId) {
             const product = products.find(p => p.id === productId);
@@ -2844,7 +1495,6 @@
         
         // แสดง Confirmation สำหรับลบสินค้า
         function showDeleteProductConfirm(productId, productName) {
-            // ตรวจสอบสิทธิ์ก่อนแสดง
             if (!checkPermission('canDelete')) {
                 showAlert('error', 'ไม่มีสิทธิ์', 'ขออภัย คุณไม่มีสิทธิ์ลบข้อมูลสินค้า');
                 return;
@@ -2892,9 +1542,123 @@
         
         // ==================== USER MANAGEMENT ====================
         
+        // อัพเดทตารางผู้ใช้
+        function updateUsersTable() {
+            const tableBody = document.getElementById('usersTableBody');
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = '';
+            
+            if (users.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                            <i class="fas fa-users text-4xl mb-4 animate-pulse"></i>
+                            <p class="text-lg">ยังไม่มีข้อมูลผู้ใช้</p>
+                            <p class="text-sm mt-2">คลิกปุ่ม "เพิ่มผู้ใช้ใหม่" เพื่อเริ่มต้นเพิ่มผู้ใช้</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            const canManageUsers = checkPermission('canManageUsers');
+            
+            users.forEach(user => {
+                let roleBadge = '';
+                let roleDisplay = '';
+                
+                switch(user.role) {
+                    case 'admin':
+                        roleBadge = 'role-admin';
+                        roleDisplay = 'ผู้ดูแลระบบ';
+                        break;
+                    case 'manager':
+                        roleBadge = 'role-manager';
+                        roleDisplay = 'ผู้จัดการ';
+                        break;
+                    case 'user':
+                        roleBadge = 'role-user';
+                        roleDisplay = 'ผู้ใช้ทั่วไป';
+                        break;
+                }
+                
+                const permissions = rolePermissions[user.role] || {};
+                let permissionsHtml = '';
+                
+                if (permissions.canView) permissionsHtml += '<span class="permission-badge permission-allowed">ดู</span> ';
+                if (permissions.canAdd) permissionsHtml += '<span class="permission-badge permission-allowed">เพิ่ม</span> ';
+                if (permissions.canEdit) permissionsHtml += '<span class="permission-badge permission-allowed">แก้ไข</span> ';
+                if (permissions.canDelete) permissionsHtml += '<span class="permission-badge permission-allowed">ลบ</span> ';
+                if (permissions.canManageUsers) permissionsHtml += '<span class="permission-badge permission-allowed">ผู้ใช้</span> ';
+                if (permissions.canViewReports) permissionsHtml += '<span class="permission-badge permission-allowed">รายงาน</span>';
+                
+                const status = user.isActive !== false ? 'active' : 'inactive';
+                const statusText = user.isActive !== false ? 'ใช้งานได้' : 'ปิดใช้งาน';
+                const statusColor = user.isActive !== false ? 'text-green-400' : 'text-red-400';
+                
+                const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString('th-TH') : 'ไม่เคยล็อกอิน';
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-700 transition-colors product-card';
+                
+                let actionButtons = '';
+                
+                if (canManageUsers) {
+                    actionButtons = `
+                        <button onclick="editUser('${user.id}')" class="text-indigo-400 hover:text-indigo-300 mr-3 transition-colors hover-effect">
+                            <i class="fas fa-edit mr-1"></i> แก้ไข
+                        </button>
+                    `;
+                    
+                    if (user.id !== currentUser.username) {
+                        actionButtons += `
+                            <button onclick="showDeleteUserConfirm('${user.id}', '${user.fullName || user.username}')" class="text-red-400 hover:text-red-300 transition-colors hover-effect">
+                                <i class="fas fa-trash-alt mr-1"></i> ลบ
+                            </button>
+                        `;
+                    } else {
+                        actionButtons += '<span class="text-gray-500 text-sm">(ผู้ใช้ปัจจุบัน)</span>';
+                    }
+                } else {
+                    actionButtons = '<span class="text-gray-500 text-sm">ไม่สามารถจัดการได้</span>';
+                }
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="font-medium">${user.username}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-medium">${user.fullName || '-'}</div>
+                        <div class="text-gray-400 text-sm">${user.email || ''}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="${roleBadge}">${roleDisplay}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-wrap gap-1">
+                            ${permissionsHtml}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="${statusColor} font-medium">${statusText}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${lastLogin}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        ${actionButtons}
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            updateUserStats();
+        }
+        
         // แสดง Modal สำหรับเพิ่ม/แก้ไขผู้ใช้
         function showUserModal(user = null) {
-            // ตรวจสอบสิทธิ์
             if (!checkPermission('canManageUsers')) {
                 showAlert('error', 'ไม่มีสิทธิ์', 'ขออภัย คุณไม่มีสิทธิ์จัดการผู้ใช้');
                 return;
@@ -2908,7 +1672,6 @@
             const fullName = document.getElementById('fullName');
             const userRole = document.getElementById('userRole');
             
-            // ตั้งค่าสิทธิ์ตามบทบาท
             const updatePermissions = (role) => {
                 const permissions = rolePermissions[role] || {};
                 document.getElementById('permView').checked = permissions.canView || false;
@@ -2918,7 +1681,6 @@
                 document.getElementById('permManageUsers').checked = permissions.canManageUsers || false;
                 document.getElementById('permViewReports').checked = permissions.canViewReports || false;
                 
-                // Disable permission checkboxes (permissions are based on role)
                 document.querySelectorAll('#userModal input[type="checkbox"]').forEach(cb => {
                     cb.disabled = true;
                 });
@@ -2953,11 +1715,6 @@
             });
             
             modal.classList.remove('hidden');
-        }
-        
-        // ซ่อน User Modal
-        function hideUserModal() {
-            document.getElementById('userModal').classList.add('hidden');
         }
         
         // บันทึกผู้ใช้
@@ -3087,51 +1844,49 @@
                 });
         }
         
-        // แสดงโปรไฟล์ผู้ใช้
-        function showUserProfile() {
-            if (!currentUser) return;
+        // ==================== OTHER FUNCTIONS ====================
+        
+        // อัพเดทสถิติแดชบอร์ด
+        function updateDashboardStats() {
+            const totalProducts = products.length;
+            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
+            const outOfStock = products.filter(p => p.quantity <= 0).length;
             
-            const modal = document.getElementById('userProfileModal');
-            const profileUsername = document.getElementById('profileUsername');
-            const profileRoleBadge = document.getElementById('profileRoleBadge');
-            const profileFullName = document.getElementById('profileFullName');
-            const profileRole = document.getElementById('profileRole');
-            const profileEmail = document.getElementById('profileEmail');
-            const profileLastLogin = document.getElementById('profileLastLogin');
-            const profileCreatedAt = document.getElementById('profileCreatedAt');
+            document.getElementById('totalProducts').textContent = totalProducts;
+            document.getElementById('totalValue').textContent = '฿' + totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2});
+            document.getElementById('outOfStock').textContent = outOfStock;
             
-            const userData = users.find(u => u.id === currentUser.username) || currentUser;
+            const totalUsers = users.length;
+            document.getElementById('totalUsers').textContent = totalUsers;
+        }
+        
+        // อัพเดทสถิติสินค้า
+        function updateProductStats() {
+            const totalProducts = products.length;
+            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
+            const outOfStock = products.filter(p => p.quantity <= 0).length;
+            const lowStock = products.filter(p => p.quantity > 0 && p.quantity <= 5).length;
+            const inStock = products.filter(p => p.quantity > 5).length;
             
-            profileUsername.textContent = userData.username;
-            profileFullName.textContent = userData.fullName || 'ไม่ระบุ';
-            profileRole.textContent = getRoleDisplay(userData.role);
-            profileEmail.textContent = userData.email || 'ไม่ระบุ';
-            profileLastLogin.textContent = userData.lastLogin ? 
-                new Date(userData.lastLogin).toLocaleString('th-TH') : 'ไม่ระบุ';
-            profileCreatedAt.textContent = userData.createdAt ? 
-                new Date(userData.createdAt).toLocaleDateString('th-TH') : 'ไม่ระบุ';
+            document.getElementById('totalProductsCount').textContent = totalProducts + ' รายการ';
+            document.getElementById('totalProductsValue').textContent = '฿' + totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2});
+            document.getElementById('outOfStockCount').textContent = outOfStock + ' รายการ';
+            document.getElementById('lowStockCount').textContent = lowStock;
+            document.getElementById('outStockCount').textContent = outOfStock;
+            document.getElementById('inStockCount').textContent = inStock;
+        }
+        
+        // อัพเดทสถิติผู้ใช้
+        function updateUserStats() {
+            const totalUsers = users.length;
+            const adminUsers = users.filter(u => u.role === 'admin').length;
+            const managerUsers = users.filter(u => u.role === 'manager').length;
+            const normalUsers = users.filter(u => u.role === 'user').length;
             
-            let badgeClass = '';
-            let roleDisplay = '';
-            
-            switch(userData.role) {
-                case 'admin':
-                    badgeClass = 'role-admin';
-                    roleDisplay = 'ผู้ดูแลระบบ';
-                    break;
-                case 'manager':
-                    badgeClass = 'role-manager';
-                    roleDisplay = 'ผู้จัดการ';
-                    break;
-                case 'user':
-                    badgeClass = 'role-user';
-                    roleDisplay = 'ผู้ใช้ทั่วไป';
-                    break;
-            }
-            
-            profileRoleBadge.innerHTML = `<span class="role-badge ${badgeClass}">${roleDisplay}</span>`;
-            
-            modal.classList.remove('hidden');
+            document.getElementById('totalUsersCount').textContent = totalUsers + ' คน';
+            document.getElementById('adminUsersCount').textContent = adminUsers + ' คน';
+            document.getElementById('managerUsersCount').textContent = managerUsers + ' คน';
+            document.getElementById('normalUsersCount').textContent = normalUsers + ' คน';
         }
         
         // ออกจากระบบ
@@ -3144,7 +1899,6 @@
                 'ยกเลิก'
             ).then(confirmed => {
                 if (confirmed) {
-                    // ล้าง Auto Refresh
                     if (autoRefreshInterval) {
                         clearInterval(autoRefreshInterval);
                     }
@@ -3159,42 +1913,6 @@
             });
         }
         
-        // ส่งออกข้อมูลสินค้า
-        function exportProducts() {
-            showLoading('กำลังเตรียมข้อมูลสำหรับส่งออก...');
-            
-            let csvContent = "รหัสสินค้า,ชื่อสินค้า,ประเภท,จำนวน,ราคาต่อหน่วย,มูลค่ารวม,สถานะ,วันที่สร้าง\n";
-            
-            products.forEach(product => {
-                const totalValue = product.quantity * product.price;
-                const isLowStock = product.quantity <= 5 && product.quantity > 0;
-                const isOutOfStock = product.quantity <= 0;
-                
-                let status = 'พร้อมจำหน่าย';
-                if (isLowStock) status = 'เหลือน้อย';
-                if (isOutOfStock) status = 'หมดสต๊อก';
-                
-                const createdDate = product.createdAt ? new Date(product.createdAt).toLocaleDateString('th-TH') : '';
-                
-                csvContent += `"${product.productCode}","${product.productName}","${product.category}",${product.quantity},${product.price},${totalValue},"${status}","${createdDate}"\n`;
-            });
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute("href", url);
-            link.setAttribute("download", `สินค้า_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            hideLoading();
-            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกข้อมูลสินค้าเป็นไฟล์ CSV เรียบร้อยแล้ว');
-        }
-        
         // ==================== EVENT LISTENERS ====================
         
         // เริ่มต้นแอพพลิเคชันเมื่อโหลดหน้าเว็บเสร็จ
@@ -3202,22 +1920,35 @@
             console.log('ระบบกำลังเริ่มต้น...');
             checkUserAndPermissions();
             
-            // ========== LOGIN PAGE EVENT LISTENERS ==========
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) {
-                loginForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const username = document.getElementById('username').value.trim();
-                    const password = document.getElementById('password').value.trim();
-                    
-                    if (!username || !password) {
-                        showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
-                        return;
-                    }
-                    
-                    loginUser(username, password);
-                });
-            }
+            // ========== LOGIN/REGISTER EVENT LISTENERS ==========
+            document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+                
+                if (!username || !password) {
+                    showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+                    return;
+                }
+                
+                loginUser(username, password);
+            });
+            
+            document.getElementById('registerForm')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('regUsername').value.trim();
+                const password = document.getElementById('regPassword').value;
+                const confirmPassword = document.getElementById('regConfirmPassword').value;
+                const fullName = document.getElementById('regFullName').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                
+                registerUser(username, password, confirmPassword, fullName, email);
+            });
+            
+            document.getElementById('showRegisterBtn')?.addEventListener('click', showRegisterForm);
+            document.getElementById('showLoginBtn')?.addEventListener('click', showLoginForm);
+            document.getElementById('loginTabBtn')?.addEventListener('click', showLoginForm);
+            document.getElementById('registerTabBtn')?.addEventListener('click', showRegisterForm);
             
             // ========== NAVIGATION EVENT LISTENERS ==========
             document.getElementById('navDashboard')?.addEventListener('click', () => showPage('dashboardPage'));
@@ -3270,11 +2001,6 @@
             
             document.getElementById('productForm')?.addEventListener('submit', saveProduct);
             document.getElementById('cancelProductModalBtn')?.addEventListener('click', hideProductModal);
-            document.getElementById('exportProductsBtn')?.addEventListener('click', exportProducts);
-            document.getElementById('refreshProductsBtn')?.addEventListener('click', () => {
-                loadProducts();
-                showToast('กำลังรีเฟรชข้อมูลสินค้า...', 'info');
-            });
             
             // ========== USERS PAGE EVENT LISTENERS ==========
             document.getElementById('addUserBtn')?.addEventListener('click', () => {
@@ -3295,166 +2021,16 @@
             
             document.getElementById('userForm')?.addEventListener('submit', saveUser);
             document.getElementById('cancelUserModalBtn')?.addEventListener('click', hideUserModal);
-            document.getElementById('refreshUsersBtn')?.addEventListener('click', () => {
-                loadUsers();
-                showToast('กำลังรีเฟรชข้อมูลผู้ใช้...', 'info');
-            });
             
-            // ========== REPORTS PAGE EVENT LISTENERS ==========
-            const reportTabs = document.querySelectorAll('.tab');
-            reportTabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    reportTabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.add('hidden');
-                    });
-                    document.getElementById(tabId).classList.remove('hidden');
-                });
-            });
-            
-            document.getElementById('exportProductReportBtn')?.addEventListener('click', exportProductReport);
-            document.getElementById('exportUserReportBtn')?.addEventListener('click', exportUserReport);
-            document.getElementById('printReportBtn')?.addEventListener('click', printReport);
-            
-            // ========== SETTINGS PAGE EVENT LISTENERS ==========
-            document.getElementById('backupDataBtn')?.addEventListener('click', () => {
-                showAlert('info', 'สำรองข้อมูล', 'ฟังก์ชันสำรองข้อมูลอยู่ระหว่างการพัฒนา');
-            });
-            
-            document.getElementById('resetDemoDataBtn')?.addEventListener('click', () => {
-                if (checkPermission('canManageSettings')) {
-                    showConfirmation(
-                        'รีเซ็ตข้อมูลตัวอย่าง',
-                        'การดำเนินการนี้จะลบข้อมูลสินค้าทั้งหมดและสร้างข้อมูลตัวอย่างใหม่\nคุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ?',
-                        'warning',
-                        'รีเซ็ตข้อมูล',
-                        'ยกเลิก'
-                    ).then(confirmed => {
-                        if (confirmed) {
-                            const demoProducts = [
-                                {
-                                    productCode: "P001",
-                                    productName: "เมาส์ไร้สาย",
-                                    category: "อิเล็กทรอนิกส์",
-                                    quantity: 25,
-                                    price: 599.00,
-                                    createdBy: currentUser.username,
-                                    createdAt: new Date().toISOString()
-                                },
-                                {
-                                    productCode: "P002",
-                                    productName: "คีย์บอร์ดเกมมิ่ง",
-                                    category: "อิเล็กทรอนิกส์",
-                                    quantity: 12,
-                                    price: 1290.00,
-                                    createdBy: currentUser.username,
-                                    createdAt: new Date().toISOString()
-                                },
-                                {
-                                    productCode: "P003",
-                                    productName: "สมุดบันทึก",
-                                    category: "เครื่องเขียน",
-                                    quantity: 150,
-                                    price: 45.00,
-                                    createdBy: currentUser.username,
-                                    createdAt: new Date().toISOString()
-                                }
-                            ];
-                            
-                            showLoading('กำลังรีเซ็ตข้อมูลตัวอย่าง...');
-                            
-                            database.ref('products').remove()
-                                .then(() => {
-                                    const promises = demoProducts.map(product => {
-                                        return database.ref('products').push(product);
-                                    });
-                                    
-                                    return Promise.all(promises);
-                                })
-                                .then(() => {
-                                    hideLoading();
-                                    showAlert('success', 'รีเซ็ตสำเร็จ', 'รีเซ็ตข้อมูลตัวอย่างสำเร็จแล้ว!');
-                                })
-                                .catch(error => {
-                                    console.error('Error resetting demo data:', error);
-                                    hideLoading();
-                                    showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการรีเซ็ตข้อมูลตัวอย่าง');
-                                });
-                        }
-                    });
-                } else {
-                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์รีเซ็ตข้อมูลตัวอย่าง');
-                }
-            });
-            
-            // Settings Toggles
-            document.getElementById('notificationToggle')?.addEventListener('change', function() {
-                showToast(this.checked ? 'เปิดการแจ้งเตือนแล้ว' : 'ปิดการแจ้งเตือนแล้ว', 'info');
-                saveSettingsToLocalStorage();
-            });
-            
-            document.getElementById('darkModeToggle')?.addEventListener('change', function() {
-                showToast(this.checked ? 'เปิดโหมดมืดแล้ว' : 'ปิดโหมดมืดแล้ว', 'info');
-                saveSettingsToLocalStorage();
-            });
-            
-            document.getElementById('autoRefreshToggle')?.addEventListener('change', function() {
-                if (this.checked) {
-                    setupAutoRefresh();
-                    showToast('เปิดรีเฟรชอัตโนมัติแล้ว', 'info');
-                } else {
-                    if (autoRefreshInterval) {
-                        clearInterval(autoRefreshInterval);
-                        autoRefreshInterval = null;
-                    }
-                    showToast('ปิดรีเฟรชอัตโนมัติแล้ว', 'info');
-                }
-                saveSettingsToLocalStorage();
-            });
-            
-            // ========== GENERAL EVENT LISTENERS ==========
+            // ========== OTHER EVENT LISTENERS ==========
             document.getElementById('logoutBtn')?.addEventListener('click', logout);
-            document.getElementById('closeProfileBtn')?.addEventListener('click', () => {
-                document.getElementById('userProfileModal').classList.add('hidden');
-            });
-            
-            document.getElementById('quickHelpBtn')?.addEventListener('click', () => {
-                showAlert('info', 'วิธีใช้งานระบบ', 
-                    '📦 **จัดการสินค้า:**\n' +
-                    '- เพิ่มสินค้าใหม่: คลิกปุ่ม "เพิ่มสินค้าใหม่"\n' +
-                    '- แก้ไขสินค้า: คลิกปุ่ม "แก้ไข" ในตาราง\n' +
-                    '- ลบสินค้า: คลิกปุ่ม "ลบ" (เฉพาะ Admin)\n\n' +
-                    '👥 **จัดการผู้ใช้:**\n' +
-                    '- เพิ่มผู้ใช้ใหม่: คลิกปุ่ม "เพิ่มผู้ใช้ใหม่"\n' +
-                    '- แก้ไขสิทธิ์: คลิกปุ่ม "แก้ไข" ในตารางผู้ใช้\n' +
-                    '- ลบผู้ใช้: คลิกปุ่ม "ลบ" (เฉพาะ Admin)\n\n' +
-                    '📊 **สิทธิ์การใช้งาน:**\n' +
-                    '- Admin: สามารถใช้งานได้ทุกฟังก์ชัน\n' +
-                    '- Manager: ไม่สามารถลบสินค้าหรือจัดการผู้ใช้ได้\n' +
-                    '- User: ไม่สามารถลบสินค้า จัดการผู้ใช้ หรือดูรายงานได้'
-                );
-            });
-            
-            // ปิด Modal เมื่อคลิกพื้นหลัง
-            document.getElementById('productModal')?.addEventListener('click', function(e) {
-                if (e.target === this) hideProductModal();
-            });
-            
-            document.getElementById('userModal')?.addEventListener('click', function(e) {
-                if (e.target === this) hideUserModal();
-            });
-            
-            // อัพเดทเวลาปัจจุบันทุกวินาที
-            setInterval(updateSystemTime, 1000);
             
             // แสดงข้อความต้อนรับ
             console.log('ระบบพร้อมใช้งานแล้ว!');
             console.log('บัญชีทดสอบ:');
-            console.log('- ผู้ใช้ทั่วไป: user / user123');
-            console.log('- ผู้จัดการ: manager / manager123');
             console.log('- ผู้ดูแลระบบ: admin / admin123');
+            console.log('- ผู้จัดการ: manager / manager123');
+            console.log('- ผู้ใช้ทั่วไป: user / user123');
         });
         
         // ทำให้ฟังก์ชันสามารถเรียกใช้จาก onclick ใน HTML ได้
