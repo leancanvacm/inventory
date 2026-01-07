@@ -1451,7 +1451,7 @@
         let notifications = [];
         let recentActivities = [];
         
-        // สิทธิ์การใช้งานตามบทบาท
+        // สิทธิ์การใช้งานตามบทบาท (แก้ไขให้ admin มีสิทธิ์เต็ม)
         const rolePermissions = {
             'admin': {
                 canView: true,
@@ -1487,9 +1487,6 @@
         const appContainer = document.getElementById('appContainer');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const notificationPanel = document.getElementById('notificationPanel');
-        
-        // ฟังก์ชันแจ้งเตือน (Alert, Toast, Confirmation)
-        // (ใช้โค้ดจากระบบแจ้งเตือนเดิม)
         
         // ==================== ALERT SYSTEM ====================
         
@@ -1711,7 +1708,7 @@
             if (savedUser) {
                 try {
                     currentUser = JSON.parse(savedUser);
-                    console.log('Current user:', currentUser);
+                    console.log('Current user loaded from localStorage:', currentUser);
                     
                     // แสดงแอพพลิเคชันและซ่อนหน้าล็อกอิน
                     showApp();
@@ -1797,6 +1794,8 @@
         // ตั้งค่าสิทธิ์ตามบทบาท
         function setupPermissions() {
             if (!currentUser) return;
+            
+            console.log('Setting up permissions for role:', currentUser.role);
             
             const permissions = rolePermissions[currentUser.role];
             
@@ -1967,24 +1966,24 @@
                 
                 // สร้างปุ่มจัดการตามสิทธิ์
                 let actionButtons = '';
-                if (canDelete) {
-                    actionButtons = `
+                const canEdit = checkPermission('canEdit');
+                
+                if (canEdit) {
+                    actionButtons += `
                         <button onclick="editProduct('${product.id}')" class="text-indigo-400 hover:text-indigo-300 mr-3 transition-colors hover-effect">
                             <i class="fas fa-edit mr-1"></i> แก้ไข
                         </button>
+                    `;
+                }
+                
+                if (canDelete) {
+                    actionButtons += `
                         <button onclick="showDeleteProductConfirm('${product.id}', '${product.productName}')" class="text-red-400 hover:text-red-300 transition-colors hover-effect">
                             <i class="fas fa-trash-alt mr-1"></i> ลบ
                         </button>
                     `;
                 } else {
-                    actionButtons = `
-                        <button onclick="editProduct('${product.id}')" class="text-indigo-400 hover:text-indigo-300 mr-3 transition-colors hover-effect">
-                            <i class="fas fa-edit mr-1"></i> แก้ไข
-                        </button>
-                        <span class="text-gray-500 text-sm">
-                            <i class="fas fa-ban mr-1"></i> ลบไม่ได้
-                        </span>
-                    `;
+                    actionButtons += `<span class="text-gray-500 text-sm"><i class="fas fa-ban mr-1"></i> ลบไม่ได้</span>`;
                 }
                 
                 row.innerHTML = `
@@ -2108,17 +2107,24 @@
                 
                 // สร้างปุ่มจัดการตามสิทธิ์
                 let actionButtons = '';
+                
                 if (canManageUsers) {
                     actionButtons = `
                         <button onclick="editUser('${user.id}')" class="text-indigo-400 hover:text-indigo-300 mr-3 transition-colors hover-effect">
                             <i class="fas fa-edit mr-1"></i> แก้ไข
                         </button>
-                        ${user.id !== currentUser.username ? `
+                    `;
+                    
+                    // ตรวจสอบว่าไม่ใช่ผู้ใช้ปัจจุบัน
+                    if (user.id !== currentUser.username) {
+                        actionButtons += `
                             <button onclick="showDeleteUserConfirm('${user.id}', '${user.fullName || user.username}')" class="text-red-400 hover:text-red-300 transition-colors hover-effect">
                                 <i class="fas fa-trash-alt mr-1"></i> ลบ
                             </button>
-                        ` : '<span class="text-gray-500 text-sm">(ผู้ใช้ปัจจุบัน)</span>'}
-                    `;
+                        `;
+                    } else {
+                        actionButtons += '<span class="text-gray-500 text-sm">(ผู้ใช้ปัจจุบัน)</span>';
+                    }
                 } else {
                     actionButtons = '<span class="text-gray-500 text-sm">ไม่สามารถจัดการได้</span>';
                 }
@@ -2234,11 +2240,11 @@
         function loginUser(username, password) {
             showLoading('กำลังตรวจสอบข้อมูลผู้ใช้...');
             
-            // ตรวจสอบข้อมูลผู้ใช้
+            // ตรวจสอบข้อมูลผู้ใช้แบบ Hardcoded สำหรับ Demo
             const validUsers = {
-                'admin': { password: 'admin123', role: 'admin' },
-                'manager': { password: 'manager123', role: 'manager' },
-                'user': { password: 'user123', role: 'user' }
+                'admin': { password: 'admin123', role: 'admin', fullName: 'ผู้ดูแลระบบ' },
+                'manager': { password: 'manager123', role: 'manager', fullName: 'ผู้จัดการ' },
+                'user': { password: 'user123', role: 'user', fullName: 'ผู้ใช้ทั่วไป' }
             };
             
             setTimeout(() => {
@@ -2246,17 +2252,17 @@
                     // เข้าสู่ระบบสำเร็จ
                     currentUser = {
                         username: username,
-                        role: validUsers[username].role
+                        role: validUsers[username].role,
+                        fullName: validUsers[username].fullName
                     };
+                    
+                    console.log('Login successful for user:', currentUser);
                     
                     // บันทึกข้อมูลผู้ใช้ใน localStorage
                     localStorage.setItem('inventoryUser', JSON.stringify(currentUser));
                     
                     // อัพเดทข้อมูลผู้ใช้ในฐานข้อมูล
-                    updateUserInDatabase(username, validUsers[username].role);
-                    
-                    // ตรวจสอบว่ามีการตั้งค่าระบบหรือยัง
-                    checkInitialSetup();
+                    updateUserInDatabase(username, validUsers[username].role, validUsers[username].fullName);
                     
                     showAlert('success', 'ล็อกอินสำเร็จ', `ยินดีต้อนรับ ${username}!`);
                     
@@ -2268,150 +2274,21 @@
         }
         
         // อัพเดทข้อมูลผู้ใช้ในฐานข้อมูล
-        function updateUserInDatabase(username, role) {
+        function updateUserInDatabase(username, role, fullName) {
             const userRef = database.ref('users/' + username);
             
             userRef.update({
                 username: username,
                 role: role,
+                fullName: fullName,
                 lastLogin: new Date().toISOString(),
-                isActive: true
+                isActive: true,
+                updatedAt: new Date().toISOString()
             }).then(() => {
-                console.log('User data updated in Firebase');
+                console.log('User data updated in Firebase:', username);
             }).catch(error => {
                 console.error('Error updating user in database:', error);
             });
-        }
-        
-        // ตรวจสอบการตั้งค่าระบบเริ่มต้น
-        function checkInitialSetup() {
-            showLoading('กำลังตรวจสอบการตั้งค่าระบบ...');
-            
-            const setupRef = database.ref('system/setup');
-            
-            setupRef.once('value').then(snapshot => {
-                const setupData = snapshot.val();
-                
-                if (setupData && setupData.completed) {
-                    proceedToApp();
-                } else {
-                    performInitialSetup();
-                }
-            }).catch(error => {
-                console.error('Error checking system setup:', error);
-                proceedToApp();
-            });
-        }
-        
-        // ดำเนินการตั้งค่าระบบเริ่มต้น
-        function performInitialSetup() {
-            showLoading('กำลังตั้งค่าระบบเริ่มต้น...');
-            
-            // สร้างข้อมูลผู้ใช้ในฐานข้อมูล
-            const defaultUsers = {
-                'admin': {
-                    username: 'admin',
-                    role: 'admin',
-                    fullName: 'ผู้ดูแลระบบ',
-                    email: 'admin@example.com',
-                    lastLogin: new Date().toISOString(),
-                    createdAt: new Date().toISOString(),
-                    isActive: true
-                },
-                'manager': {
-                    username: 'manager',
-                    role: 'manager',
-                    fullName: 'ผู้จัดการระบบ',
-                    email: 'manager@example.com',
-                    lastLogin: new Date().toISOString(),
-                    createdAt: new Date().toISOString(),
-                    isActive: true
-                },
-                'user': {
-                    username: 'user',
-                    role: 'user',
-                    fullName: 'ผู้ใช้ทั่วไป',
-                    email: 'user@example.com',
-                    lastLogin: new Date().toISOString(),
-                    createdAt: new Date().toISOString(),
-                    isActive: true
-                }
-            };
-            
-            // สร้างข้อมูลสินค้าตัวอย่าง
-            const demoProducts = [
-                {
-                    productCode: "P001",
-                    productName: "เมาส์ไร้สาย",
-                    category: "อิเล็กทรอนิกส์",
-                    quantity: 25,
-                    price: 599.00,
-                    createdBy: "system",
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    productCode: "P002",
-                    productName: "คีย์บอร์ดเกมมิ่ง",
-                    category: "อิเล็กทรอนิกส์",
-                    quantity: 12,
-                    price: 1290.00,
-                    createdBy: "system",
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    productCode: "P003",
-                    productName: "สมุดบันทึก",
-                    category: "เครื่องเขียน",
-                    quantity: 150,
-                    price: 45.00,
-                    createdBy: "system",
-                    createdAt: new Date().toISOString()
-                }
-            ];
-            
-            // บันทึกข้อมูลทั้งหมด
-            const updates = {};
-            
-            // บันทึกข้อมูลผู้ใช้
-            Object.keys(defaultUsers).forEach(username => {
-                updates[`users/${username}`] = defaultUsers[username];
-            });
-            
-            // บันทึกข้อมูลสินค้า
-            demoProducts.forEach((product, index) => {
-                updates[`products/product${index + 1}`] = product;
-            });
-            
-            // บันทึกสถานะการตั้งค่าระบบ
-            updates['system/setup'] = {
-                completed: true,
-                completedAt: new Date().toISOString(),
-                version: "3.0.0",
-                demoProductsCount: demoProducts.length,
-                defaultUsersCount: Object.keys(defaultUsers).length
-            };
-            
-            // อัพเดทฐานข้อมูล
-            database.ref().update(updates)
-                .then(() => {
-                    showAlert('success', 'การตั้งค่าระบบสำเร็จ', 'ระบบได้ทำการตั้งค่าฐานข้อมูลเริ่มต้นเรียบร้อยแล้ว');
-                    proceedToApp();
-                })
-                .catch(error => {
-                    console.error('Error during initial setup:', error);
-                    showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการตั้งค่าระบบเริ่มต้น');
-                    proceedToApp();
-                });
-        }
-        
-        // ไปยังแอพพลิเคชัน
-        function proceedToApp() {
-            showLoading('กำลังเข้าสู่ระบบ...');
-            
-            setTimeout(() => {
-                hideLoading();
-                showApp();
-            }, 1000);
         }
         
         // ==================== PRODUCT MANAGEMENT ====================
@@ -2562,7 +2439,10 @@
         
         // ลบสินค้า
         function deleteProduct() {
-            if (!productToDelete || !checkPermission('canDelete')) return;
+            if (!productToDelete || !checkPermission('canDelete')) {
+                showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์ลบข้อมูลสินค้า');
+                return;
+            }
             
             showLoading('กำลังลบข้อมูลสินค้า...');
             
@@ -2771,7 +2651,10 @@
         
         // ลบผู้ใช้
         function deleteUser() {
-            if (!userToDelete || !checkPermission('canManageUsers')) return;
+            if (!userToDelete || !checkPermission('canManageUsers')) {
+                showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์ลบข้อมูลผู้ใช้');
+                return;
+            }
             
             showLoading('กำลังลบข้อมูลผู้ใช้...');
             
@@ -3007,12 +2890,24 @@
             // Add Product Button
             const addProductMainBtn = document.getElementById('addProductMainBtn');
             if (addProductMainBtn) {
-                addProductMainBtn.addEventListener('click', () => showProductModal());
+                addProductMainBtn.addEventListener('click', () => {
+                    if (checkPermission('canAdd')) {
+                        showProductModal();
+                    } else {
+                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มสินค้า');
+                    }
+                });
             }
             
             const quickAddProductBtn = document.getElementById('quickAddProductBtn');
             if (quickAddProductBtn) {
-                quickAddProductBtn.addEventListener('click', () => showProductModal());
+                quickAddProductBtn.addEventListener('click', () => {
+                    if (checkPermission('canAdd')) {
+                        showProductModal();
+                    } else {
+                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มสินค้า');
+                    }
+                });
             }
             
             // Product Form
@@ -3046,7 +2941,13 @@
             // Add User Button
             const addUserBtn = document.getElementById('addUserBtn');
             if (addUserBtn) {
-                addUserBtn.addEventListener('click', () => showUserModal());
+                addUserBtn.addEventListener('click', () => {
+                    if (checkPermission('canManageUsers')) {
+                        showUserModal();
+                    } else {
+                        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มผู้ใช้');
+                    }
+                });
             }
             
             const quickAddUserBtn = document.getElementById('quickAddUserBtn');
@@ -3239,6 +3140,9 @@
             
             // อัพเดทเวลาทุกวินาที
             setInterval(updateSystemTime, 1000);
+            
+            // ซ่อน Firebase Config หลังจากโหลดเสร็จ
+            setTimeout(hideFirebaseConfig, 3000);
             
             // แสดงข้อความต้อนรับ
             console.log('ระบบพร้อมใช้งานแล้ว!');
