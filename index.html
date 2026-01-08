@@ -18,7 +18,7 @@
     <!-- Animate.css for animations -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
-    <!-- QR Code Library -->
+    <!-- QR Code Library (เปลี่ยนมาใช้ CDN ที่ต่างกัน) -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     
     <!-- DataTables JS -->
@@ -2447,31 +2447,55 @@
             const qrContainer = document.getElementById('qrcodeCanvas');
             qrContainer.innerHTML = '';
             
-            // ใช้ QRCode.js เพื่อสร้าง QR Code
-            QRCode.toCanvas(qrDataString, {
-                width: 200,
-                height: 200,
-                margin: 1,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
+            // ใช้ QRCode.js เพื่อสร้าง QR Code (ตรวจสอบก่อนว่า library โหลดสำเร็จ)
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    QRCode.toCanvas(qrDataString, {
+                        width: 200,
+                        height: 200,
+                        margin: 1,
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF'
+                        }
+                    }, function (error, canvas) {
+                        if (error) {
+                            console.error('Error generating QR code:', error);
+                            // สร้าง fallback QR code
+                            createFallbackQRCode(qrContainer, totalAmount);
+                        } else {
+                            qrContainer.appendChild(canvas);
+                        }
+                    });
+                } catch (error) {
+                    console.error('QRCode library error:', error);
+                    createFallbackQRCode(qrContainer, totalAmount);
                 }
-            }, function (error, canvas) {
-                if (error) {
-                    console.error('Error generating QR code:', error);
-                    // สร้าง fallback QR code
-                    qrContainer.innerHTML = `
-                        <div class="border-2 border-dashed border-gray-400 w-48 h-48 flex items-center justify-center">
-                            <div class="text-center">
-                                <i class="fas fa-qrcode text-4xl text-gray-400 mb-2"></i>
-                                <p class="text-gray-600 text-sm">QR Code: ${totalAmount} บาท</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    qrContainer.appendChild(canvas);
-                }
-            });
+            } else {
+                console.warn('QRCode library not loaded, using fallback');
+                createFallbackQRCode(qrContainer, totalAmount);
+                
+                // พยายามโหลด library อีกครั้ง
+                loadQRCodeLibrary().then(() => {
+                    // หากโหลดสำเร็จให้สร้าง QR Code จริง
+                    if (typeof QRCode !== 'undefined') {
+                        QRCode.toCanvas(qrDataString, {
+                            width: 200,
+                            height: 200,
+                            margin: 1,
+                            color: {
+                                dark: '#000000',
+                                light: '#FFFFFF'
+                            }
+                        }, function (error, canvas) {
+                            if (!error && qrContainer) {
+                                qrContainer.innerHTML = '';
+                                qrContainer.appendChild(canvas);
+                            }
+                        });
+                    }
+                });
+            }
             
             // เริ่มต้นตัวนับถอยหลัง
             startQRPaymentTimer();
@@ -2482,6 +2506,38 @@
             
             // ตั้งค่าการชำระเงินเป็น QR Payment
             document.getElementById('paymentMethod').value = 'QR Payment';
+        }
+        
+        // ฟังก์ชันสร้าง Fallback QR Code
+        function createFallbackQRCode(container, totalAmount) {
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="border-2 border-dashed border-gray-400 w-48 h-48 flex items-center justify-center">
+                    <div class="text-center">
+                        <i class="fas fa-qrcode text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-600 text-sm font-bold">${totalAmount.toLocaleString('th-TH')} บาท</p>
+                        <p class="text-gray-600 text-xs mt-1">QR Code สำหรับชำระเงิน</p>
+                        <p class="text-gray-500 text-xs mt-1">Ref: ${qrPaymentRef}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // โหลด QR Code Library
+        function loadQRCodeLibrary() {
+            return new Promise((resolve) => {
+                if (typeof QRCode !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+                script.onload = resolve;
+                script.onerror = resolve;
+                document.head.appendChild(script);
+            });
         }
         
         // เริ่มต้นตัวนับถอยหลังสำหรับ QR Payment
