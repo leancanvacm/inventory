@@ -1965,12 +1965,19 @@
                     
                     if (data) {
                         Object.keys(data).forEach(key => {
-                            users.push({
-                                id: key,
-                                ...data[key]
-                            });
+                            // ตรวจสอบว่า user มีข้อมูลครบถ้วน
+                            const userData = data[key];
+                            if (userData && userData.username && userData.role) {
+                                users.push({
+                                    id: key,
+                                    ...userData
+                                });
+                            }
                         });
                     }
+                    
+                    // ตรวจสอบว่ามีผู้ใช้พื้นฐานในระบบหรือไม่
+                    ensureDefaultUsers();
                     
                     updateUsersTable();
                     resolve();
@@ -1978,6 +1985,35 @@
                     console.error('Error loading users:', error);
                     reject(error);
                 });
+            });
+        }
+        
+        // ตรวจสอบว่ามีผู้ใช้พื้นฐานในระบบหรือไม่
+        function ensureDefaultUsers() {
+            const defaultUsers = [
+                { username: 'admin', password: 'admin123', role: 'admin', fullName: 'ผู้ดูแลระบบ' },
+                { username: 'manager', password: 'manager123', role: 'manager', fullName: 'ผู้จัดการ' },
+                { username: 'user', password: 'user123', role: 'user', fullName: 'ผู้ใช้ทั่วไป' }
+            ];
+            
+            defaultUsers.forEach(defaultUser => {
+                const userExists = users.some(user => user.username === defaultUser.username);
+                if (!userExists) {
+                    // เพิ่มผู้ใช้พื้นฐาน
+                    database.ref('users/' + defaultUser.username).set({
+                        username: defaultUser.username,
+                        password: defaultUser.password,
+                        role: defaultUser.role,
+                        fullName: defaultUser.fullName,
+                        createdAt: new Date().toISOString(),
+                        lastLogin: null,
+                        isActive: true
+                    }).then(() => {
+                        console.log(`เพิ่มผู้ใช้พื้นฐาน: ${defaultUser.username}`);
+                    }).catch(error => {
+                        console.error(`Error adding default user ${defaultUser.username}:`, error);
+                    });
+                }
             });
         }
         
@@ -2106,6 +2142,9 @@
             const canManageUsers = checkPermission('canManageUsers');
             
             users.forEach(user => {
+                // ตรวจสอบว่ามีข้อมูลผู้ใช้ครบถ้วน
+                if (!user.username || !user.role) return;
+                
                 let roleBadge = '';
                 let roleDisplay = '';
                 
@@ -2122,10 +2161,13 @@
                         roleBadge = 'role-user';
                         roleDisplay = 'ผู้ใช้ทั่วไป';
                         break;
+                    default:
+                        roleBadge = 'role-user';
+                        roleDisplay = 'ผู้ใช้ทั่วไป';
                 }
                 
                 // สร้างรายการสิทธิ์
-                const permissions = rolePermissions[user.role] || {};
+                const permissions = rolePermissions[user.role] || rolePermissions['user'];
                 let permissionsHtml = '';
                 
                 if (permissions.canView) permissionsHtml += '<span class="permission-badge permission-allowed">ดู</span> ';
@@ -2261,20 +2303,16 @@
         function loginUser(username, password) {
             showLoading('กำลังตรวจสอบข้อมูลผู้ใช้...');
             
-            // ตรวจสอบข้อมูลผู้ใช้แบบ Hardcoded สำหรับ Demo
-            const validUsers = {
-                'admin': { password: 'admin123', role: 'admin', fullName: 'ผู้ดูแลระบบ' },
-                'manager': { password: 'manager123', role: 'manager', fullName: 'ผู้จัดการ' },
-                'user': { password: 'user123', role: 'user', fullName: 'ผู้ใช้ทั่วไป' }
-            };
-            
-            setTimeout(() => {
-                if (validUsers[username] && validUsers[username].password === password) {
+            // ตรวจสอบจาก Firebase
+            database.ref('users/' + username).once('value').then(snapshot => {
+                const userData = snapshot.val();
+                
+                if (userData && userData.password === password) {
                     // เข้าสู่ระบบสำเร็จ
                     currentUser = {
                         username: username,
-                        role: validUsers[username].role,
-                        fullName: validUsers[username].fullName
+                        role: userData.role || 'user',
+                        fullName: userData.fullName || username
                     };
                     
                     console.log('Login successful for user:', currentUser);
@@ -2282,33 +2320,31 @@
                     // บันทึกข้อมูลผู้ใช้ใน localStorage
                     localStorage.setItem('inventoryUser', JSON.stringify(currentUser));
                     
-                    // อัพเดทข้อมูลผู้ใช้ในฐานข้อมูล
-                    updateUserInDatabase(username, validUsers[username].role, validUsers[username].fullName);
+                    // อัพเดทข้อมูลผู้ใช้ในฐานข้อมูล (อัพเดทเวลาล็อกอินล่าสุด)
+                    database.ref('users/' + username).update({
+                        lastLogin: new Date().toISOString()
+                    }).then(() => {
+                        console.log('User login time updated:', username);
+                    }).catch(error => {
+                        console.error('Error updating user login time:', error);
+                    });
                     
-                    showAlert('success', 'ล็อกอินสำเร็จ', `ยินดีต้อนรับ ${username}!`);
+                    // แสดงแอพพลิเคชัน
+                    setTimeout(() => {
+                        hideLoading();
+                        showApp();
+                        showAlert('success', 'ล็อกอินสำเร็จ', `ยินดีต้อนรับ ${username}!`);
+                    }, 1000);
                     
                 } else {
+                    // ล็อกอินไม่สำเร็จ
                     hideLoading();
                     showAlert('error', 'ล็อกอินไม่สำเร็จ', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
                 }
-            }, 1500);
-        }
-        
-        // อัพเดทข้อมูลผู้ใช้ในฐานข้อมูล
-        function updateUserInDatabase(username, role, fullName) {
-            const userRef = database.ref('users/' + username);
-            
-            userRef.update({
-                username: username,
-                role: role,
-                fullName: fullName,
-                lastLogin: new Date().toISOString(),
-                isActive: true,
-                updatedAt: new Date().toISOString()
-            }).then(() => {
-                console.log('User data updated in Firebase:', username);
             }).catch(error => {
-                console.error('Error updating user in database:', error);
+                console.error('Error checking user:', error);
+                hideLoading();
+                showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการตรวจสอบข้อมูลผู้ใช้');
             });
         }
         
@@ -2910,7 +2946,7 @@
             
             // ตั้งค่าสิทธิ์ตามบทบาท
             const updatePermissions = (role) => {
-                const permissions = rolePermissions[role] || {};
+                const permissions = rolePermissions[role] || rolePermissions['user'];
                 document.getElementById('permView').checked = permissions.canView || false;
                 document.getElementById('permAdd').checked = permissions.canAdd || false;
                 document.getElementById('permEdit').checked = permissions.canEdit || false;
@@ -2993,6 +3029,11 @@
                 updatedAt: new Date().toISOString(),
                 isActive: true
             };
+            
+            // ถ้ามีการกรอกรหัสผ่านใหม่ ให้เพิ่มรหัสผ่าน
+            if (password) {
+                userData.password = password;
+            }
             
             if (userId) {
                 database.ref('users/' + userId).update(userData)
