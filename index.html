@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดการสินค้าและการขาย | Inventory & Sales Management</title>
+    <title>ระบบจัดการสินค้า | Inventory Management</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,9 +17,6 @@
     
     <!-- Animate.css for animations -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
-    <!-- Chart.js for reports -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- DataTables JS -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -394,53 +391,6 @@
                 display: none !important;
             }
         }
-        
-        /* Sale Receipt Styles */
-        .receipt {
-            font-family: 'Courier New', monospace;
-            background: white;
-            color: black;
-            padding: 20px;
-            max-width: 300px;
-            margin: 0 auto;
-            border: 1px dashed #ccc;
-        }
-        
-        .receipt-header {
-            text-align: center;
-            border-bottom: 1px dashed #000;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .receipt-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        
-        .receipt-total {
-            border-top: 2px solid #000;
-            margin-top: 10px;
-            padding-top: 10px;
-            font-weight: bold;
-        }
-        
-        /* Sale Form Styles */
-        .sale-item {
-            background: #374151;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-left: 4px solid #4f46e5;
-        }
-        
-        /* Chart Container */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
@@ -469,10 +419,10 @@
             <div class="bg-gradient-to-r from-indigo-700 to-purple-700 p-8 text-center relative overflow-hidden">
                 <div class="absolute inset-0 bg-black opacity-10"></div>
                 <div class="floating inline-block p-4 bg-white/10 rounded-full mb-4 relative z-10">
-                    <i class="fas fa-cash-register text-white text-3xl"></i>
+                    <i class="fas fa-boxes text-white text-3xl"></i>
                 </div>
-                <h1 class="text-3xl font-bold text-white relative z-10">ระบบจัดการขายสินค้า</h1>
-                <p class="text-indigo-200 mt-2 relative z-10">Inventory & Sales Management System</p>
+                <h1 class="text-3xl font-bold text-white relative z-10">ระบบจัดการสินค้า</h1>
+                <p class="text-indigo-200 mt-2 relative z-10">Inventory Management System</p>
                 
                 <!-- Decorative elements -->
                 <div class="absolute top-0 left-0 w-20 h-20 bg-white/5 rounded-full -translate-x-10 -translate-y-10"></div>
@@ -558,7 +508,7 @@
             <!-- Footer -->
             <div class="bg-gray-900 p-4 text-center animate__animated animate__fadeIn animate__delay-6s">
                 <p class="text-gray-500 text-sm">
-                    <i class="fas fa-cube mr-1"></i> ระบบจัดการสินค้าและการขายด้วย Firebase
+                    <i class="fas fa-cube mr-1"></i> ระบบจัดการสินค้าพื้นฐานด้วย Firebase
                 </p>
             </div>
         </div>
@@ -573,11 +523,11 @@
                     <div class="flex items-center space-x-3 mb-4 md:mb-0">
                         <a href="#" id="homeBtn" class="flex items-center space-x-3">
                             <div class="bg-indigo-600 p-3 rounded-lg hover-effect">
-                                <i class="fas fa-cash-register text-white text-2xl"></i>
+                                <i class="fas fa-boxes text-white text-2xl"></i>
                             </div>
                             <div>
-                                <h1 class="text-2xl md:text-3xl font-bold">ระบบจัดการขายสินค้า</h1>
-                                <p class="text-gray-400 text-sm">ระบบจัดการสินค้า การขาย และรายงานแบบครบวงจร</p>
+                                <h1 class="text-2xl md:text-3xl font-bold">ระบบจัดการสินค้า</h1>
+                                <p class="text-gray-400 text-sm">ระบบจัดการสินค้าและผู้ใช้แบบครบวงจร</p>
                             </div>
                         </a>
                     </div>
@@ -623,14 +573,6 @@
                         <i class="fas fa-box"></i>
                         <span>จัดการสินค้า</span>
                     </button>
-                    <button id="navSales" class="nav-link">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span>จัดการการขาย</span>
-                    </button>
-                    <button id="navSalesReport" class="nav-link">
-                        <i class="fas fa-chart-line"></i>
-                        <span>รายงานการขาย</span>
-                    </button>
                     <button id="navUsers" class="nav-link">
                         <i class="fas fa-users"></i>
                         <span>จัดการผู้ใช้</span>
@@ -656,7 +598,7 @@
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
                         <div>
                             <h2 class="text-2xl font-bold mb-2 animate__animated animate__fadeInLeft">ยินดีต้อนรับ, <span id="welcomeUsername" class="text-indigo-300">ผู้ใช้</span>!</h2>
-                            <p class="text-gray-300 animate__animated animate__fadeInLeft animate__delay-1s" id="welcomeMessage">คุณกำลังใช้ระบบจัดการสินค้าและการขาย</p>
+                            <p class="text-gray-300 animate__animated animate__fadeInLeft animate__delay-1s" id="welcomeMessage">คุณกำลังใช้ระบบจัดการสินค้าพื้นฐาน</p>
                         </div>
                         <div class="mt-4 md:mt-0 animate__animated animate__fadeInRight">
                             <div class="flex items-center space-x-2">
@@ -708,11 +650,11 @@
                     <div class="bg-gray-800 rounded-xl p-6 shadow-lg hover-effect product-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
                         <div class="flex justify-between items-center">
                             <div>
-                                <p class="text-gray-400 text-sm">ยอดขายวันนี้</p>
-                                <h3 id="todaySales" class="text-3xl font-bold mt-2 shimmer">฿0</h3>
+                                <p class="text-gray-400 text-sm">จำนวนผู้ใช้</p>
+                                <h3 id="totalUsers" class="text-3xl font-bold mt-2 shimmer">0</h3>
                             </div>
                             <div class="bg-purple-900 p-4 rounded-lg hover-effect">
-                                <i class="fas fa-shopping-cart text-purple-300 text-2xl"></i>
+                                <i class="fas fa-users text-purple-300 text-2xl"></i>
                             </div>
                         </div>
                     </div>
@@ -725,9 +667,9 @@
                         <span class="text-sm">เพิ่มสินค้า</span>
                     </button>
                     
-                    <button id="quickAddSaleBtn" class="bg-gradient-to-r from-blue-700 to-cyan-700 hover:from-blue-800 hover:to-cyan-800 text-white font-bold py-3 px-4 rounded-lg flex flex-col items-center justify-center space-y-2 btn-glow transition-all duration-300 hover-effect animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
-                        <i class="fas fa-cash-register text-2xl"></i>
-                        <span class="text-sm">ขายสินค้า</span>
+                    <button id="quickAddUserBtn" class="bg-gradient-to-r from-blue-700 to-cyan-700 hover:from-blue-800 hover:to-cyan-800 text-white font-bold py-3 px-4 rounded-lg flex flex-col items-center justify-center space-y-2 btn-glow transition-all duration-300 hover-effect animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
+                        <i class="fas fa-user-plus text-2xl"></i>
+                        <span class="text-sm">เพิ่มผู้ใช้</span>
                     </button>
                     
                     <button id="quickReportBtn" class="bg-gradient-to-r from-purple-700 to-pink-700 hover:from-purple-800 hover:to-pink-800 text-white font-bold py-3 px-4 rounded-lg flex flex-col items-center justify-center space-y-2 btn-glow transition-all duration-300 hover-effect animate__animated animate__fadeInUp" style="animation-delay: 0.7s">
@@ -754,28 +696,15 @@
                     </div>
                 </div>
                 
-                <!-- Recent Sales -->
-                <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-8 animate__animated animate__fadeInUp" style="animation-delay: 1s">
-                    <h2 class="text-xl font-bold mb-4 flex items-center">
-                        <i class="fas fa-shopping-cart mr-2 text-green-400"></i> การขายล่าสุด
-                    </h2>
-                    <div id="recentSales" class="space-y-3">
-                        <div class="text-center py-8 text-gray-500">
-                            <i class="fas fa-receipt text-2xl mb-2"></i>
-                            <p>ยังไม่มีรายการขาย</p>
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- System Info -->
-                <div class="bg-gray-800 rounded-xl shadow-lg p-6 animate__animated animate__fadeInUp" style="animation-delay: 1.1s">
+                <div class="bg-gray-800 rounded-xl shadow-lg p-6 animate__animated animate__fadeInUp" style="animation-delay: 1s">
                     <h2 class="text-xl font-bold mb-4 flex items-center">
                         <i class="fas fa-info-circle mr-2 text-green-400"></i> ข้อมูลระบบ
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-gray-900/50 p-4 rounded-lg product-card hover-effect">
                             <p class="text-gray-400 text-sm">เวอร์ชันระบบ</p>
-                            <p class="font-medium">4.0.0</p>
+                            <p class="font-medium">3.0.0</p>
                         </div>
                         <div class="bg-gray-900/50 p-4 rounded-lg product-card hover-effect">
                             <p class="text-gray-400 text-sm">ฐานข้อมูล</p>
@@ -783,7 +712,7 @@
                         </div>
                         <div class="bg-gray-900/50 p-4 rounded-lg product-card hover-effect">
                             <p class="text-gray-400 text-sm">ผู้พัฒนา</p>
-                            <p class="font-medium">ระบบจัดการสินค้าและการขาย</p>
+                            <p class="font-medium">ระบบจัดการสินค้าพื้นฐาน</p>
                         </div>
                     </div>
                 </div>
@@ -890,272 +819,6 @@
                                 <p id="outOfStockCount" class="text-2xl font-bold">0 รายการ</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sales Management Page -->
-            <div id="salesPage" class="page-content hidden">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                    <div>
-                        <h2 class="text-2xl font-bold flex items-center">
-                            <i class="fas fa-shopping-cart mr-2 text-green-400"></i> จัดการการขายสินค้า
-                        </h2>
-                        <p class="text-gray-400 text-sm mt-1">สร้างรายการขายใหม่ ตัดสต๊อกสินค้า และจัดการประวัติการขาย</p>
-                    </div>
-                    <div class="mt-4 md:mt-0 flex space-x-2">
-                        <button id="newSaleBtn" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-plus-circle"></i>
-                            <span>สร้างการขายใหม่</span>
-                        </button>
-                        <button id="refreshSalesBtn" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-sync-alt"></i>
-                            <span>รีเฟรช</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- New Sale Form -->
-                <div id="newSaleForm" class="bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-                    <h3 class="text-xl font-bold mb-6 flex items-center">
-                        <i class="fas fa-receipt mr-2 text-yellow-400"></i> รายการขายใหม่
-                    </h3>
-                    
-                    <form id="saleForm">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <label for="saleCode" class="block text-sm font-medium text-gray-300 mb-2">รหัสการขาย *</label>
-                                <input type="text" id="saleCode" value="SALE-001" readonly class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300">
-                            </div>
-                            <div>
-                                <label for="customerName" class="block text-sm font-medium text-gray-300 mb-2">ชื่อลูกค้า</label>
-                                <input type="text" id="customerName" placeholder="กรอกชื่อลูกค้า (ถ้ามี)" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300">
-                            </div>
-                        </div>
-                        
-                        <!-- Product Selection -->
-                        <div class="mb-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h4 class="text-lg font-medium">เลือกรายการสินค้า</h4>
-                                <button type="button" id="addSaleItemBtn" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 rounded-lg transition-colors hover-effect flex items-center space-x-2">
-                                    <i class="fas fa-plus"></i>
-                                    <span>เพิ่มสินค้า</span>
-                                </button>
-                            </div>
-                            
-                            <div id="saleItemsContainer" class="space-y-4">
-                                <!-- Sale items will be added here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Sale Summary -->
-                        <div class="bg-gray-900/50 rounded-lg p-6 mb-6">
-                            <h4 class="text-lg font-medium mb-4">สรุปรายการขาย</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                <div>
-                                    <p class="text-gray-400 text-sm">จำนวนรายการ</p>
-                                    <p id="totalItemsCount" class="text-2xl font-bold">0</p>
-                                </div>
-                                <div>
-                                    <p class="text-gray-400 text-sm">รวมจำนวนสินค้า</p>
-                                    <p id="totalQuantityCount" class="text-2xl font-bold">0 ชิ้น</p>
-                                </div>
-                                <div>
-                                    <p class="text-gray-400 text-sm">ยอดรวมทั้งหมด</p>
-                                    <p id="totalSaleAmount" class="text-2xl font-bold text-green-400">฿0.00</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Actions -->
-                        <div class="flex justify-end space-x-3">
-                            <button type="button" id="clearSaleBtn" class="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors hover-effect">
-                                ล้างรายการ
-                            </button>
-                            <button type="submit" id="saveSaleBtn" class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg transition-colors hover-effect flex items-center space-x-2">
-                                <i class="fas fa-check-circle"></i>
-                                <span>บันทึกการขาย</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
-                <!-- Sales History -->
-                <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-                    <div class="p-6 border-b border-gray-700">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-                            <div>
-                                <h3 class="text-lg font-bold">ประวัติการขาย</h3>
-                                <p class="text-gray-400 text-sm mt-1">แสดงประวัติการขายทั้งหมดในระบบ</p>
-                            </div>
-                            <div class="mt-3 md:mt-0">
-                                <div class="flex items-center space-x-2">
-                                    <div class="relative">
-                                        <input type="text" id="saleSearch" placeholder="ค้นหารายการขาย..." class="bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent w-64">
-                                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-4">
-                        <table id="salesTable" class="min-w-full divide-y divide-gray-700">
-                            <thead>
-                                <tr class="bg-gray-900">
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">รหัสการขาย</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ลูกค้า</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">จำนวนรายการ</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ยอดรวม</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">วันที่ขาย</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">พนักงานขาย</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">การจัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="salesTableBody" class="divide-y divide-gray-700">
-                                <!-- ข้อมูลจะถูกเพิ่มโดย JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sales Report Page -->
-            <div id="salesReportPage" class="page-content hidden">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold flex items-center">
-                        <i class="fas fa-chart-line mr-2 text-green-400"></i> รายงานการขาย
-                    </h2>
-                    <p class="text-gray-400 text-sm mt-1">วิเคราะห์ข้อมูลการขายและสรุปรายงาน</p>
-                </div>
-                
-                <!-- Report Filters -->
-                <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-                    <h3 class="text-lg font-bold mb-4">ตัวกรองรายงาน</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label for="reportPeriod" class="block text-sm font-medium text-gray-300 mb-2">ช่วงเวลา</label>
-                            <select id="reportPeriod" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300">
-                                <option value="today">วันนี้</option>
-                                <option value="yesterday">เมื่อวาน</option>
-                                <option value="week">สัปดาห์นี้</option>
-                                <option value="month">เดือนนี้</option>
-                                <option value="year">ปีนี้</option>
-                                <option value="custom">กำหนดเอง</option>
-                            </select>
-                        </div>
-                        <div id="customDateRange" class="hidden md:col-span-2">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="startDate" class="block text-sm font-medium text-gray-300 mb-2">ตั้งแต่</label>
-                                    <input type="date" id="startDate" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300">
-                                </div>
-                                <div>
-                                    <label for="endDate" class="block text-sm font-medium text-gray-300 mb-2">ถึง</label>
-                                    <input type="date" id="endDate" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex items-end">
-                            <button id="generateReportBtn" class="w-full px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg transition-colors hover-effect">
-                                สร้างรายงาน
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Sales Summary -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-gradient-to-r from-green-800 to-emerald-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-shopping-cart text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">จำนวนรายการขาย</p>
-                                <p id="totalSalesCount" class="text-2xl font-bold">0 รายการ</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gradient-to-r from-blue-800 to-cyan-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-coins text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">ยอดขายรวม</p>
-                                <p id="totalSalesAmount" class="text-2xl font-bold">฿0</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gradient-to-r from-purple-800 to-pink-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-boxes text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">จำนวนสินค้าที่ขาย</p>
-                                <p id="totalSoldItems" class="text-2xl font-bold">0 ชิ้น</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gradient-to-r from-yellow-800 to-orange-800 rounded-xl p-6 shadow-lg">
-                        <div class="flex items-center">
-                            <div class="mr-4">
-                                <i class="fas fa-chart-line text-3xl text-white"></i>
-                            </div>
-                            <div>
-                                <p class="text-gray-300 text-sm">ยอดขายเฉลี่ย/รายการ</p>
-                                <p id="averageSaleAmount" class="text-2xl font-bold">฿0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Charts -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="bg-gray-800 rounded-xl shadow-lg p-6">
-                        <h3 class="text-lg font-bold mb-4">ยอดขายรายวัน</h3>
-                        <div class="chart-container">
-                            <canvas id="dailySalesChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-800 rounded-xl shadow-lg p-6">
-                        <h3 class="text-lg font-bold mb-4">ประเภทสินค้าขายดี</h3>
-                        <div class="chart-container">
-                            <canvas id="productCategoryChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Top Products -->
-                <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-                    <h3 class="text-lg font-bold mb-4">สินค้าขายดีอันดับต้นๆ</h3>
-                    <div id="topProductsList" class="space-y-3">
-                        <!-- Top products will be loaded here -->
-                        <div class="text-center py-8 text-gray-500">
-                            <i class="fas fa-chart-bar text-2xl mb-2"></i>
-                            <p>ยังไม่มีข้อมูลสินค้าขายดี</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Export Options -->
-                <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <h3 class="text-lg font-bold mb-4">ตัวเลือกการส่งออก</h3>
-                    <div class="flex flex-wrap gap-4">
-                        <button id="exportSalesReportBtn" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-file-export"></i>
-                            <span>ส่งออกรายงานการขาย</span>
-                        </button>
-                        <button id="printSalesReportBtn" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 btn-glow transition-all duration-300 hover-effect">
-                            <i class="fas fa-print"></i>
-                            <span>พิมพ์รายงาน</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -1300,12 +963,6 @@
                                     <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-3">ขายสินค้า</td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                    <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
-                                </tr>
-                                <tr>
                                     <td class="px-4 py-3">แก้ไขข้อมูลสินค้า</td>
                                     <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
                                     <td class="px-4 py-3"><span class="permission-badge permission-allowed">อนุญาต</span></td>
@@ -1416,8 +1073,8 @@
                         <h3 class="text-lg font-bold mb-4">รายงานการขาย</h3>
                         <div class="text-center py-12 text-gray-500">
                             <i class="fas fa-chart-line text-4xl mb-4"></i>
-                            <p>รายงานการขายได้ย้ายไปยังเมนู "รายงานการขาย" แล้ว</p>
-                            <p class="text-sm mt-2">กรุณาไปที่เมนูรายงานการขายเพื่อดูรายละเอียด</p>
+                            <p>ส่วนรายงานการขายอยู่ระหว่างการพัฒนา</p>
+                            <p class="text-sm mt-2">ระบบนี้ยังไม่รองรับการบันทึกข้อมูลการขาย</p>
                         </div>
                     </div>
                 </div>
@@ -1511,7 +1168,7 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
                             <span class="text-gray-400">เวอร์ชันระบบ</span>
-                            <span class="font-medium">4.0.0</span>
+                            <span class="font-medium">3.0.0</span>
                         </div>
                         <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
                             <span class="text-gray-400">ฐานข้อมูล</span>
@@ -1519,7 +1176,7 @@
                         </div>
                         <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
                             <span class="text-gray-400">ผู้พัฒนาระบบ</span>
-                            <span class="font-medium">ระบบจัดการสินค้าและการขาย</span>
+                            <span class="font-medium">ระบบจัดการสินค้าพื้นฐาน</span>
                         </div>
                         <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
                             <span class="text-gray-400">การเชื่อมต่อ</span>
@@ -1540,7 +1197,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <div class="mb-4 md:mb-0">
                         <p class="text-gray-400">
-                            <i class="fas fa-cube mr-1"></i> ระบบจัดการสินค้าและการขายด้วย Firebase
+                            <i class="fas fa-cube mr-1"></i> ระบบจัดการสินค้าพื้นฐานด้วย Firebase
                         </p>
                         <p class="text-gray-500 text-sm mt-1">ครบเครื่องเรื่องไอที</p>
                     </div>
@@ -1664,10 +1321,6 @@
                                 <input type="checkbox" id="permAdd" class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500" checked>
                             </div>
                             <div class="flex items-center justify-between">
-                                <span class="text-sm">ขายสินค้า</span>
-                                <input type="checkbox" id="permSale" class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500" checked>
-                            </div>
-                            <div class="flex items-center justify-between">
                                 <span class="text-sm">แก้ไขข้อมูลสินค้า</span>
                                 <input type="checkbox" id="permEdit" class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500" checked>
                             </div>
@@ -1695,59 +1348,6 @@
         </div>
     </div>
 
-    <!-- Modal สำหรับดูรายละเอียดการขาย -->
-    <div id="saleDetailModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl mx-4 animate__animated animate__zoomIn">
-            <div class="p-6 border-b border-gray-700">
-                <h3 id="modalSaleTitle" class="text-xl font-bold">รายละเอียดการขาย</h3>
-            </div>
-            
-            <div class="p-6">
-                <div class="mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <p class="text-gray-400 text-sm">รหัสการขาย</p>
-                            <p id="saleDetailCode" class="font-medium text-lg"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">ลูกค้า</p>
-                            <p id="saleDetailCustomer" class="font-medium"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">วันที่ขาย</p>
-                            <p id="saleDetailDate" class="font-medium"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm">พนักงานขาย</p>
-                            <p id="saleDetailStaff" class="font-medium"></p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mb-6">
-                    <h4 class="font-medium mb-3">รายการสินค้า</h4>
-                    <div id="saleDetailItems" class="space-y-3">
-                        <!-- Sale items will be loaded here -->
-                    </div>
-                </div>
-                
-                <div class="bg-gray-900/50 rounded-lg p-4">
-                    <div class="flex justify-between items-center">
-                        <p class="text-lg font-medium">ยอดรวมทั้งหมด</p>
-                        <p id="saleDetailTotal" class="text-2xl font-bold text-green-400"></p>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end space-x-3 mt-8">
-                    <button type="button" id="printReceiptBtn" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 rounded-lg transition-colors hover-effect">
-                        <i class="fas fa-print mr-2"></i> พิมพ์ใบเสร็จ
-                    </button>
-                    <button type="button" id="closeSaleDetailBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors hover-effect">ปิด</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Confirmation Dialog -->
     <div id="confirmationDialog" class="confirmation-dialog hidden">
         <div class="confirmation-header">
@@ -1765,10 +1365,114 @@
         </div>
     </div>
 
-    <!-- Print Receipt Section -->
-    <div id="printReceiptSection" class="print-section hidden">
-        <div class="receipt" id="receiptContent">
-            <!-- Receipt content will be generated here -->
+    <!-- Notification Panel -->
+    <div id="notificationPanel" class="fixed top-16 right-4 bg-gray-800 rounded-xl shadow-2xl w-80 max-h-96 overflow-y-auto z-50 hidden animate__animated animate__fadeInRight">
+        <div class="p-4 border-b border-gray-700">
+            <h3 class="font-bold flex items-center">
+                <i class="fas fa-bell mr-2 text-yellow-400"></i> การแจ้งเตือน
+                <span id="notificationCount" class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">0</span>
+            </h3>
+        </div>
+        <div id="notificationList" class="p-2">
+            <!-- Notifications will be added here -->
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-bell-slash text-2xl mb-2"></i>
+                <p>ไม่มีการแจ้งเตือนใหม่</p>
+            </div>
+        </div>
+        <div class="p-3 border-t border-gray-700">
+            <button id="clearNotificationsBtn" class="w-full py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition-colors hover-effect">
+                <i class="fas fa-trash-alt mr-2"></i> ล้างการแจ้งเตือนทั้งหมด
+            </button>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="userProfileModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 animate__animated animate__zoomIn">
+            <div class="p-6 border-b border-gray-700">
+                <h3 class="text-xl font-bold">โปรไฟล์ผู้ใช้</h3>
+            </div>
+            
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user text-white text-3xl"></i>
+                    </div>
+                    <h4 id="profileUsername" class="text-xl font-bold"></h4>
+                    <div id="profileRoleBadge" class="inline-block mt-2"></div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-gray-400 text-sm">ชื่อ-นามสกุล</p>
+                        <p id="profileFullName" class="font-medium">-</p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-gray-400 text-sm">บทบาท</p>
+                        <p id="profileRole" class="font-medium">-</p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-gray-400 text-sm">อีเมล</p>
+                        <p id="profileEmail" class="font-medium">-</p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-gray-400 text-sm">ล็อกอินล่าสุด</p>
+                        <p id="profileLastLogin" class="font-medium">-</p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-gray-400 text-sm">วันที่สมัคร</p>
+                        <p id="profileCreatedAt" class="font-medium">-</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-gray-700">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="changePasswordBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors hover-effect">
+                            <i class="fas fa-key mr-2"></i> เปลี่ยนรหัสผ่าน
+                        </button>
+                        <button id="closeProfileBtn" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg transition-colors hover-effect">
+                            <i class="fas fa-times mr-2"></i> ปิด
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Report Section (Hidden until printing) -->
+    <div id="printReportSection" class="print-section hidden">
+        <div class="p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold">รายงานระบบจัดการสินค้า</h1>
+                <p class="text-gray-600">วันที่พิมพ์: <span id="printDate"></span></p>
+                <p class="text-gray-600">พิมพ์โดย: <span id="printUser"></span></p>
+            </div>
+            
+            <div class="mb-8">
+                <h2 class="text-xl font-bold mb-4">สรุปข้อมูลสินค้า</h2>
+                <div id="printProductSummary"></div>
+            </div>
+            
+            <div class="mb-8">
+                <h2 class="text-xl font-bold mb-4">สรุปข้อมูลผู้ใช้</h2>
+                <div id="printUserSummary"></div>
+            </div>
+            
+            <div class="mb-8">
+                <h2 class="text-xl font-bold mb-4">ข้อมูลสินค้าทั้งหมด</h2>
+                <div id="printProductsTable"></div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-gray-300">
+                <p class="text-gray-600 text-sm text-center">
+                    ระบบจัดการสินค้าพื้นฐานด้วย Firebase | เวอร์ชัน 3.0.0
+                </p>
+            </div>
         </div>
     </div>
 
@@ -1798,18 +1502,12 @@
         // ตัวแปรหลักของแอพพลิเคชัน
         let products = [];
         let users = [];
-        let sales = [];
         let currentUser = null;
         let userToDelete = null;
         let productToDelete = null;
-        let saleToDelete = null;
         let notifications = [];
         let recentActivities = [];
         let autoRefreshInterval = null;
-        let saleItems = [];
-        let saleCounter = 1;
-        let dailySalesChart = null;
-        let productCategoryChart = null;
         
         // สิทธิ์การใช้งานตามบทบาท
         const rolePermissions = {
@@ -1820,8 +1518,7 @@
                 canDelete: true,
                 canManageUsers: true,
                 canViewReports: true,
-                canManageSettings: true,
-                canSale: true
+                canManageSettings: true
             },
             'manager': {
                 canView: true,
@@ -1830,8 +1527,7 @@
                 canDelete: false,
                 canManageUsers: false,
                 canViewReports: true,
-                canManageSettings: false,
-                canSale: true
+                canManageSettings: false
             },
             'user': {
                 canView: true,
@@ -1840,8 +1536,7 @@
                 canDelete: false,
                 canManageUsers: false,
                 canViewReports: false,
-                canManageSettings: false,
-                canSale: true
+                canManageSettings: false
             }
         };
         
@@ -2104,9 +1799,6 @@
             showPage('dashboardPage');
             
             showToast(`ยินดีต้อนรับ ${currentUser.username}!`, 'success');
-            
-            // สร้างรหัสการขายใหม่
-            generateSaleCode();
         }
         
         // อัพเดทข้อมูลผู้ใช้ใน UI
@@ -2162,14 +1854,10 @@
             const navUsers = document.getElementById('navUsers');
             const navReports = document.getElementById('navReports');
             const navSettings = document.getElementById('navSettings');
-            const navSales = document.getElementById('navSales');
-            const navSalesReport = document.getElementById('navSalesReport');
             
             if (navUsers) navUsers.style.display = permissions.canManageUsers ? 'flex' : 'none';
             if (navReports) navReports.style.display = permissions.canViewReports ? 'flex' : 'none';
             if (navSettings) navSettings.style.display = permissions.canManageSettings ? 'flex' : 'none';
-            if (navSales) navSales.style.display = permissions.canSale ? 'flex' : 'none';
-            if (navSalesReport) navSalesReport.style.display = permissions.canViewReports ? 'flex' : 'none';
             
             // อัพเดทข้อความในหน้า Products
             const productsTableInfo = document.getElementById('productsTableInfo');
@@ -2199,25 +1887,9 @@
             if (activePage) {
                 activePage.classList.remove('hidden');
                 
-                // เมื่อแสดงหน้า Dashboard ให้อัพเดทข้อมูล
-                if (pageId === 'dashboardPage') {
-                    updateDashboardStats();
-                    updateRecentSales();
-                }
-                
-                // เมื่อแสดงหน้า Sales ให้โหลดข้อมูลการขาย
-                if (pageId === 'salesPage') {
-                    loadSales();
-                }
-                
                 // เมื่อแสดงหน้า Reports ให้โหลดรายงาน
                 if (pageId === 'reportsPage') {
                     loadReports();
-                }
-                
-                // เมื่อแสดงหน้า Sales Report ให้โหลดรายงานการขาย
-                if (pageId === 'salesReportPage') {
-                    generateSalesReport('today');
                 }
                 
                 // เมื่อแสดงหน้า Settings ให้โหลดการตั้งค่า
@@ -2242,8 +1914,7 @@
             
             Promise.all([
                 loadProducts(),
-                loadUsers(),
-                loadSales()
+                loadUsers()
             ]).then(() => {
                 hideLoading();
                 updateDashboardStats();
@@ -2312,36 +1983,6 @@
                     resolve();
                 }, (error) => {
                     console.error('Error loading users:', error);
-                    reject(error);
-                });
-            });
-        }
-        
-        // โหลดข้อมูลการขาย
-        function loadSales() {
-            return new Promise((resolve, reject) => {
-                const salesRef = database.ref('sales');
-                
-                salesRef.on('value', (snapshot) => {
-                    sales = [];
-                    const data = snapshot.val();
-                    
-                    if (data) {
-                        Object.keys(data).forEach(key => {
-                            sales.push({
-                                id: key,
-                                ...data[key]
-                            });
-                        });
-                    }
-                    
-                    // เรียงลำดับตามวันที่ขาย (ใหม่ไปเก่า)
-                    sales.sort((a, b) => new Date(b.saleDateTime) - new Date(a.saleDateTime));
-                    
-                    updateSalesTable();
-                    resolve();
-                }, (error) => {
-                    console.error('Error loading sales:', error);
                     reject(error);
                 });
             });
@@ -2531,7 +2172,6 @@
                 
                 if (permissions.canView) permissionsHtml += '<span class="permission-badge permission-allowed">ดู</span> ';
                 if (permissions.canAdd) permissionsHtml += '<span class="permission-badge permission-allowed">เพิ่ม</span> ';
-                if (permissions.canSale) permissionsHtml += '<span class="permission-badge permission-allowed">ขาย</span> ';
                 if (permissions.canEdit) permissionsHtml += '<span class="permission-badge permission-allowed">แก้ไข</span> ';
                 if (permissions.canDelete) permissionsHtml += '<span class="permission-badge permission-allowed">ลบ</span> ';
                 if (permissions.canManageUsers) permissionsHtml += '<span class="permission-badge permission-allowed">ผู้ใช้</span> ';
@@ -2606,68 +2246,6 @@
             updateUserStats();
         }
         
-        // อัพเดทตารางการขาย
-        function updateSalesTable() {
-            const tableBody = document.getElementById('salesTableBody');
-            if (!tableBody) return;
-            
-            tableBody.innerHTML = '';
-            
-            if (sales.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
-                            <i class="fas fa-receipt text-4xl mb-4 animate-pulse"></i>
-                            <p class="text-lg">ยังไม่มีรายการขาย</p>
-                            <p class="text-sm mt-2">คลิกปุ่ม "สร้างการขายใหม่" เพื่อเริ่มต้นขายสินค้า</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            sales.forEach(sale => {
-                const saleDate = new Date(sale.saleDateTime).toLocaleDateString('th-TH');
-                const saleTime = new Date(sale.saleDateTime).toLocaleTimeString('th-TH');
-                const itemsCount = sale.items ? sale.items.length : 0;
-                
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-700 transition-colors product-card';
-                
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="font-mono font-bold text-green-300">${sale.saleCode}</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="font-medium">${sale.customerName || 'ลูกค้าทั่วไป'}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 bg-gray-700 rounded-full text-sm">${itemsCount} รายการ</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="font-bold text-lg text-green-400">฿${sale.totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        <div>${saleDate}</div>
-                        <div class="text-gray-400 text-xs">${saleTime}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 bg-indigo-700 rounded-full text-xs">${sale.createdBy}</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button onclick="showSaleDetail('${sale.id}')" class="text-blue-400 hover:text-blue-300 mr-3 transition-colors hover-effect">
-                            <i class="fas fa-eye mr-1"></i> ดูรายละเอียด
-                        </button>
-                        <button onclick="showDeleteSaleConfirm('${sale.id}', '${sale.saleCode}')" class="text-red-400 hover:text-red-300 transition-colors hover-effect">
-                            <i class="fas fa-trash-alt mr-1"></i> ลบ
-                        </button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-        }
-        
         // อัพเดทสถิติแดชบอร์ด
         function updateDashboardStats() {
             // สินค้า
@@ -2675,66 +2253,21 @@
             const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
             const outOfStock = products.filter(p => p.quantity <= 0).length;
             
-            // ยอดขายวันนี้
-            const today = new Date().toLocaleDateString('th-TH');
-            const todaySales = sales.filter(sale => {
-                const saleDate = new Date(sale.saleDateTime).toLocaleDateString('th-TH');
-                return saleDate === today;
-            });
-            
-            const todaySalesAmount = todaySales.reduce((sum, sale) => sum + sale.totalAmount, 0);
-            
             document.getElementById('totalProducts').textContent = totalProducts;
             document.getElementById('totalValue').textContent = '฿' + totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2});
             document.getElementById('outOfStock').textContent = outOfStock;
-            document.getElementById('todaySales').textContent = '฿' + todaySalesAmount.toLocaleString('th-TH', {minimumFractionDigits: 2});
             
             // ผู้ใช้
             const totalUsers = users.length;
+            const adminUsers = users.filter(u => u.role === 'admin').length;
+            const managerUsers = users.filter(u => u.role === 'manager').length;
+            const normalUsers = users.filter(u => u.role === 'user').length;
             
             document.getElementById('totalUsers').textContent = totalUsers;
-        }
-        
-        // อัพเดทการขายล่าสุดในแดชบอร์ด
-        function updateRecentSales() {
-            const recentSalesContainer = document.getElementById('recentSales');
-            if (!recentSalesContainer) return;
-            
-            recentSalesContainer.innerHTML = '';
-            
-            // เอา 5 รายการล่าสุด
-            const recentSalesList = sales.slice(0, 5);
-            
-            if (recentSalesList.length === 0) {
-                recentSalesContainer.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <i class="fas fa-receipt text-2xl mb-2"></i>
-                        <p>ยังไม่มีรายการขาย</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            recentSalesList.forEach(sale => {
-                const saleDate = new Date(sale.saleDateTime).toLocaleDateString('th-TH');
-                const saleTime = new Date(sale.saleDateTime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-                const itemsCount = sale.items ? sale.items.length : 0;
-                
-                const saleElement = document.createElement('div');
-                saleElement.className = 'flex justify-between items-center p-3 bg-gray-900/50 rounded-lg hover-effect';
-                saleElement.innerHTML = `
-                    <div>
-                        <p class="font-medium">${sale.saleCode}</p>
-                        <p class="text-gray-400 text-sm">${sale.customerName || 'ลูกค้าทั่วไป'} • ${itemsCount} รายการ</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold text-green-400">฿${sale.totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
-                        <p class="text-gray-400 text-sm">${saleDate} ${saleTime}</p>
-                    </div>
-                `;
-                
-                recentSalesContainer.appendChild(saleElement);
-            });
+            document.getElementById('totalUsersCount').textContent = totalUsers + ' คน';
+            document.getElementById('adminUsersCount').textContent = adminUsers + ' คน';
+            document.getElementById('managerUsersCount').textContent = managerUsers + ' คน';
+            document.getElementById('normalUsersCount').textContent = normalUsers + ' คน';
         }
         
         // อัพเดทสถิติสินค้า
@@ -2815,781 +2348,241 @@
             });
         }
         
-        // ==================== SALE MANAGEMENT ====================
+        // ==================== SETTINGS FUNCTIONS ====================
         
-        // สร้างรหัสการขาย
-        function generateSaleCode() {
-            const today = new Date();
-            const year = today.getFullYear().toString().slice(-2);
-            const month = (today.getMonth() + 1).toString().padStart(2, '0');
-            const day = today.getDate().toString().padStart(2, '0');
+        // โหลดการตั้งค่าจาก Local Storage
+        function loadSettingsFromLocalStorage() {
+            const settings = JSON.parse(localStorage.getItem('inventorySettings')) || {};
             
-            // นับจำนวนการขายวันนี้
-            const todaySales = sales.filter(sale => {
-                const saleDate = new Date(sale.saleDateTime);
-                return saleDate.getDate() === today.getDate() &&
-                       saleDate.getMonth() === today.getMonth() &&
-                       saleDate.getFullYear() === today.getFullYear();
-            });
+            // โหลดการตั้งค่า Toggles
+            const notificationToggle = document.getElementById('notificationToggle');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const autoRefreshToggle = document.getElementById('autoRefreshToggle');
             
-            const saleNumber = (todaySales.length + 1).toString().padStart(3, '0');
-            const saleCode = `SALE-${year}${month}${day}-${saleNumber}`;
-            
-            document.getElementById('saleCode').value = saleCode;
-            return saleCode;
-        }
-        
-        // เพิ่มรายการสินค้าในฟอร์มขาย
-        function addSaleItem() {
-            if (products.length === 0) {
-                showAlert('warning', 'ไม่มีสินค้า', 'ไม่มีสินค้าในระบบ กรุณาเพิ่มสินค้าก่อน');
-                return;
+            if (notificationToggle) {
+                notificationToggle.checked = settings.notifications !== false;
             }
             
-            const saleItemsContainer = document.getElementById('saleItemsContainer');
-            const itemId = Date.now();
+            if (darkModeToggle) {
+                darkModeToggle.checked = settings.darkMode !== false;
+            }
             
-            const itemElement = document.createElement('div');
-            itemElement.className = 'sale-item';
-            itemElement.id = `saleItem-${itemId}`;
-            itemElement.innerHTML = `
-                <div class="flex justify-between items-center mb-3">
-                    <h5 class="font-medium">รายการสินค้า</h5>
-                    <button type="button" onclick="removeSaleItem(${itemId})" class="text-red-400 hover:text-red-300">
-                        <i class="fas fa-times"></i>
-                    </button>
+            if (autoRefreshToggle) {
+                autoRefreshToggle.checked = settings.autoRefresh === true;
+                
+                // ถ้าเปิด Auto Refresh ให้ตั้งค่าช่วงเวลา
+                if (settings.autoRefresh) {
+                    setupAutoRefresh();
+                }
+            }
+        }
+        
+        // บันทึกการตั้งค่าไปยัง Local Storage
+        function saveSettingsToLocalStorage() {
+            const settings = {
+                notifications: document.getElementById('notificationToggle').checked,
+                darkMode: document.getElementById('darkModeToggle').checked,
+                autoRefresh: document.getElementById('autoRefreshToggle').checked
+            };
+            
+            localStorage.setItem('inventorySettings', JSON.stringify(settings));
+            showToast('บันทึกการตั้งค่าสำเร็จ', 'success');
+        }
+        
+        // โหลดการตั้งค่าสำหรับหน้า Settings
+        function loadSettings() {
+            // อัพเดทเวลาปัจจุบัน
+            updateSystemTime();
+            
+            // โหลดการตั้งค่าจาก Local Storage
+            loadSettingsFromLocalStorage();
+            
+            // อัพเดทสถานะการเชื่อมต่อ
+            updateConnectionStatus();
+        }
+        
+        // อัพเดทเวลาปัจจุบัน
+        function updateSystemTime() {
+            const systemTimeElement = document.getElementById('systemTime');
+            if (systemTimeElement) {
+                const now = new Date();
+                systemTimeElement.textContent = now.toLocaleString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+        }
+        
+        // อัพเดทสถานะการเชื่อมต่อ
+        function updateConnectionStatus() {
+            const statusElement = document.getElementById('systemConnectionStatus');
+            if (statusElement) {
+                statusElement.textContent = 'ออนไลน์';
+                statusElement.className = 'font-medium text-green-400';
+            }
+        }
+        
+        // ตั้งค่า Auto Refresh
+        function setupAutoRefresh() {
+            // ล้าง interval เดิมถ้ามี
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            
+            // ตั้งค่า interval ใหม่ทุก 30 วินาที
+            autoRefreshInterval = setInterval(() => {
+                loadProducts();
+                loadUsers();
+                showToast('รีเฟรชข้อมูลอัตโนมัติเรียบร้อย', 'info');
+            }, 30000); // 30 วินาที
+        }
+        
+        // ==================== REPORTS FUNCTIONS ====================
+        
+        // โหลดรายงาน
+        function loadReports() {
+            updateProductReport();
+            updateUserReport();
+        }
+        
+        // อัพเดทรายงานสินค้า
+        function updateProductReport() {
+            const productSummary = document.getElementById('productSummary');
+            const topProducts = document.getElementById('topProducts');
+            
+            if (!productSummary || !topProducts) return;
+            
+            // สรุปข้อมูลสินค้า
+            const totalProducts = products.length;
+            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
+            const outOfStock = products.filter(p => p.quantity <= 0).length;
+            const lowStock = products.filter(p => p.quantity > 0 && p.quantity <= 5).length;
+            const highValueProducts = products.filter(p => (p.quantity * p.price) > 10000).length;
+            
+            productSummary.innerHTML = `
+                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
+                    <span class="text-gray-400">จำนวนสินค้าทั้งหมด</span>
+                    <span class="font-bold text-lg">${totalProducts} รายการ</span>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">สินค้า</label>
-                        <select class="sale-product-select w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300" onchange="updateSaleItemPrice(${itemId})">
-                            <option value="">เลือกสินค้า</option>
-                            ${products.filter(p => p.quantity > 0).map(product => `
-                                <option value="${product.id}" data-price="${product.price}" data-stock="${product.quantity}">${product.productCode} - ${product.productName} (เหลือ: ${product.quantity})</option>
-                            `).join('')}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">จำนวน</label>
-                        <input type="number" min="1" value="1" class="sale-quantity w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300" oninput="updateSaleItemTotal(${itemId})">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">ราคาต่อหน่วย</label>
-                        <input type="number" min="0" step="0.01" class="sale-price w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300" readonly>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">รวม</label>
-                        <input type="number" class="sale-total w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300" readonly>
-                    </div>
+                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
+                    <span class="text-gray-400">มูลค่ารวม</span>
+                    <span class="font-bold text-lg text-green-400">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
+                    <span class="text-gray-400">สินค้าหมดสต๊อก</span>
+                    <span class="font-bold text-lg text-red-400">${outOfStock} รายการ</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
+                    <span class="text-gray-400">สินค้าเหลือน้อย</span>
+                    <span class="font-bold text-lg text-yellow-400">${lowStock} รายการ</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
+                    <span class="text-gray-400">สินค้ามูลค่าสูง</span>
+                    <span class="font-bold text-lg text-purple-400">${highValueProducts} รายการ</span>
                 </div>
             `;
             
-            saleItemsContainer.appendChild(itemElement);
-            updateSaleSummary();
-        }
-        
-        // ลบรายการสินค้าในฟอร์มขาย
-        function removeSaleItem(itemId) {
-            const itemElement = document.getElementById(`saleItem-${itemId}`);
-            if (itemElement) {
-                itemElement.remove();
-                updateSaleSummary();
-            }
-        }
-        
-        // อัพเดทราคาสินค้าในรายการขาย
-        function updateSaleItemPrice(itemId) {
-            const itemElement = document.getElementById(`saleItem-${itemId}`);
-            if (!itemElement) return;
+            // สินค้าขายดี (เรียงตามมูลค่ารวม)
+            const sortedProducts = [...products].sort((a, b) => {
+                const valueA = a.quantity * a.price;
+                const valueB = b.quantity * b.price;
+                return valueB - valueA;
+            }).slice(0, 5); // เอา 5 อันดับแรก
             
-            const productSelect = itemElement.querySelector('.sale-product-select');
-            const priceInput = itemElement.querySelector('.sale-price');
-            const quantityInput = itemElement.querySelector('.sale-quantity');
-            const totalInput = itemElement.querySelector('.sale-total');
+            topProducts.innerHTML = '';
             
-            const selectedOption = productSelect.options[productSelect.selectedIndex];
-            if (selectedOption && selectedOption.value) {
-                const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-                const stock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
-                
-                priceInput.value = price.toFixed(2);
-                
-                // ตรวจสอบว่าจำนวนที่ต้องการขายมีในสต๊อกหรือไม่
-                const quantity = parseInt(quantityInput.value) || 1;
-                if (quantity > stock) {
-                    quantityInput.value = stock;
-                    showAlert('warning', 'จำนวนไม่เพียงพอ', `สินค้านี้เหลือเพียง ${stock} ชิ้นในสต๊อก`);
-                }
-                
-                updateSaleItemTotal(itemId);
-            } else {
-                priceInput.value = '';
-                totalInput.value = '';
-            }
-        }
-        
-        // อัพเดทยอดรวมของรายการขาย
-        function updateSaleItemTotal(itemId) {
-            const itemElement = document.getElementById(`saleItem-${itemId}`);
-            if (!itemElement) return;
-            
-            const priceInput = itemElement.querySelector('.sale-price');
-            const quantityInput = itemElement.querySelector('.sale-quantity');
-            const totalInput = itemElement.querySelector('.sale-total');
-            
-            const price = parseFloat(priceInput.value) || 0;
-            const quantity = parseInt(quantityInput.value) || 0;
-            
-            totalInput.value = (price * quantity).toFixed(2);
-            updateSaleSummary();
-        }
-        
-        // อัพเดทสรุปรายการขาย
-        function updateSaleSummary() {
-            const saleItems = document.querySelectorAll('.sale-item');
-            let totalItems = 0;
-            let totalQuantity = 0;
-            let totalAmount = 0;
-            
-            saleItems.forEach(item => {
-                const quantityInput = item.querySelector('.sale-quantity');
-                const totalInput = item.querySelector('.sale-total');
-                const productSelect = item.querySelector('.sale-product-select');
-                
-                if (productSelect.value) {
-                    totalItems++;
-                    totalQuantity += parseInt(quantityInput.value) || 0;
-                    totalAmount += parseFloat(totalInput.value) || 0;
-                }
-            });
-            
-            document.getElementById('totalItemsCount').textContent = totalItems;
-            document.getElementById('totalQuantityCount').textContent = totalQuantity + ' ชิ้น';
-            document.getElementById('totalSaleAmount').textContent = '฿' + totalAmount.toFixed(2);
-        }
-        
-        // ล้างฟอร์มขาย
-        function clearSaleForm() {
-            showConfirmation(
-                'ล้างรายการขาย',
-                'คุณแน่ใจหรือไม่ว่าต้องการล้างรายการขายทั้งหมด?',
-                'warning',
-                'ล้างรายการ',
-                'ยกเลิก'
-            ).then(confirmed => {
-                if (confirmed) {
-                    document.getElementById('saleItemsContainer').innerHTML = '';
-                    document.getElementById('customerName').value = '';
-                    generateSaleCode();
-                    updateSaleSummary();
-                    showToast('ล้างรายการขายเรียบร้อยแล้ว', 'success');
-                }
-            });
-        }
-        
-        // บันทึกรายการขาย
-        function saveSale(e) {
-            e.preventDefault();
-            
-            // ตรวจสอบว่ามีรายการสินค้าหรือไม่
-            const saleItems = document.querySelectorAll('.sale-item');
-            if (saleItems.length === 0) {
-                showAlert('error', 'ไม่มีรายการสินค้า', 'กรุณาเพิ่มรายการสินค้าก่อนบันทึกการขาย');
+            if (sortedProducts.length === 0) {
+                topProducts.innerHTML = '<p class="text-gray-500 text-center">ไม่มีข้อมูลสินค้า</p>';
                 return;
             }
             
-            // ตรวจสอบว่าทุกรายการมีสินค้าเลือกแล้ว
-            let isValid = true;
-            const saleDataItems = [];
-            
-            saleItems.forEach(item => {
-                const productSelect = item.querySelector('.sale-product-select');
-                const quantityInput = item.querySelector('.sale-quantity');
-                const priceInput = item.querySelector('.sale-price');
-                
-                if (!productSelect.value) {
-                    isValid = false;
-                    return;
-                }
-                
-                // ตรวจสอบว่ามีสินค้าพอในสต๊อกหรือไม่
-                const productId = productSelect.value;
-                const selectedOption = productSelect.options[productSelect.selectedIndex];
-                const stock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
-                const quantity = parseInt(quantityInput.value) || 0;
-                
-                if (quantity > stock) {
-                    showAlert('error', 'จำนวนไม่เพียงพอ', `สินค้า ${selectedOption.text} มีเพียง ${stock} ชิ้นในสต๊อก`);
-                    isValid = false;
-                    return;
-                }
-                
-                if (quantity <= 0) {
-                    showAlert('error', 'จำนวนไม่ถูกต้อง', 'กรุณากรอกจำนวนสินค้าให้ถูกต้อง');
-                    isValid = false;
-                    return;
-                }
-                
-                // ค้นหาข้อมูลสินค้า
-                const product = products.find(p => p.id === productId);
-                if (!product) {
-                    isValid = false;
-                    return;
-                }
-                
-                saleDataItems.push({
-                    productId: productId,
-                    productCode: product.productCode,
-                    productName: product.productName,
-                    quantity: quantity,
-                    price: parseFloat(priceInput.value) || 0,
-                    total: quantity * parseFloat(priceInput.value)
-                });
-            });
-            
-            if (!isValid) {
-                showAlert('error', 'ข้อมูลไม่ถูกต้อง', 'กรุณาตรวจสอบข้อมูลรายการสินค้าให้ครบถ้วนและถูกต้อง');
-                return;
-            }
-            
-            // คำนวณยอดรวม
-            const totalAmount = saleDataItems.reduce((sum, item) => sum + item.total, 0);
-            
-            // ข้อมูลการขาย
-            const saleData = {
-                saleCode: document.getElementById('saleCode').value,
-                customerName: document.getElementById('customerName').value.trim() || 'ลูกค้าทั่วไป',
-                items: saleDataItems,
-                totalAmount: totalAmount,
-                saleDate: new Date().toLocaleDateString('th-TH'),
-                saleDateTime: new Date().toISOString(),
-                createdBy: currentUser.username,
-                createdAt: new Date().toISOString()
-            };
-            
-            showLoading('กำลังบันทึกการขาย...');
-            
-            // บันทึกข้อมูลการขาย
-            database.ref('sales').push(saleData)
-                .then((ref) => {
-                    // อัพเดทจำนวนสินค้าในสต๊อก
-                    const updatePromises = saleDataItems.map(item => {
-                        const product = products.find(p => p.id === item.productId);
-                        if (product) {
-                            const newQuantity = product.quantity - item.quantity;
-                            return database.ref('products/' + item.productId).update({
-                                quantity: newQuantity
-                            });
-                        }
-                        return Promise.resolve();
-                    });
-                    
-                    return Promise.all(updatePromises).then(() => ref.key);
-                })
-                .then((saleId) => {
-                    hideLoading();
-                    
-                    // ล้างฟอร์ม
-                    document.getElementById('saleItemsContainer').innerHTML = '';
-                    document.getElementById('customerName').value = '';
-                    generateSaleCode();
-                    updateSaleSummary();
-                    
-                    // แสดงใบเสร็จ
-                    showSaleDetail(saleId);
-                    
-                    showAlert('success', 'บันทึกการขายสำเร็จ', `บันทึกรายการขาย ${saleData.saleCode} เรียบร้อยแล้ว`);
-                    
-                    // โหลดข้อมูลใหม่
-                    loadProducts();
-                    loadSales();
-                })
-                .catch(error => {
-                    hideLoading();
-                    console.error('Error saving sale:', error);
-                    showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึกการขาย');
-                });
-        }
-        
-        // แสดงรายละเอียดการขาย
-        function showSaleDetail(saleId) {
-            const sale = sales.find(s => s.id === saleId);
-            if (!sale) {
-                // ถ้าไม่เจอในรายการ sales (อาจเป็นรายการที่เพิ่งบันทึก)
-                database.ref('sales/' + saleId).once('value').then(snapshot => {
-                    const saleData = snapshot.val();
-                    if (saleData) {
-                        displaySaleDetail({ id: saleId, ...saleData });
-                    }
-                });
-                return;
-            }
-            
-            displaySaleDetail(sale);
-        }
-        
-        // แสดงรายละเอียดการขายใน Modal
-        function displaySaleDetail(sale) {
-            const modal = document.getElementById('saleDetailModal');
-            const modalTitle = document.getElementById('modalSaleTitle');
-            const saleDetailCode = document.getElementById('saleDetailCode');
-            const saleDetailCustomer = document.getElementById('saleDetailCustomer');
-            const saleDetailDate = document.getElementById('saleDetailDate');
-            const saleDetailStaff = document.getElementById('saleDetailStaff');
-            const saleDetailItems = document.getElementById('saleDetailItems');
-            const saleDetailTotal = document.getElementById('saleDetailTotal');
-            
-            modalTitle.textContent = `รายละเอียดการขาย: ${sale.saleCode}`;
-            saleDetailCode.textContent = sale.saleCode;
-            saleDetailCustomer.textContent = sale.customerName;
-            saleDetailDate.textContent = `${sale.saleDate} ${new Date(sale.saleDateTime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
-            saleDetailStaff.textContent = sale.createdBy;
-            saleDetailTotal.textContent = `฿${sale.totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
-            
-            // รายการสินค้า
-            saleDetailItems.innerHTML = '';
-            if (sale.items && sale.items.length > 0) {
-                sale.items.forEach((item, index) => {
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'flex justify-between items-center p-3 bg-gray-900/50 rounded-lg';
-                    itemElement.innerHTML = `
-                        <div>
-                            <p class="font-medium">${item.productName}</p>
-                            <p class="text-gray-400 text-sm">${item.productCode} • ${item.quantity} ชิ้น</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-medium">฿${item.price.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
-                            <p class="text-green-400 font-bold">฿${item.total.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
-                        </div>
-                    `;
-                    saleDetailItems.appendChild(itemElement);
-                });
-            } else {
-                saleDetailItems.innerHTML = '<p class="text-gray-500 text-center py-4">ไม่มีรายการสินค้า</p>';
-            }
-            
-            modal.classList.remove('hidden');
-        }
-        
-        // แสดง Confirmation สำหรับลบรายการขาย
-        function showDeleteSaleConfirm(saleId, saleCode) {
-            saleToDelete = saleId;
-            
-            showConfirmation(
-                'ยืนยันการลบรายการขาย',
-                `คุณแน่ใจหรือไม่ว่าต้องการลบรายการขาย "${saleCode}"? การกระทำนี้ไม่สามารถย้อนกลับได้`,
-                'warning',
-                'ลบข้อมูล',
-                'ยกเลิก'
-            ).then(confirmed => {
-                if (confirmed) {
-                    deleteSale();
-                } else {
-                    saleToDelete = null;
-                }
-            });
-        }
-        
-        // ลบรายการขาย
-        function deleteSale() {
-            if (!saleToDelete) return;
-            
-            showLoading('กำลังลบรายการขาย...');
-            
-            database.ref('sales/' + saleToDelete).remove()
-                .then(() => {
-                    hideLoading();
-                    showAlert('success', 'ลบสำเร็จ', 'ลบรายการขายเรียบร้อยแล้ว');
-                    saleToDelete = null;
-                    
-                    // โหลดข้อมูลใหม่
-                    loadSales();
-                })
-                .catch(error => {
-                    hideLoading();
-                    console.error('Error deleting sale:', error);
-                    showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการลบรายการขาย');
-                    saleToDelete = null;
-                });
-        }
-        
-        // ==================== SALES REPORT ====================
-        
-        // สร้างรายงานการขาย
-        function generateSalesReport(period) {
-            let startDate, endDate;
-            const today = new Date();
-            
-            switch(period) {
-                case 'today':
-                    startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                    endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
-                    break;
-                case 'yesterday':
-                    const yesterday = new Date(today);
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    startDate = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
-                    endDate = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59);
-                    break;
-                case 'week':
-                    const firstDayOfWeek = new Date(today);
-                    firstDayOfWeek.setDate(today.getDate() - today.getDay());
-                    startDate = new Date(firstDayOfWeek.getFullYear(), firstDayOfWeek.getMonth(), firstDayOfWeek.getDate());
-                    endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
-                    break;
-                case 'month':
-                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
-                    break;
-                case 'year':
-                    startDate = new Date(today.getFullYear(), 0, 1);
-                    endDate = new Date(today.getFullYear(), 11, 31, 23, 59, 59);
-                    break;
-                case 'custom':
-                    const customStartDate = document.getElementById('startDate').value;
-                    const customEndDate = document.getElementById('endDate').value;
-                    
-                    if (!customStartDate || !customEndDate) {
-                        showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด');
-                        return;
-                    }
-                    
-                    startDate = new Date(customStartDate);
-                    endDate = new Date(customEndDate);
-                    endDate.setHours(23, 59, 59);
-                    break;
-            }
-            
-            // กรองข้อมูลการขายตามช่วงเวลา
-            const filteredSales = sales.filter(sale => {
-                const saleDate = new Date(sale.saleDateTime);
-                return saleDate >= startDate && saleDate <= endDate;
-            });
-            
-            // อัพเดทสถิติ
-            updateSalesReportStats(filteredSales);
-            
-            // สร้างกราฟ
-            createSalesCharts(filteredSales, startDate, endDate);
-            
-            // แสดงสินค้าขายดี
-            updateTopProductsList(filteredSales);
-        }
-        
-        // อัพเดทสถิติรายงานการขาย
-        function updateSalesReportStats(filteredSales) {
-            const totalSalesCount = filteredSales.length;
-            const totalSalesAmount = filteredSales.reduce((sum, sale) => sum + sale.totalAmount, 0);
-            
-            // นับจำนวนสินค้าทั้งหมดที่ขาย
-            let totalSoldItems = 0;
-            filteredSales.forEach(sale => {
-                if (sale.items) {
-                    totalSoldItems += sale.items.reduce((sum, item) => sum + item.quantity, 0);
-                }
-            });
-            
-            const averageSaleAmount = totalSalesCount > 0 ? totalSalesAmount / totalSalesCount : 0;
-            
-            document.getElementById('totalSalesCount').textContent = totalSalesCount + ' รายการ';
-            document.getElementById('totalSalesAmount').textContent = '฿' + totalSalesAmount.toLocaleString('th-TH', {minimumFractionDigits: 2});
-            document.getElementById('totalSoldItems').textContent = totalSoldItems + ' ชิ้น';
-            document.getElementById('averageSaleAmount').textContent = '฿' + averageSaleAmount.toLocaleString('th-TH', {minimumFractionDigits: 2});
-        }
-        
-        // สร้างกราฟรายงานการขาย
-        function createSalesCharts(filteredSales, startDate, endDate) {
-            // กราฟยอดขายรายวัน
-            createDailySalesChart(filteredSales, startDate, endDate);
-            
-            // กราฟประเภทสินค้าขายดี
-            createProductCategoryChart(filteredSales);
-        }
-        
-        // สร้างกราฟยอดขายรายวัน
-        function createDailySalesChart(filteredSales, startDate, endDate) {
-            const ctx = document.getElementById('dailySalesChart').getContext('2d');
-            
-            // สร้างข้อมูลรายวัน
-            const days = [];
-            const salesData = [];
-            
-            // คำนวณช่วงวันที่
-            const currentDate = new Date(startDate);
-            const endDateObj = new Date(endDate);
-            
-            while (currentDate <= endDateObj) {
-                const dateStr = currentDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-                days.push(dateStr);
-                
-                // คำนวณยอดขายของวันนั้น
-                const daySales = filteredSales.filter(sale => {
-                    const saleDate = new Date(sale.saleDateTime);
-                    return saleDate.getDate() === currentDate.getDate() &&
-                           saleDate.getMonth() === currentDate.getMonth() &&
-                           saleDate.getFullYear() === currentDate.getFullYear();
-                });
-                
-                const dayTotal = daySales.reduce((sum, sale) => sum + sale.totalAmount, 0);
-                salesData.push(dayTotal);
-                
-                // เพิ่ม 1 วัน
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-            
-            // ทำลายกราฟเดิม (ถ้ามี)
-            if (dailySalesChart) {
-                dailySalesChart.destroy();
-            }
-            
-            // สร้างกราฟใหม่
-            dailySalesChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: days,
-                    datasets: [{
-                        label: 'ยอดขาย (บาท)',
-                        data: salesData,
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#9ca3af'
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: 'rgba(156, 163, 175, 0.2)'
-                            },
-                            ticks: {
-                                color: '#9ca3af'
-                            }
-                        },
-                        y: {
-                            grid: {
-                                color: 'rgba(156, 163, 175, 0.2)'
-                            },
-                            ticks: {
-                                color: '#9ca3af',
-                                callback: function(value) {
-                                    return '฿' + value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // สร้างกราฟประเภทสินค้าขายดี
-        function createProductCategoryChart(filteredSales) {
-            const ctx = document.getElementById('productCategoryChart').getContext('2d');
-            
-            // รวบรวมข้อมูลตามประเภทสินค้า
-            const categorySales = {};
-            
-            filteredSales.forEach(sale => {
-                if (sale.items) {
-                    sale.items.forEach(item => {
-                        // ค้นหาข้อมูลสินค้า
-                        const product = products.find(p => p.id === item.productId);
-                        if (product) {
-                            const category = product.category || 'อื่นๆ';
-                            if (!categorySales[category]) {
-                                categorySales[category] = 0;
-                            }
-                            categorySales[category] += item.total;
-                        }
-                    });
-                }
-            });
-            
-            // จัดเรียงข้อมูล
-            const categories = Object.keys(categorySales);
-            const salesByCategory = categories.map(category => categorySales[category]);
-            
-            // สีสำหรับแต่ละประเภท
-            const backgroundColors = [
-                'rgba(59, 130, 246, 0.7)',
-                'rgba(16, 185, 129, 0.7)',
-                'rgba(245, 158, 11, 0.7)',
-                'rgba(139, 92, 246, 0.7)',
-                'rgba(239, 68, 68, 0.7)',
-                'rgba(14, 165, 233, 0.7)'
-            ];
-            
-            // ทำลายกราฟเดิม (ถ้ามี)
-            if (productCategoryChart) {
-                productCategoryChart.destroy();
-            }
-            
-            // สร้างกราฟใหม่
-            productCategoryChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: categories,
-                    datasets: [{
-                        label: 'ยอดขายตามประเภท',
-                        data: salesByCategory,
-                        backgroundColor: backgroundColors.slice(0, categories.length),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#9ca3af'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // อัพเดทรายการสินค้าขายดี
-        function updateTopProductsList(filteredSales) {
-            const topProductsList = document.getElementById('topProductsList');
-            
-            // รวบรวมข้อมูลสินค้าขายดี
-            const productSales = {};
-            
-            filteredSales.forEach(sale => {
-                if (sale.items) {
-                    sale.items.forEach(item => {
-                        const productId = item.productId;
-                        if (!productSales[productId]) {
-                            productSales[productId] = {
-                                productId: productId,
-                                productCode: item.productCode,
-                                productName: item.productName,
-                                totalQuantity: 0,
-                                totalAmount: 0
-                            };
-                        }
-                        productSales[productId].totalQuantity += item.quantity;
-                        productSales[productId].totalAmount += item.total;
-                    });
-                }
-            });
-            
-            // แปลงเป็น array และเรียงลำดับตามยอดขาย
-            const topProducts = Object.values(productSales)
-                .sort((a, b) => b.totalAmount - a.totalAmount)
-                .slice(0, 5); // เอา 5 อันดับแรก
-            
-            // แสดงผล
-            if (topProducts.length === 0) {
-                topProductsList.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <i class="fas fa-chart-bar text-2xl mb-2"></i>
-                        <p>ยังไม่มีข้อมูลสินค้าขายดี</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            topProductsList.innerHTML = '';
-            topProducts.forEach((product, index) => {
+            sortedProducts.forEach((product, index) => {
+                const totalValue = product.quantity * product.price;
                 const productElement = document.createElement('div');
-                productElement.className = 'flex justify-between items-center p-4 bg-gray-900/50 rounded-lg hover-effect';
+                productElement.className = 'flex justify-between items-center p-3 bg-gray-900/30 rounded-lg';
                 productElement.innerHTML = `
                     <div class="flex items-center">
-                        <span class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mr-3">${index + 1}</span>
+                        <span class="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs mr-3">${index + 1}</span>
                         <div>
                             <p class="font-medium">${product.productName}</p>
-                            <p class="text-gray-400 text-sm">${product.productCode} • ขายได้ ${product.totalQuantity} ชิ้น</p>
+                            <p class="text-gray-400 text-sm">${product.category}</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="font-bold text-green-400">฿${product.totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
+                        <p class="font-bold text-green-400">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
+                        <p class="text-gray-400 text-sm">${product.quantity} ชิ้น</p>
                     </div>
                 `;
-                topProductsList.appendChild(productElement);
+                topProducts.appendChild(productElement);
             });
         }
         
-        // ส่งออกรายงานการขาย
-        function exportSalesReport() {
-            const period = document.getElementById('reportPeriod').value;
-            let startDate, endDate;
-            const today = new Date();
+        // อัพเดทรายงานผู้ใช้
+        function updateUserReport() {
+            const userSummary = document.getElementById('userSummary');
             
-            switch(period) {
-                case 'today':
-                    startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                    endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
-                    break;
-                case 'yesterday':
-                    const yesterday = new Date(today);
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    startDate = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
-                    endDate = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59);
-                    break;
-                case 'week':
-                    const firstDayOfWeek = new Date(today);
-                    firstDayOfWeek.setDate(today.getDate() - today.getDay());
-                    startDate = new Date(firstDayOfWeek.getFullYear(), firstDayOfWeek.getMonth(), firstDayOfWeek.getDate());
-                    endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
-                    break;
-                case 'month':
-                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
-                    break;
-                case 'year':
-                    startDate = new Date(today.getFullYear(), 0, 1);
-                    endDate = new Date(today.getFullYear(), 11, 31, 23, 59, 59);
-                    break;
-                case 'custom':
-                    const customStartDate = document.getElementById('startDate').value;
-                    const customEndDate = document.getElementById('endDate').value;
-                    
-                    if (!customStartDate || !customEndDate) {
-                        showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด');
-                        return;
-                    }
-                    
-                    startDate = new Date(customStartDate);
-                    endDate = new Date(customEndDate);
-                    endDate.setHours(23, 59, 59);
-                    break;
-            }
+            if (!userSummary) return;
             
-            // กรองข้อมูลการขายตามช่วงเวลา
-            const filteredSales = sales.filter(sale => {
-                const saleDate = new Date(sale.saleDateTime);
-                return saleDate >= startDate && saleDate <= endDate;
-            });
+            const totalUsers = users.length;
+            const adminUsers = users.filter(u => u.role === 'admin').length;
+            const managerUsers = users.filter(u => u.role === 'manager').length;
+            const normalUsers = users.filter(u => u.role === 'user').length;
+            const activeUsers = users.filter(u => u.isActive !== false).length;
             
-            if (filteredSales.length === 0) {
-                showAlert('warning', 'ไม่มีข้อมูล', 'ไม่มีข้อมูลการขายในช่วงเวลาที่เลือก');
-                return;
-            }
-            
-            showLoading('กำลังสร้างรายงานการขาย...');
+            userSummary.innerHTML = `
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-indigo-900/30 rounded-lg">
+                        <div class="text-3xl font-bold text-indigo-400">${totalUsers}</div>
+                        <div class="text-sm text-gray-300">ผู้ใช้ทั้งหมด</div>
+                    </div>
+                    <div class="text-center p-4 bg-purple-900/30 rounded-lg">
+                        <div class="text-3xl font-bold text-purple-400">${adminUsers}</div>
+                        <div class="text-sm text-gray-300">ผู้ดูแลระบบ</div>
+                    </div>
+                    <div class="text-center p-4 bg-blue-900/30 rounded-lg">
+                        <div class="text-3xl font-bold text-blue-400">${managerUsers}</div>
+                        <div class="text-sm text-gray-300">ผู้จัดการ</div>
+                    </div>
+                    <div class="text-center p-4 bg-green-900/30 rounded-lg">
+                        <div class="text-3xl font-bold text-green-400">${normalUsers}</div>
+                        <div class="text-sm text-gray-300">ผู้ใช้ทั่วไป</div>
+                    </div>
+                </div>
+                <div class="bg-gray-900/30 p-4 rounded-lg">
+                    <p class="font-medium mb-2">สถานะผู้ใช้</p>
+                    <div class="flex items-center">
+                        <div class="flex-1">
+                            <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500" style="width: ${(activeUsers / totalUsers) * 100}%"></div>
+                            </div>
+                        </div>
+                        <span class="ml-3 text-sm">${activeUsers}/${totalUsers} คน (ใช้งานได้)</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ส่งออกรายงานสินค้า
+        function exportProductReport() {
+            showLoading('กำลังสร้างรายงานสินค้า...');
             
             // สร้างข้อมูล CSV
-            let csvContent = "รหัสการขาย,ลูกค้า,จำนวนรายการ,ยอดรวม,วันที่ขาย,พนักงานขาย\n";
+            let csvContent = "รหัสสินค้า,ชื่อสินค้า,ประเภท,จำนวน,ราคาต่อหน่วย,มูลค่ารวม,สถานะ\n";
             
-            filteredSales.forEach(sale => {
-                const itemsCount = sale.items ? sale.items.length : 0;
-                const saleDate = new Date(sale.saleDateTime).toLocaleDateString('th-TH');
+            products.forEach(product => {
+                const totalValue = product.quantity * product.price;
+                const isLowStock = product.quantity <= 5 && product.quantity > 0;
+                const isOutOfStock = product.quantity <= 0;
                 
-                csvContent += `"${sale.saleCode}","${sale.customerName || 'ลูกค้าทั่วไป'}",${itemsCount},${sale.totalAmount},"${saleDate}","${sale.createdBy}"\n`;
+                let status = 'พร้อมจำหน่าย';
+                if (isLowStock) status = 'เหลือน้อย';
+                if (isOutOfStock) status = 'หมดสต๊อก';
+                
+                csvContent += `"${product.productCode}","${product.productName}","${product.category}",${product.quantity},${product.price},${totalValue},"${status}"\n`;
             });
             
             // สร้างไฟล์และดาวน์โหลด
@@ -3598,7 +2591,7 @@
             const url = URL.createObjectURL(blob);
             
             link.setAttribute("href", url);
-            link.setAttribute("download", `รายงานการขาย_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", `รายงานสินค้า_${new Date().toISOString().split('T')[0]}.csv`);
             link.style.visibility = 'hidden';
             
             document.body.appendChild(link);
@@ -3606,86 +2599,162 @@
             document.body.removeChild(link);
             
             hideLoading();
-            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกรายงานการขายเป็นไฟล์ CSV เรียบร้อยแล้ว');
+            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกรายงานสินค้าเป็นไฟล์ CSV เรียบร้อยแล้ว');
         }
         
-        // พิมพ์ใบเสร็จ
-        function printReceipt() {
-            const saleCode = document.getElementById('saleDetailCode').textContent;
-            const customerName = document.getElementById('saleDetailCustomer').textContent;
-            const saleDate = document.getElementById('saleDetailDate').textContent;
-            const saleTotal = document.getElementById('saleDetailTotal').textContent;
+        // ส่งออกรายงานผู้ใช้
+        function exportUserReport() {
+            showLoading('กำลังสร้างรายงานผู้ใช้...');
             
-            // สร้างใบเสร็จ
-            const receiptContent = document.getElementById('receiptContent');
-            receiptContent.innerHTML = `
-                <div class="receipt-header">
-                    <h2>ใบเสร็จรับเงิน</h2>
-                    <p>ระบบจัดการขายสินค้า</p>
-                    <p>${saleDate}</p>
-                </div>
-                <div class="mb-4">
-                    <div class="receipt-item">
-                        <span>รหัสการขาย:</span>
-                        <span>${saleCode}</span>
+            // สร้างข้อมูล CSV
+            let csvContent = "ชื่อผู้ใช้,ชื่อ-นามสกุล,บทบาท,สถานะ,ล็อกอินล่าสุด\n";
+            
+            users.forEach(user => {
+                const status = user.isActive !== false ? 'ใช้งานได้' : 'ปิดใช้งาน';
+                const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('th-TH') : 'ไม่เคยล็อกอิน';
+                
+                csvContent += `"${user.username}","${user.fullName || ''}","${getRoleDisplay(user.role)}","${status}","${lastLogin}"\n`;
+            });
+            
+            // สร้างไฟล์และดาวน์โหลด
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `รายงานผู้ใช้_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            hideLoading();
+            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกรายงานผู้ใช้เป็นไฟล์ CSV เรียบร้อยแล้ว');
+        }
+        
+        // พิมพ์รายงาน
+        function printReport() {
+            showLoading('กำลังเตรียมรายงานสำหรับพิมพ์...');
+            
+            // อัพเดทข้อมูลสำหรับพิมพ์
+            document.getElementById('printDate').textContent = new Date().toLocaleString('th-TH');
+            document.getElementById('printUser').textContent = currentUser.username;
+            
+            // สรุปสินค้า
+            const totalProducts = products.length;
+            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
+            const outOfStock = products.filter(p => p.quantity <= 0).length;
+            const lowStock = products.filter(p => p.quantity > 0 && p.quantity <= 5).length;
+            
+            document.getElementById('printProductSummary').innerHTML = `
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">จำนวนสินค้าทั้งหมด</p>
+                        <p class="font-bold text-lg">${totalProducts} รายการ</p>
                     </div>
-                    <div class="receipt-item">
-                        <span>ลูกค้า:</span>
-                        <span>${customerName}</span>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">มูลค่ารวม</p>
+                        <p class="font-bold text-lg text-green-600">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
                     </div>
-                </div>
-                <div class="mb-4">
-                    <h4>รายการสินค้า</h4>
-                    <div id="receiptItems">
-                        <!-- Items will be added here -->
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">สินค้าหมดสต๊อก</p>
+                        <p class="font-bold text-lg text-red-600">${outOfStock} รายการ</p>
                     </div>
-                </div>
-                <div class="receipt-total">
-                    <div class="receipt-item">
-                        <span>รวมทั้งสิ้น:</span>
-                        <span>${saleTotal}</span>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">สินค้าเหลือน้อย</p>
+                        <p class="font-bold text-lg text-yellow-600">${lowStock} รายการ</p>
                     </div>
-                </div>
-                <div class="mt-8 text-center">
-                    <p>ขอบคุณที่ใช้บริการ</p>
-                    <p>ระบบจัดการขายสินค้า</p>
                 </div>
             `;
             
-            // เพิ่มรายการสินค้า
-            const receiptItems = document.getElementById('receiptItems');
-            const saleItemsContainer = document.getElementById('saleDetailItems');
-            const items = saleItemsContainer.querySelectorAll('.bg-gray-900\\/50');
+            // สรุปผู้ใช้
+            const totalUsers = users.length;
+            const adminUsers = users.filter(u => u.role === 'admin').length;
+            const managerUsers = users.filter(u => u.role === 'manager').length;
+            const normalUsers = users.filter(u => u.role === 'user').length;
             
-            items.forEach(item => {
-                const itemName = item.querySelector('.font-medium').textContent;
-                const itemDetails = item.querySelector('.text-gray-400').textContent;
-                const itemTotal = item.querySelector('.text-green-400').textContent;
-                
-                const itemElement = document.createElement('div');
-                itemElement.className = 'receipt-item';
-                itemElement.innerHTML = `
-                    <div>
-                        <span>${itemName}</span>
-                        <br>
-                        <small>${itemDetails}</small>
+            document.getElementById('printUserSummary').innerHTML = `
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">ผู้ใช้ทั้งหมด</p>
+                        <p class="font-bold text-lg">${totalUsers} คน</p>
                     </div>
-                    <span>${itemTotal}</span>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">ผู้ดูแลระบบ</p>
+                        <p class="font-bold text-lg">${adminUsers} คน</p>
+                    </div>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">ผู้จัดการ</p>
+                        <p class="font-bold text-lg">${managerUsers} คน</p>
+                    </div>
+                    <div class="p-3 border rounded">
+                        <p class="text-gray-600">ผู้ใช้ทั่วไป</p>
+                        <p class="font-bold text-lg">${normalUsers} คน</p>
+                    </div>
+                </div>
+            `;
+            
+            // ตารางสินค้า
+            let productsTableHtml = `
+                <table class="min-w-full border">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border p-2">รหัสสินค้า</th>
+                            <th class="border p-2">ชื่อสินค้า</th>
+                            <th class="border p-2">ประเภท</th>
+                            <th class="border p-2">จำนวน</th>
+                            <th class="border p-2">ราคา/หน่วย</th>
+                            <th class="border p-2">มูลค่ารวม</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            products.forEach(product => {
+                const totalValue = product.quantity * product.price;
+                productsTableHtml += `
+                    <tr>
+                        <td class="border p-2">${product.productCode}</td>
+                        <td class="border p-2">${product.productName}</td>
+                        <td class="border p-2">${product.category}</td>
+                        <td class="border p-2">${product.quantity}</td>
+                        <td class="border p-2">฿${product.price.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                        <td class="border p-2">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                    </tr>
                 `;
-                receiptItems.appendChild(itemElement);
             });
             
-            // แสดงส่วนพิมพ์
-            const printSection = document.getElementById('printReceiptSection');
-            printSection.classList.remove('hidden');
+            productsTableHtml += '</tbody></table>';
+            document.getElementById('printProductsTable').innerHTML = productsTableHtml;
             
-            // พิมพ์
-            window.print();
-            
-            // ซ่อนส่วนพิมพ์หลังพิมพ์เสร็จ
+            // ซ่อน Loading และพิมพ์รายงาน
             setTimeout(() => {
-                printSection.classList.add('hidden');
-            }, 500);
+                hideLoading();
+                
+                // แสดงส่วนที่จะพิมพ์
+                const printSection = document.getElementById('printReportSection');
+                printSection.classList.remove('hidden');
+                
+                // พิมพ์
+                window.print();
+                
+                // ซ่อนส่วนพิมพ์หลังพิมพ์เสร็จ
+                setTimeout(() => {
+                    printSection.classList.add('hidden');
+                }, 500);
+                
+            }, 1000);
+        }
+        
+        // ฟังก์ชันช่วยเหลือสำหรับแสดงบทบาท
+        function getRoleDisplay(role) {
+            switch(role) {
+                case 'admin': return 'ผู้ดูแลระบบ';
+                case 'manager': return 'ผู้จัดการ';
+                case 'user': return 'ผู้ใช้ทั่วไป';
+                default: return 'ไม่ระบุ';
+            }
         }
         
         // ==================== PRODUCT MANAGEMENT ====================
@@ -3880,7 +2949,6 @@
                 const permissions = rolePermissions[role] || rolePermissions['user'];
                 document.getElementById('permView').checked = permissions.canView || false;
                 document.getElementById('permAdd').checked = permissions.canAdd || false;
-                document.getElementById('permSale').checked = permissions.canSale || false;
                 document.getElementById('permEdit').checked = permissions.canEdit || false;
                 document.getElementById('permDelete').checked = permissions.canDelete || false;
                 document.getElementById('permManageUsers').checked = permissions.canManageUsers || false;
@@ -4060,6 +3128,53 @@
                 });
         }
         
+        // แสดงโปรไฟล์ผู้ใช้
+        function showUserProfile() {
+            if (!currentUser) return;
+            
+            const modal = document.getElementById('userProfileModal');
+            const profileUsername = document.getElementById('profileUsername');
+            const profileRoleBadge = document.getElementById('profileRoleBadge');
+            const profileFullName = document.getElementById('profileFullName');
+            const profileRole = document.getElementById('profileRole');
+            const profileEmail = document.getElementById('profileEmail');
+            const profileLastLogin = document.getElementById('profileLastLogin');
+            const profileCreatedAt = document.getElementById('profileCreatedAt');
+            
+            const userData = users.find(u => u.id === currentUser.username) || currentUser;
+            
+            profileUsername.textContent = userData.username;
+            profileFullName.textContent = userData.fullName || 'ไม่ระบุ';
+            profileRole.textContent = getRoleDisplay(userData.role);
+            profileEmail.textContent = userData.email || 'ไม่ระบุ';
+            profileLastLogin.textContent = userData.lastLogin ? 
+                new Date(userData.lastLogin).toLocaleString('th-TH') : 'ไม่ระบุ';
+            profileCreatedAt.textContent = userData.createdAt ? 
+                new Date(userData.createdAt).toLocaleDateString('th-TH') : 'ไม่ระบุ';
+            
+            let badgeClass = '';
+            let roleDisplay = '';
+            
+            switch(userData.role) {
+                case 'admin':
+                    badgeClass = 'role-admin';
+                    roleDisplay = 'ผู้ดูแลระบบ';
+                    break;
+                case 'manager':
+                    badgeClass = 'role-manager';
+                    roleDisplay = 'ผู้จัดการ';
+                    break;
+                case 'user':
+                    badgeClass = 'role-user';
+                    roleDisplay = 'ผู้ใช้ทั่วไป';
+                    break;
+            }
+            
+            profileRoleBadge.innerHTML = `<span class="role-badge ${badgeClass}">${roleDisplay}</span>`;
+            
+            modal.classList.remove('hidden');
+        }
+        
         // ออกจากระบบ
         function logout() {
             showConfirmation(
@@ -4079,7 +3194,6 @@
                     currentUser = null;
                     products = [];
                     users = [];
-                    sales = [];
                     showLogin();
                     showAlert('success', 'ออกจากระบบสำเร็จ', 'คุณได้ออกจากระบบเรียบร้อยแล้ว');
                 }
@@ -4149,20 +3263,6 @@
             // ========== NAVIGATION EVENT LISTENERS ==========
             document.getElementById('navDashboard')?.addEventListener('click', () => showPage('dashboardPage'));
             document.getElementById('navProducts')?.addEventListener('click', () => showPage('productsPage'));
-            document.getElementById('navSales')?.addEventListener('click', () => {
-                if (checkPermission('canSale')) {
-                    showPage('salesPage');
-                } else {
-                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เข้าถึงหน้าจัดการการขาย');
-                }
-            });
-            document.getElementById('navSalesReport')?.addEventListener('click', () => {
-                if (checkPermission('canViewReports')) {
-                    showPage('salesReportPage');
-                } else {
-                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เข้าถึงหน้ารายงานการขาย');
-                }
-            });
             document.getElementById('navUsers')?.addEventListener('click', () => {
                 if (checkPermission('canManageUsers')) {
                     showPage('usersPage');
@@ -4192,15 +3292,6 @@
             
             document.getElementById('userInfoBtn')?.addEventListener('click', showUserProfile);
             
-            // ========== DASHBOARD PAGE EVENT LISTENERS ==========
-            document.getElementById('quickAddSaleBtn')?.addEventListener('click', () => {
-                if (checkPermission('canSale')) {
-                    showPage('salesPage');
-                } else {
-                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์ขายสินค้า');
-                }
-            });
-            
             // ========== PRODUCTS PAGE EVENT LISTENERS ==========
             document.getElementById('addProductMainBtn')?.addEventListener('click', () => {
                 if (checkPermission('canAdd')) {
@@ -4226,42 +3317,16 @@
                 showToast('กำลังรีเฟรชข้อมูลสินค้า...', 'info');
             });
             
-            // ========== SALES PAGE EVENT LISTENERS ==========
-            document.getElementById('newSaleBtn')?.addEventListener('click', () => {
-                // โฟกัสไปที่ฟอร์มขายใหม่
-                document.getElementById('newSaleForm').scrollIntoView({ behavior: 'smooth' });
-            });
-            
-            document.getElementById('addSaleItemBtn')?.addEventListener('click', addSaleItem);
-            document.getElementById('saleForm')?.addEventListener('submit', saveSale);
-            document.getElementById('clearSaleBtn')?.addEventListener('click', clearSaleForm);
-            document.getElementById('refreshSalesBtn')?.addEventListener('click', () => {
-                loadSales();
-                showToast('กำลังรีเฟรชข้อมูลการขาย...', 'info');
-            });
-            
-            // ========== SALES REPORT PAGE EVENT LISTENERS ==========
-            document.getElementById('reportPeriod')?.addEventListener('change', function() {
-                const customDateRange = document.getElementById('customDateRange');
-                if (this.value === 'custom') {
-                    customDateRange.classList.remove('hidden');
+            // ========== USERS PAGE EVENT LISTENERS ==========
+            document.getElementById('addUserBtn')?.addEventListener('click', () => {
+                if (checkPermission('canManageUsers')) {
+                    showUserModal();
                 } else {
-                    customDateRange.classList.add('hidden');
+                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์เพิ่มผู้ใช้');
                 }
             });
             
-            document.getElementById('generateReportBtn')?.addEventListener('click', function() {
-                const period = document.getElementById('reportPeriod').value;
-                generateSalesReport(period);
-            });
-            
-            document.getElementById('exportSalesReportBtn')?.addEventListener('click', exportSalesReport);
-            document.getElementById('printSalesReportBtn')?.addEventListener('click', () => {
-                showAlert('info', 'พิมพ์รายงาน', 'ฟังก์ชันพิมพ์รายงานอยู่ระหว่างการพัฒนา');
-            });
-            
-            // ========== USERS PAGE EVENT LISTENERS ==========
-            document.getElementById('addUserBtn')?.addEventListener('click', () => {
+            document.getElementById('quickAddUserBtn')?.addEventListener('click', () => {
                 if (checkPermission('canManageUsers')) {
                     showUserModal();
                 } else {
@@ -4290,32 +3355,126 @@
                 });
             });
             
-            // ========== MODAL EVENT LISTENERS ==========
-            document.getElementById('closeSaleDetailBtn')?.addEventListener('click', () => {
-                document.getElementById('saleDetailModal').classList.add('hidden');
+            document.getElementById('exportProductReportBtn')?.addEventListener('click', exportProductReport);
+            document.getElementById('exportUserReportBtn')?.addEventListener('click', exportUserReport);
+            document.getElementById('printReportBtn')?.addEventListener('click', printReport);
+            
+            // ========== SETTINGS PAGE EVENT LISTENERS ==========
+            document.getElementById('backupDataBtn')?.addEventListener('click', () => {
+                showAlert('info', 'สำรองข้อมูล', 'ฟังก์ชันสำรองข้อมูลอยู่ระหว่างการพัฒนา');
             });
             
-            document.getElementById('printReceiptBtn')?.addEventListener('click', printReceipt);
+            document.getElementById('resetDemoDataBtn')?.addEventListener('click', () => {
+                if (checkPermission('canManageSettings')) {
+                    showConfirmation(
+                        'รีเซ็ตข้อมูลตัวอย่าง',
+                        'การดำเนินการนี้จะลบข้อมูลสินค้าทั้งหมดและสร้างข้อมูลตัวอย่างใหม่\nคุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ?',
+                        'warning',
+                        'รีเซ็ตข้อมูล',
+                        'ยกเลิก'
+                    ).then(confirmed => {
+                        if (confirmed) {
+                            const demoProducts = [
+                                {
+                                    productCode: "P001",
+                                    productName: "เมาส์ไร้สาย",
+                                    category: "อิเล็กทรอนิกส์",
+                                    quantity: 25,
+                                    price: 599.00,
+                                    createdBy: currentUser.username,
+                                    createdAt: new Date().toISOString()
+                                },
+                                {
+                                    productCode: "P002",
+                                    productName: "คีย์บอร์ดเกมมิ่ง",
+                                    category: "อิเล็กทรอนิกส์",
+                                    quantity: 12,
+                                    price: 1290.00,
+                                    createdBy: currentUser.username,
+                                    createdAt: new Date().toISOString()
+                                },
+                                {
+                                    productCode: "P003",
+                                    productName: "สมุดบันทึก",
+                                    category: "เครื่องเขียน",
+                                    quantity: 150,
+                                    price: 45.00,
+                                    createdBy: currentUser.username,
+                                    createdAt: new Date().toISOString()
+                                }
+                            ];
+                            
+                            showLoading('กำลังรีเซ็ตข้อมูลตัวอย่าง...');
+                            
+                            database.ref('products').remove()
+                                .then(() => {
+                                    const promises = demoProducts.map(product => {
+                                        return database.ref('products').push(product);
+                                    });
+                                    
+                                    return Promise.all(promises);
+                                })
+                                .then(() => {
+                                    hideLoading();
+                                    showAlert('success', 'รีเซ็ตสำเร็จ', 'รีเซ็ตข้อมูลตัวอย่างสำเร็จแล้ว!');
+                                })
+                                .catch(error => {
+                                    console.error('Error resetting demo data:', error);
+                                    hideLoading();
+                                    showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการรีเซ็ตข้อมูลตัวอย่าง');
+                                });
+                        }
+                    });
+                } else {
+                    showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์รีเซ็ตข้อมูลตัวอย่าง');
+                }
+            });
+            
+            // Settings Toggles
+            document.getElementById('notificationToggle')?.addEventListener('change', function() {
+                showToast(this.checked ? 'เปิดการแจ้งเตือนแล้ว' : 'ปิดการแจ้งเตือนแล้ว', 'info');
+                saveSettingsToLocalStorage();
+            });
+            
+            document.getElementById('darkModeToggle')?.addEventListener('change', function() {
+                showToast(this.checked ? 'เปิดโหมดมืดแล้ว' : 'ปิดโหมดมืดแล้ว', 'info');
+                saveSettingsToLocalStorage();
+            });
+            
+            document.getElementById('autoRefreshToggle')?.addEventListener('change', function() {
+                if (this.checked) {
+                    setupAutoRefresh();
+                    showToast('เปิดรีเฟรชอัตโนมัติแล้ว', 'info');
+                } else {
+                    if (autoRefreshInterval) {
+                        clearInterval(autoRefreshInterval);
+                        autoRefreshInterval = null;
+                    }
+                    showToast('ปิดรีเฟรชอัตโนมัติแล้ว', 'info');
+                }
+                saveSettingsToLocalStorage();
+            });
             
             // ========== GENERAL EVENT LISTENERS ==========
             document.getElementById('logoutBtn')?.addEventListener('click', logout);
+            document.getElementById('closeProfileBtn')?.addEventListener('click', () => {
+                document.getElementById('userProfileModal').classList.add('hidden');
+            });
             
             document.getElementById('quickHelpBtn')?.addEventListener('click', () => {
                 showAlert('info', 'วิธีใช้งานระบบ', 
-                    '🛒 **ระบบจัดการการขาย:**\n' +
-                    '- ขายสินค้า: คลิกเมนู "จัดการการขาย" หรือปุ่ม "ขายสินค้า" ในแดชบอร์ด\n' +
-                    '- เพิ่มรายการสินค้า: คลิกปุ่ม "เพิ่มสินค้า" ในฟอร์มขาย\n' +
-                    '- ตัดสต๊อก: ระบบจะตัดสต๊อกอัตโนมัติเมื่อบันทึกการขาย\n' +
-                    '- ดูประวัติการขาย: คลิกเมนู "รายงานการขาย" เพื่อดูสรุปรายวัน/รายเดือน\n\n' +
-                    '📊 **รายงานการขาย:**\n' +
-                    '- สรุปรายวัน: ดูยอดขายและสถิติประจำวัน\n' +
-                    '- สรุปรายเดือน: วิเคราะห์แนวโน้มการขาย\n' +
-                    '- สินค้าขายดี: ดูสินค้าขายดีอันดับต้นๆ\n' +
-                    '- ส่งออกรายงาน: ส่งออกรายงานการขายเป็นไฟล์ CSV\n\n' +
                     '📦 **จัดการสินค้า:**\n' +
-                    '- เพิ่มสินค้า: คลิกปุ่ม "เพิ่มสินค้าใหม่"\n' +
-                    '- แก้ไข/ลบสินค้า: คลิกปุ่มจัดการในตาราง\n' +
-                    '- ตรวจสอบสต๊อก: ดูสถานะสินค้าในตาราง'
+                    '- เพิ่มสินค้าใหม่: คลิกปุ่ม "เพิ่มสินค้าใหม่"\n' +
+                    '- แก้ไขสินค้า: คลิกปุ่ม "แก้ไข" ในตาราง\n' +
+                    '- ลบสินค้า: คลิกปุ่ม "ลบ" (เฉพาะ Admin)\n\n' +
+                    '👥 **จัดการผู้ใช้:**\n' +
+                    '- เพิ่มผู้ใช้ใหม่: คลิกปุ่ม "เพิ่มผู้ใช้ใหม่"\n' +
+                    '- แก้ไขสิทธิ์: คลิกปุ่ม "แก้ไข" ในตารางผู้ใช้\n' +
+                    '- ลบผู้ใช้: คลิกปุ่ม "ลบ" (เฉพาะ Admin)\n\n' +
+                    '📊 **สิทธิ์การใช้งาน:**\n' +
+                    '- Admin: สามารถใช้งานได้ทุกฟังก์ชัน\n' +
+                    '- Manager: ไม่สามารถลบสินค้าหรือจัดการผู้ใช้ได้\n' +
+                    '- User: ไม่สามารถลบสินค้า จัดการผู้ใช้ หรือดูรายงานได้'
                 );
             });
             
@@ -4326,12 +3485,6 @@
             
             document.getElementById('userModal')?.addEventListener('click', function(e) {
                 if (e.target === this) hideUserModal();
-            });
-            
-            document.getElementById('saleDetailModal')?.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.add('hidden');
-                }
             });
             
             // อัพเดทเวลาปัจจุบันทุกวินาที
@@ -4350,12 +3503,6 @@
         window.showDeleteProductConfirm = showDeleteProductConfirm;
         window.editUser = editUser;
         window.showDeleteUserConfirm = showDeleteUserConfirm;
-        window.showSaleDetail = showSaleDetail;
-        window.showDeleteSaleConfirm = showDeleteSaleConfirm;
-        window.addSaleItem = addSaleItem;
-        window.removeSaleItem = removeSaleItem;
-        window.updateSaleItemPrice = updateSaleItemPrice;
-        window.updateSaleItemTotal = updateSaleItemTotal;
         window.closeAlert = closeAlert;
     </script>
 </body>
