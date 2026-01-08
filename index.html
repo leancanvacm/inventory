@@ -18,8 +18,8 @@
     <!-- Animate.css for animations -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
-    <!-- QR Code Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- Chart.js for Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- DataTables JS -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -2509,47 +2509,17 @@
             qrContainer.innerHTML = '';
             
             // สร้างลิงค์สำหรับ PromptPay
-            const promptpayUrl = `https://promptpay.io/${promptpayId}/${promptpayAmount}`;
+            const promptpayUrl = `https://promptpay.io/${promptpayId}/${promptpayAmount}.png`;
             
-            // ใช้ QRCode.js เพื่อสร้าง QR Code
-            try {
-                QRCode.toCanvas(promptpayUrl, {
-                    width: 200,
-                    height: 200,
-                    margin: 1,
-                    color: {
-                        dark: '#000000',
-                        light: '#FFFFFF'
-                    }
-                }, function (error, canvas) {
-                    if (error) {
-                        console.error('Error generating QR code:', error);
-                        // สร้าง fallback QR code
-                        qrContainer.innerHTML = `
-                            <div class="border-2 border-dashed border-gray-400 w-48 h-48 flex items-center justify-center">
-                                <div class="text-center">
-                                    <i class="fas fa-qrcode text-4xl text-gray-400 mb-2"></i>
-                                    <p class="text-gray-600 text-sm">PromptPay: ${totalAmount} บาท</p>
-                                    <p class="text-gray-600 text-xs">ID: ${promptpayId}</p>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        qrContainer.appendChild(canvas);
-                    }
-                });
-            } catch (error) {
-                console.error('QR Code generation error:', error);
-                qrContainer.innerHTML = `
-                    <div class="border-2 border-dashed border-gray-400 w-48 h-48 flex items-center justify-center">
-                        <div class="text-center">
-                            <i class="fas fa-qrcode text-4xl text-gray-400 mb-2"></i>
-                            <p class="text-gray-600 text-sm">PromptPay: ${totalAmount} บาท</p>
-                            <p class="text-gray-600 text-xs">ID: ${promptpayId}</p>
-                        </div>
-                    </div>
-                `;
-            }
+            // สร้าง img element สำหรับ QR Code
+            const img = document.createElement('img');
+            img.src = promptpayUrl;
+            img.alt = `QR Code for ${promptpayAmount} THB`;
+            img.width = 200;
+            img.height = 200;
+            img.className = 'mx-auto border-2 border-gray-300 rounded';
+            
+            qrContainer.appendChild(img);
             
             // เริ่มต้นตัวนับถอยหลัง
             startQRPaymentTimer();
@@ -3687,6 +3657,16 @@
                         </td>
                     </tr>
                 `;
+                
+                // ล้างกราฟถ้าไม่มีข้อมูล
+                const chartContainer = document.getElementById('dailySalesChart');
+                chartContainer.innerHTML = `
+                    <div class="text-center text-gray-500">
+                        <i class="fas fa-chart-bar text-3xl mb-3"></i>
+                        <p>ไม่มีข้อมูลการขาย</p>
+                        <p class="text-sm">กรุณาเลือกช่วงเวลาและสร้างรายงาน</p>
+                    </div>
+                `;
                 return;
             }
             
@@ -3701,6 +3681,136 @@
                     <td class="px-4 py-3">฿${(day.totalAmount / day.salesCount).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
                 `;
                 tableBody.appendChild(row);
+            });
+            
+            // สร้างกราฟแท่งแสดงยอดขายรายวัน
+            createDailySalesChart(dailyArray);
+        }
+        
+        // สร้างกราฟแท่งแสดงยอดขายรายวัน
+        function createDailySalesChart(dailyArray) {
+            const chartContainer = document.getElementById('dailySalesChart');
+            
+            // ล้างกราฟเก่า
+            chartContainer.innerHTML = '<canvas id="dailyChart" style="height: 256px;"></canvas>';
+            
+            // ดึงข้อมูลสำหรับกราฟ
+            const labels = dailyArray.map(day => day.date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }));
+            const salesData = dailyArray.map(day => day.totalAmount);
+            const salesCountData = dailyArray.map(day => day.salesCount);
+            
+            // ตรวจสอบว่า Chart.js พร้อมใช้งานหรือไม่
+            if (typeof Chart === 'undefined') {
+                chartContainer.innerHTML = `
+                    <div class="text-center text-gray-500">
+                        <i class="fas fa-chart-bar text-3xl mb-3"></i>
+                        <p>ไม่สามารถแสดงกราฟได้</p>
+                        <p class="text-sm">กรุณารีเฟรชหน้าเว็บอีกครั้ง</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // สร้างกราฟแท่ง
+            const ctx = document.getElementById('dailyChart').getContext('2d');
+            
+            // ลบกราฟเก่าถ้ามี
+            if (window.dailyChartInstance) {
+                window.dailyChartInstance.destroy();
+            }
+            
+            window.dailyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'ยอดขายรวม (บาท)',
+                            data: salesData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'จำนวนการขาย',
+                            data: salesCountData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y1',
+                            type: 'line',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#d1d5db'
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(31, 41, 55, 0.9)',
+                            titleColor: '#f3f4f6',
+                            bodyColor: '#f3f4f6',
+                            borderColor: '#4b5563',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#9ca3af'
+                            },
+                            grid: {
+                                color: '#374151'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'ยอดขายรวม (บาท)',
+                                color: '#9ca3af'
+                            },
+                            ticks: {
+                                color: '#9ca3af',
+                                callback: function(value) {
+                                    return '฿' + value.toLocaleString('th-TH');
+                                }
+                            },
+                            grid: {
+                                color: '#374151'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'จำนวนการขาย',
+                                color: '#9ca3af'
+                            },
+                            ticks: {
+                                color: '#9ca3af'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                                color: '#374151'
+                            }
+                        }
+                    }
+                }
             });
         }
         
