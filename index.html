@@ -823,7 +823,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-gray-900/50 p-4 rounded-lg product-card hover-effect">
                             <p class="text-gray-400 text-sm">เวอร์ชันระบบ</p>
-                            <p class="font-medium">4.1.0</p>
+                            <p class="font-medium">5.0.0</p>
                         </div>
                         <div class="bg-gray-900/50 p-4 rounded-lg product-card hover-effect">
                             <p class="text-gray-400 text-sm">ฐานข้อมูล</p>
@@ -1026,6 +1026,37 @@
                                             <option value="QR Payment">QR Payment</option>
                                             <option value="อื่นๆ">อื่นๆ</option>
                                         </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Bank Account Details (shown when transfer is selected) -->
+                                <div id="bankAccountInfo" class="bg-gray-900 p-4 rounded-lg mb-4 hidden">
+                                    <h4 class="font-bold text-green-400 mb-2 flex items-center">
+                                        <i class="fas fa-university mr-2"></i> รายละเอียดบัญชีธนาคาร
+                                    </h4>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <p class="text-gray-400 text-sm">ธนาคาร</p>
+                                            <p class="font-bold">กรุงไทย</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-400 text-sm">เลขบัญชี</p>
+                                            <p class="font-bold">123-4-56789-0</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-400 text-sm">ชื่อบัญชี</p>
+                                            <p class="font-bold">ร้านค้าทั่วไป</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-400 text-sm">สาขา</p>
+                                            <p class="font-bold">สาขาหลัก</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 p-2 bg-yellow-900/30 rounded border border-yellow-700">
+                                        <p class="text-yellow-300 text-sm flex items-center">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            กรุณาโอนเงินและแนบสลิปการโอนเงิน
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -1513,7 +1544,7 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
                             <span class="text-gray-400">เวอร์ชันระบบ</span>
-                            <span class="font-medium">4.1.0</span>
+                            <span class="font-medium">5.0.0</span>
                         </div>
                         <div class="flex justify-between items-center p-3 bg-gray-900/30 rounded-lg">
                             <span class="text-gray-400">ฐานข้อมูล</span>
@@ -1723,6 +1754,30 @@
                             <span>วิธีการชำระเงิน:</span>
                             <span id="receiptPaymentMethod">เงินสด</span>
                         </div>
+                        
+                        <!-- Bank Transfer Details -->
+                        <div id="receiptBankTransfer" class="hidden mt-4 p-3 border border-gray-300 rounded">
+                            <h4 class="font-bold mb-2">รายละเอียดการโอนเงิน</h4>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <p class="text-gray-600">ธนาคาร:</p>
+                                    <p id="receiptBankName" class="font-bold">กรุงไทย</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600">เลขบัญชี:</p>
+                                    <p id="receiptBankAccount" class="font-bold">123-4-56789-0</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600">ชื่อบัญชี:</p>
+                                    <p id="receiptBankAccountName" class="font-bold">ร้านค้าทั่วไป</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-600">สาขา:</p>
+                                    <p id="receiptBankBranch" class="font-bold">สาขาหลัก</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">กรุณาแนบสลิปการโอนเงิน</p>
+                        </div>
                     </div>
                     
                     <div class="text-center mt-6 pt-4 border-t border-dashed border-gray-400">
@@ -1797,7 +1852,7 @@
             
             <div class="p-6">
                 <div class="text-center mb-6">
-                    <p class="text-gray-300 mb-4">สแกน QR Code เพื่อชำระเงิน</p>
+                    <p class="text-gray-300 mb-4">สแกน QR Code เพื่อชำระเงินผ่าน PromptPay</p>
                     <div id="qrcodeCanvas" class="qrcode-container mb-4">
                         <!-- QR Code will be generated here -->
                     </div>
@@ -1814,6 +1869,10 @@
                         <div class="flex justify-between">
                             <span class="text-gray-400">รหัสอ้างอิง:</span>
                             <span id="qrPaymentRef" class="font-mono">REF-0000</span>
+                        </div>
+                        <div class="flex justify-between mt-2">
+                            <span class="text-gray-400">PromptPay ID:</span>
+                            <span class="font-mono font-bold">0857243350</span>
                         </div>
                     </div>
                     
@@ -1957,7 +2016,7 @@
             
             <div class="mt-12 pt-8 border-t border-gray-300">
                 <p class="text-gray-600 text-sm text-center">
-                    ระบบจัดการสินค้าและขายด้วย Firebase | เวอร์ชัน 4.1.0
+                    ระบบจัดการสินค้าและขายด้วย Firebase | เวอร์ชัน 5.0.0
                 </p>
             </div>
         </div>
@@ -2011,6 +2070,17 @@
         let qrPaymentTimeLeft = 60; // 1 นาที = 60 วินาที
         let qrPaymentActive = false;
         let qrPaymentRef = '';
+        
+        // ข้อมูลธนาคารสำหรับโอนเงิน
+        const bankAccount = {
+            bankName: "กรุงไทย",
+            accountNumber: "123-4-56789-0",
+            accountName: "ร้านค้าทั่วไป",
+            branch: "สาขาหลัก"
+        };
+        
+        // PromptPay ID สำหรับสร้าง QR Code
+        const promptpayId = "0857243350";
         
         // สิทธิ์การใช้งานตามบทบาท
         const rolePermissions = {
@@ -2425,53 +2495,61 @@
             }
             
             // สร้างรหัสอ้างอิง
-            qrPaymentRef = `PAY-${Date.now().toString().slice(-6)}`;
+            qrPaymentRef = `QR-${Date.now().toString().slice(-6)}`;
             
             // ตั้งค่า UI
             document.getElementById('qrPaymentAmount').textContent = '฿' + totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2});
             document.getElementById('qrPaymentRef').textContent = qrPaymentRef;
             
-            // สร้างข้อมูลสำหรับ QR Code
-            const qrData = {
-                amount: totalAmount,
-                reference: qrPaymentRef,
-                store: "ร้านค้าทั่วไป",
-                date: new Date().toISOString(),
-                items: cart.length
-            };
-            
-            // แปลงเป็น JSON string
-            const qrDataString = JSON.stringify(qrData);
+            // สร้างข้อมูลสำหรับ QR Code (PromptPay)
+            const promptpayAmount = totalAmount.toFixed(2);
             
             // สร้าง QR Code
             const qrContainer = document.getElementById('qrcodeCanvas');
             qrContainer.innerHTML = '';
             
+            // สร้างลิงค์สำหรับ PromptPay
+            const promptpayUrl = `https://promptpay.io/${promptpayId}/${promptpayAmount}`;
+            
             // ใช้ QRCode.js เพื่อสร้าง QR Code
-            QRCode.toCanvas(qrDataString, {
-                width: 200,
-                height: 200,
-                margin: 1,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
-            }, function (error, canvas) {
-                if (error) {
-                    console.error('Error generating QR code:', error);
-                    // สร้าง fallback QR code
-                    qrContainer.innerHTML = `
-                        <div class="border-2 border-dashed border-gray-400 w-48 h-48 flex items-center justify-center">
-                            <div class="text-center">
-                                <i class="fas fa-qrcode text-4xl text-gray-400 mb-2"></i>
-                                <p class="text-gray-600 text-sm">QR Code: ${totalAmount} บาท</p>
+            try {
+                QRCode.toCanvas(promptpayUrl, {
+                    width: 200,
+                    height: 200,
+                    margin: 1,
+                    color: {
+                        dark: '#000000',
+                        light: '#FFFFFF'
+                    }
+                }, function (error, canvas) {
+                    if (error) {
+                        console.error('Error generating QR code:', error);
+                        // สร้าง fallback QR code
+                        qrContainer.innerHTML = `
+                            <div class="border-2 border-dashed border-gray-400 w-48 h-48 flex items-center justify-center">
+                                <div class="text-center">
+                                    <i class="fas fa-qrcode text-4xl text-gray-400 mb-2"></i>
+                                    <p class="text-gray-600 text-sm">PromptPay: ${totalAmount} บาท</p>
+                                    <p class="text-gray-600 text-xs">ID: ${promptpayId}</p>
+                                </div>
                             </div>
+                        `;
+                    } else {
+                        qrContainer.appendChild(canvas);
+                    }
+                });
+            } catch (error) {
+                console.error('QR Code generation error:', error);
+                qrContainer.innerHTML = `
+                    <div class="border-2 border-dashed border-gray-400 w-48 h-48 flex items-center justify-center">
+                        <div class="text-center">
+                            <i class="fas fa-qrcode text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-600 text-sm">PromptPay: ${totalAmount} บาท</p>
+                            <p class="text-gray-600 text-xs">ID: ${promptpayId}</p>
                         </div>
-                    `;
-                } else {
-                    qrContainer.appendChild(canvas);
-                }
-            });
+                    </div>
+                `;
+            }
             
             // เริ่มต้นตัวนับถอยหลัง
             startQRPaymentTimer();
@@ -2865,6 +2943,7 @@
                     loadRecentSales();
                     updateTodaySalesStats();
                     resetCart();
+                    setupPaymentMethodListener();
                 }
                 
                 // เมื่อแสดงหน้า Sales Report ให้โหลดรายงานการขาย
@@ -2897,6 +2976,21 @@
             const activeNav = document.getElementById(navId);
             if (activeNav) {
                 activeNav.classList.add('active');
+            }
+        }
+        
+        // ตั้งค่าการฟังการเปลี่ยนแปลงวิธีการชำระเงิน
+        function setupPaymentMethodListener() {
+            const paymentMethodSelect = document.getElementById('paymentMethod');
+            if (paymentMethodSelect) {
+                paymentMethodSelect.addEventListener('change', function() {
+                    const bankAccountInfo = document.getElementById('bankAccountInfo');
+                    if (this.value === 'โอนเงิน') {
+                        bankAccountInfo.classList.remove('hidden');
+                    } else {
+                        bankAccountInfo.classList.add('hidden');
+                    }
+                });
             }
         }
         
@@ -3428,6 +3522,337 @@
             });
         }
         
+        // ==================== SALES REPORT FUNCTIONS ====================
+        
+        // โหลดรายงานการขาย
+        function loadSalesReports() {
+            // ตั้งค่าเริ่มต้นวันที่ - 7 วันที่ผ่านมา
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+            
+            document.getElementById('reportStartDate').valueAsDate = startDate;
+            document.getElementById('reportEndDate').valueAsDate = endDate;
+            
+            // อัพเดทแท็บรายงาน
+            setupReportTabs();
+            
+            // สร้างรายงานเริ่มต้น
+            generateSalesReport();
+        }
+        
+        // ตั้งค่าแท็บรายงาน
+        function setupReportTabs() {
+            const tabs = document.querySelectorAll('.tab[data-tab]');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // อัพเดทแท็บที่ active
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // แสดงเนื้อหาแท็บที่เลือก
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+                    document.getElementById(tabId).classList.remove('hidden');
+                    
+                    // อัพเดทรายงานสำหรับแท็บนั้น
+                    if (tabId === 'dailyReport') {
+                        updateDailyReport();
+                    } else if (tabId === 'topProductsReport') {
+                        updateTopProductsReport();
+                    } else if (tabId === 'salesListReport') {
+                        updateSalesListReport();
+                    }
+                });
+            });
+        }
+        
+        // สร้างรายงานการขาย
+        function generateSalesReport() {
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            const category = document.getElementById('reportCategoryFilter').value;
+            
+            if (!startDate || !endDate) {
+                showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด');
+                return;
+            }
+            
+            // แปลงวันที่
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999); // ตั้งเวลาเป็นสิ้นวัน
+            
+            // กรองการขายตามวันที่
+            let filteredSales = sales.filter(sale => {
+                const saleDate = new Date(sale.saleDate);
+                return saleDate >= start && saleDate <= end;
+            });
+            
+            // กรองตามประเภทสินค้า (ถ้ามี)
+            if (category) {
+                filteredSales = filteredSales.filter(sale => {
+                    // ตรวจสอบว่ามีสินค้าในประเภทที่เลือกหรือไม่
+                    if (sale.items) {
+                        const items = Object.values(sale.items);
+                        return items.some(item => {
+                            const product = products.find(p => p.id === item.productId);
+                            return product && product.category === category;
+                        });
+                    }
+                    return false;
+                });
+            }
+            
+            // อัพเดทสถิติ
+            updateReportStatistics(filteredSales);
+            
+            // อัพเดทรายงาน
+            updateDailyReport(filteredSales);
+            updateTopProductsReport(filteredSales);
+            updateSalesListReport(filteredSales);
+            
+            showToast('สร้างรายงานสำเร็จ', 'success');
+        }
+        
+        // อัพเดทสถิติรายงาน
+        function updateReportStatistics(filteredSales) {
+            const totalSalesCount = filteredSales.length;
+            const totalSalesAmount = filteredSales.reduce((sum, sale) => sum + sale.totalAmount, 0);
+            const totalItemsSold = filteredSales.reduce((sum, sale) => {
+                return sum + (sale.items ? Object.keys(sale.items).length : 0);
+            }, 0);
+            const averageSaleAmount = totalSalesCount > 0 ? totalSalesAmount / totalSalesCount : 0;
+            
+            document.getElementById('totalSalesCount').textContent = totalSalesCount.toLocaleString();
+            document.getElementById('totalSalesAmount').textContent = '฿' + totalSalesAmount.toLocaleString('th-TH', {minimumFractionDigits: 2});
+            document.getElementById('totalItemsSold').textContent = totalItemsSold.toLocaleString();
+            document.getElementById('averageSaleAmount').textContent = '฿' + averageSaleAmount.toLocaleString('th-TH', {minimumFractionDigits: 2});
+        }
+        
+        // อัพเดทรายงานรายวัน
+        function updateDailyReport(filteredSales = []) {
+            // ถ้าไม่ได้ส่ง filteredSales มาให้คำนวณใหม่
+            if (filteredSales.length === 0) {
+                const startDate = document.getElementById('reportStartDate').value;
+                const endDate = document.getElementById('reportEndDate').value;
+                
+                if (!startDate || !endDate) return;
+                
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                
+                filteredSales = sales.filter(sale => {
+                    const saleDate = new Date(sale.saleDate);
+                    return saleDate >= start && saleDate <= end;
+                });
+            }
+            
+            // จัดกลุ่มการขายตามวัน
+            const dailySales = {};
+            
+            filteredSales.forEach(sale => {
+                const saleDate = new Date(sale.saleDate);
+                const dateKey = saleDate.toISOString().split('T')[0];
+                
+                if (!dailySales[dateKey]) {
+                    dailySales[dateKey] = {
+                        date: saleDate,
+                        salesCount: 0,
+                        totalAmount: 0,
+                        itemsSold: 0
+                    };
+                }
+                
+                dailySales[dateKey].salesCount++;
+                dailySales[dateKey].totalAmount += sale.totalAmount;
+                dailySales[dateKey].itemsSold += sale.items ? Object.keys(sale.items).length : 0;
+            });
+            
+            // แปลงเป็น array และเรียงตามวันที่
+            const dailyArray = Object.values(dailySales).sort((a, b) => a.date - b.date);
+            
+            // อัพเดทตารางรายงานรายวัน
+            const tableBody = document.getElementById('dailySalesTableBody');
+            tableBody.innerHTML = '';
+            
+            if (dailyArray.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                            <i class="fas fa-chart-line text-xl mb-2"></i>
+                            <p>ไม่มีข้อมูลการขายในช่วงเวลาที่เลือก</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            dailyArray.forEach(day => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-700';
+                row.innerHTML = `
+                    <td class="px-4 py-3">${day.date.toLocaleDateString('th-TH')}</td>
+                    <td class="px-4 py-3">${day.salesCount}</td>
+                    <td class="px-4 py-3">฿${day.totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                    <td class="px-4 py-3">${day.itemsSold}</td>
+                    <td class="px-4 py-3">฿${(day.totalAmount / day.salesCount).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // อัพเดทรายงานสินค้าขายดี
+        function updateTopProductsReport(filteredSales = []) {
+            // ถ้าไม่ได้ส่ง filteredSales มาให้คำนวณใหม่
+            if (filteredSales.length === 0) {
+                const startDate = document.getElementById('reportStartDate').value;
+                const endDate = document.getElementById('reportEndDate').value;
+                
+                if (!startDate || !endDate) return;
+                
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                
+                filteredSales = sales.filter(sale => {
+                    const saleDate = new Date(sale.saleDate);
+                    return saleDate >= start && saleDate <= end;
+                });
+            }
+            
+            // นับยอดขายสินค้า
+            const productSales = {};
+            
+            filteredSales.forEach(sale => {
+                if (sale.items) {
+                    Object.values(sale.items).forEach(item => {
+                        if (!productSales[item.productId]) {
+                            productSales[item.productId] = {
+                                productName: item.productName,
+                                totalQuantity: 0,
+                                totalAmount: 0
+                            };
+                        }
+                        
+                        productSales[item.productId].totalQuantity += item.quantity;
+                        productSales[item.productId].totalAmount += item.total;
+                    });
+                }
+            });
+            
+            // แปลงเป็น array และเรียงตามยอดขาย
+            const topProducts = Object.values(productSales)
+                .sort((a, b) => b.totalAmount - a.totalAmount)
+                .slice(0, 10); // 10 อันดับแรก
+            
+            // อัพเดทรายการสินค้าขายดี
+            const topProductsList = document.getElementById('topProductsList');
+            topProductsList.innerHTML = '';
+            
+            if (topProducts.length === 0) {
+                topProductsList.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-crown text-3xl mb-3"></i>
+                        <p>ยังไม่มีข้อมูลสินค้าขายดี</p>
+                        <p class="text-sm">กรุณาเลือกช่วงเวลาและสร้างรายงาน</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            topProducts.forEach((product, index) => {
+                const productElement = document.createElement('div');
+                productElement.className = 'bg-gray-900/50 p-4 rounded-lg product-card hover-effect';
+                productElement.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 flex items-center justify-center bg-indigo-600 text-white rounded-full mr-3">
+                                ${index + 1}
+                            </div>
+                            <div>
+                                <div class="font-medium">${product.productName}</div>
+                                <div class="text-gray-400 text-sm">ขายได้ ${product.totalQuantity} ชิ้น</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-green-400">฿${product.totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</div>
+                        </div>
+                    </div>
+                `;
+                topProductsList.appendChild(productElement);
+            });
+        }
+        
+        // อัพเดทรายการขายทั้งหมด
+        function updateSalesListReport(filteredSales = []) {
+            // ถ้าไม่ได้ส่ง filteredSales มาให้คำนวณใหม่
+            if (filteredSales.length === 0) {
+                const startDate = document.getElementById('reportStartDate').value;
+                const endDate = document.getElementById('reportEndDate').value;
+                
+                if (!startDate || !endDate) return;
+                
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                
+                filteredSales = sales.filter(sale => {
+                    const saleDate = new Date(sale.saleDate);
+                    return saleDate >= start && saleDate <= end;
+                });
+            }
+            
+            // อัพเดทตารางรายการขาย
+            const tableBody = document.getElementById('salesListTableBody');
+            tableBody.innerHTML = '';
+            
+            if (filteredSales.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                            <i class="fas fa-receipt text-xl mb-2"></i>
+                            <p>ไม่มีข้อมูลการขายในช่วงเวลาที่เลือก</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            filteredSales.forEach(sale => {
+                const saleDate = new Date(sale.saleDate);
+                const formattedDate = saleDate.toLocaleDateString('th-TH', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-700';
+                row.innerHTML = `
+                    <td class="px-4 py-3">${sale.saleCode}</td>
+                    <td class="px-4 py-3">${sale.customerName}</td>
+                    <td class="px-4 py-3">${formattedDate}</td>
+                    <td class="px-4 py-3">${sale.items ? Object.keys(sale.items).length : 0}</td>
+                    <td class="px-4 py-3">฿${sale.totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 bg-gray-700 rounded text-xs">${sale.paymentMethod}</span>
+                    </td>
+                    <td class="px-4 py-3">${sale.seller}</td>
+                    <td class="px-4 py-3">
+                        <button onclick="viewReceipt('${sale.id}')" class="text-indigo-400 hover:text-indigo-300 transition-colors hover-effect">
+                            <i class="fas fa-receipt mr-1"></i> ดูใบเสร็จ
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
         // ==================== SALES SYSTEM FUNCTIONS ====================
         
         // โหลดสินค้าสำหรับหน้าขาย
@@ -3654,6 +4079,7 @@
             document.getElementById('customerName').value = 'ลูกค้าทั่วไป';
             document.getElementById('paymentMethod').value = 'เงินสด';
             document.getElementById('discountAmount').value = '0';
+            document.getElementById('bankAccountInfo').classList.add('hidden');
             updateCartDisplay();
         }
         
@@ -3685,9 +4111,16 @@
                 }
             }
             
+            // ถ้าเป็น QR Payment ให้แสดง QR Code
+            if (paymentMethod === 'QR Payment') {
+                showQRCodePayment();
+                return;
+            }
+            
+            // สำหรับวิธีชำระเงินอื่น ๆ
             showConfirmation(
                 'ยืนยันการขาย',
-                `คุณแน่ใจหรือไม่ว่าต้องการบันทึกการขายนี้?\n\nลูกค้า: ${customerName}\nยอดรวม: ฿${totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}`,
+                `คุณแน่ใจหรือไม่ว่าต้องการบันทึกการขายนี้?\n\nลูกค้า: ${customerName}\nยอดรวม: ฿${totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}\nวิธีการชำระ: ${paymentMethod}`,
                 'question',
                 'บันทึกการขาย',
                 'ยกเลิก'
@@ -3794,6 +4227,11 @@
             const receiptDiscount = document.getElementById('receiptDiscount');
             const receiptTotal = document.getElementById('receiptTotal');
             const receiptPaymentMethod = document.getElementById('receiptPaymentMethod');
+            const receiptBankTransfer = document.getElementById('receiptBankTransfer');
+            const receiptBankName = document.getElementById('receiptBankName');
+            const receiptBankAccount = document.getElementById('receiptBankAccount');
+            const receiptBankAccountName = document.getElementById('receiptBankAccountName');
+            const receiptBankBranch = document.getElementById('receiptBankBranch');
             
             receiptNumber.textContent = saleData.saleCode;
             receiptDate.textContent = new Date(saleData.saleDate).toLocaleString('th-TH');
@@ -3802,6 +4240,17 @@
             receiptDiscount.textContent = '฿' + saleData.discount.toLocaleString('th-TH', {minimumFractionDigits: 2});
             receiptTotal.textContent = '฿' + saleData.totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2});
             receiptPaymentMethod.textContent = saleData.paymentMethod;
+            
+            // แสดงหรือซ่อนรายละเอียดการโอนเงิน
+            if (saleData.paymentMethod === 'โอนเงิน') {
+                receiptBankTransfer.classList.remove('hidden');
+                receiptBankName.textContent = bankAccount.bankName;
+                receiptBankAccount.textContent = bankAccount.accountNumber;
+                receiptBankAccountName.textContent = bankAccount.accountName;
+                receiptBankBranch.textContent = bankAccount.branch;
+            } else {
+                receiptBankTransfer.classList.add('hidden');
+            }
             
             // ล้างรายการเก่า
             receiptItems.innerHTML = '';
@@ -3818,6 +4267,14 @@
             });
             
             modal.classList.remove('hidden');
+        }
+        
+        // ดูใบเสร็จจากรายงาน
+        function viewReceipt(saleId) {
+            const sale = sales.find(s => s.id === saleId);
+            if (sale) {
+                showReceipt(sale);
+            }
         }
         
         // โหลดการขายล่าสุด
@@ -4342,6 +4799,9 @@
             console.log('ระบบกำลังเริ่มต้น...');
             checkUserAndPermissions();
             
+            // อัพเดทเวลาปัจจุบันทุกวินาที
+            setInterval(updateSystemTime, 1000);
+            
             // ========== LOGIN PAGE EVENT LISTENERS ==========
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
@@ -4493,6 +4953,9 @@
             
             // เมื่อ discount เปลี่ยน ให้อัพเดทยอดรวม
             document.getElementById('discountAmount')?.addEventListener('input', updateCartDisplay);
+            
+            // ========== SALES REPORT PAGE EVENT LISTENERS ==========
+            document.getElementById('generateReportBtn')?.addEventListener('click', generateSalesReport);
             
             // ========== QR PAYMENT EVENT LISTENERS ==========
             document.getElementById('cancelQrPaymentBtn')?.addEventListener('click', cancelQRPayment);
@@ -4661,9 +5124,6 @@
                 }
             });
             
-            // อัพเดทเวลาปัจจุบันทุกวินาที
-            setInterval(updateSystemTime, 1000);
-            
             // แสดงข้อความต้อนรับ
             console.log('ระบบพร้อมใช้งานแล้ว!');
             console.log('ระบบขายสินค้าและรายงานการขายพร้อมใช้งาน');
@@ -4684,6 +5144,7 @@
         window.decreaseQuantity = decreaseQuantity;
         window.removeFromCart = removeFromCart;
         window.closeAlert = closeAlert;
+        window.viewReceipt = viewReceipt;
         
         // ฟังก์ชันส่งออกข้อมูลสินค้า
         function exportProducts() {
