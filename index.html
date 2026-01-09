@@ -3263,6 +3263,16 @@
                     productsTableInfo.textContent = 'คุณสามารถเพิ่มและแก้ไขข้อมูลสินค้าได้ แต่ไม่สามารถลบได้';
                 }
             }
+            
+            // อัพเดทข้อความในหน้า Users
+            const usersTableInfo = document.querySelector('#usersPage p.text-gray-400');
+            if (usersTableInfo) {
+                if (permissions.canManageUsers) {
+                    usersTableInfo.textContent = 'เพิ่ม แก้ไข ลบ และจัดการสิทธิ์ผู้ใช้ทั้งหมดในระบบ';
+                } else {
+                    usersTableInfo.textContent = 'คุณสามารถดูข้อมูลผู้ใช้ได้ แต่ไม่สามารถจัดการได้';
+                }
+            }
         }
         
         // ตรวจสอบสิทธิ์
@@ -3486,7 +3496,7 @@
             defaultUsers.forEach(defaultUser => {
                 const userExists = users.some(user => user.username === defaultUser.username);
                 if (!userExists) {
-                    database.ref('users/' + defaultUser.username).set({
+                    database.ref('users').push({
                         username: defaultUser.username,
                         password: defaultUser.password,
                         role: defaultUser.role,
@@ -3677,6 +3687,7 @@
                         </button>
                     `;
                     
+                    // ตรวจสอบว่าผู้ใช้ปัจจุบันเป็นผู้ใช้ที่กำลังจะลบหรือไม่
                     if (user.id !== currentUser.username) {
                         actionButtons += `
                             <button onclick="showDeleteUserConfirm('${user.id}', '${user.fullName || user.username}')" class="text-red-400 hover:text-red-300 transition-colors hover-effect">
@@ -3828,21 +3839,37 @@
         function loginUser(username, password) {
             showLoading('กำลังตรวจสอบข้อมูลผู้ใช้...');
             
-            database.ref('users/' + username).once('value').then(snapshot => {
-                const userData = snapshot.val();
+            // ค้นหาผู้ใช้จาก users array
+            const userRef = database.ref('users');
+            userRef.once('value').then(snapshot => {
+                const usersData = snapshot.val();
+                let userFound = null;
+                let userId = null;
                 
-                if (userData && userData.password === password) {
+                // ค้นหาผู้ใช้ที่ตรงกับ username และ password
+                if (usersData) {
+                    Object.keys(usersData).forEach(key => {
+                        const user = usersData[key];
+                        if (user.username === username && user.password === password) {
+                            userFound = user;
+                            userId = key;
+                        }
+                    });
+                }
+                
+                if (userFound) {
                     currentUser = {
+                        id: userId,
                         username: username,
-                        role: userData.role || 'user',
-                        fullName: userData.fullName || username
+                        role: userFound.role || 'user',
+                        fullName: userFound.fullName || username
                     };
                     
                     console.log('Login successful for user:', currentUser);
                     
                     localStorage.setItem('inventoryUser', JSON.stringify(currentUser));
                     
-                    database.ref('users/' + username).update({
+                    database.ref('users/' + userId).update({
                         lastLogin: new Date().toISOString()
                     }).then(() => {
                         console.log('User login time updated:', username);
@@ -5090,6 +5117,7 @@
             }
             
             if (userId) {
+                // แก้ไขผู้ใช้ที่มีอยู่ - ใช้ key ของ Firebase เป็น reference
                 database.ref('users/' + userId).update(userData)
                     .then(() => {
                         hideUserModal();
@@ -5098,29 +5126,37 @@
                         addNotification('แก้ไขผู้ใช้สำเร็จ', `แก้ไขข้อมูลผู้ใช้ ${username} เรียบร้อยแล้ว`, 'success');
                         
                         showAlert('success', 'อัพเดทสำเร็จ', 'อัพเดทข้อมูลผู้ใช้เรียบร้อยแล้ว');
+                        
+                        // โหลดข้อมูลผู้ใช้ใหม่
+                        loadUsers();
                     })
                     .catch(error => {
                         console.error('Error updating user:', error);
                         showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการอัพเดทข้อมูลผู้ใช้');
                     });
             } else {
+                // ตรวจสอบชื่อผู้ใช้ซ้ำก่อนเพิ่ม
                 const isDuplicate = users.some(user => user.username === username);
                 if (isDuplicate) {
                     showAlert('error', 'ข้อมูลซ้ำ', 'ชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว กรุณาใช้ชื่ออื่น');
                     return;
                 }
                 
+                // เพิ่มผู้ใช้ใหม่
                 userData.createdAt = new Date().toISOString();
                 userData.createdBy = currentUser.username;
                 
                 database.ref('users').push(userData)
-                    .then(() => {
+                    .then((ref) => {
                         hideUserModal();
                         
                         // เพิ่มการแจ้งเตือน
                         addNotification('เพิ่มผู้ใช้สำเร็จ', `เพิ่มผู้ใช้ ${username} เรียบร้อยแล้ว`, 'success');
                         
                         showAlert('success', 'เพิ่มสำเร็จ', 'เพิ่มผู้ใช้ใหม่เรียบร้อยแล้ว');
+                        
+                        // โหลดข้อมูลผู้ใช้ใหม่
+                        loadUsers();
                     })
                     .catch(error => {
                         console.error('Error adding user:', error);
@@ -5134,6 +5170,8 @@
             const user = users.find(u => u.id === userId);
             if (user) {
                 showUserModal(user);
+            } else {
+                showAlert('error', 'ไม่พบข้อมูล', 'ไม่พบข้อมูลผู้ใช้ที่ต้องการแก้ไข');
             }
         }
         
@@ -5144,7 +5182,9 @@
                 return;
             }
             
-            if (userId === currentUser.username) {
+            // ตรวจสอบว่าผู้ใช้กำลังลบบัญชีตัวเองหรือไม่
+            const userToCheck = users.find(u => u.id === userId);
+            if (userToCheck && userToCheck.username === currentUser.username) {
                 showAlert('error', 'ไม่สามารถดำเนินการได้', 'ไม่สามารถลบบัญชีผู้ใช้ปัจจุบันได้');
                 return;
             }
@@ -5168,7 +5208,7 @@
         
         // ลบผู้ใช้
         function deleteUser() {
-            if (!userToDelete || !checkPermission('canManageUsers')) {
+            if (!userToDelete || !checkPermission('canDelete')) {
                 showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์ลบข้อมูลผู้ใช้');
                 return;
             }
@@ -5187,6 +5227,9 @@
                     
                     showAlert('success', 'ลบสำเร็จ', 'ลบข้อมูลผู้ใช้เรียบร้อยแล้ว');
                     userToDelete = null;
+                    
+                    // โหลดข้อมูลผู้ใช้ใหม่
+                    loadUsers();
                 })
                 .catch(error => {
                     console.error('Error deleting user:', error);
@@ -5675,7 +5718,7 @@
             const profileLastLogin = document.getElementById('profileLastLogin');
             const profileCreatedAt = document.getElementById('profileCreatedAt');
             
-            const userData = users.find(u => u.id === currentUser.username) || currentUser;
+            const userData = users.find(u => u.id === currentUser.id) || currentUser;
             
             profileUsername.textContent = userData.username;
             profileFullName.textContent = userData.fullName || 'ไม่ระบุ';
