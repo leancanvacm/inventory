@@ -2612,11 +2612,19 @@
             clearInterval(qrPaymentTimer);
             qrPaymentActive = false;
             
-            // ปิด Modal
+            // ดึงข้อมูลจากฟอร์มขาย
+            const customerName = document.getElementById('customerName').value.trim() || 'ลูกค้าทั่วไป';
+            const paymentMethod = 'QR Payment';
+            const discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+            
+            const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
+            const totalAmount = subtotal - discount;
+            
+            // ปิด Modal QR Code
             document.getElementById('qrPaymentModal').classList.add('hidden');
             
             // บันทึกการขาย
-            completeSale();
+            processSale(customerName, paymentMethod, discount, totalAmount);
             
             // เพิ่มการแจ้งเตือน
             addNotification('ชำระเงินสำเร็จ', `ลูกค้าชำระเงินด้วย QR Code อ้างอิง ${qrPaymentRef} สำเร็จแล้ว`, 'success');
