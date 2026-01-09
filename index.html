@@ -28,6 +28,7 @@
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -506,7 +507,174 @@
             align-items: center;
             justify-content: center;
         }
+        
+        /* Protection Styles */
+        .protection-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
     </style>
+    
+    <!-- Protection Script (ป้องกันการ inspect) -->
+    <script>
+        // ระบบป้องกันการเปิด Developer Tools และการตรวจสอบโค้ด
+        (function() {
+            'use strict';
+            
+            // ป้องกันการคลิกขวา
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                showProtectionWarning();
+                return false;
+            });
+            
+            // ป้องกันการกดปุ่มลัดต่างๆ
+            document.addEventListener('keydown', function(e) {
+                // ป้องกัน F12
+                if (e.key === 'F12' || e.keyCode === 123) {
+                    e.preventDefault();
+                    showProtectionWarning();
+                    return false;
+                }
+                
+                // ป้องกัน Ctrl+Shift+I
+                if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                    e.preventDefault();
+                    showProtectionWarning();
+                    return false;
+                }
+                
+                // ป้องกัน Ctrl+Shift+J
+                if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                    e.preventDefault();
+                    showProtectionWarning();
+                    return false;
+                }
+                
+                // ป้องกัน Ctrl+U
+                if (e.ctrlKey && e.key === 'u') {
+                    e.preventDefault();
+                    showProtectionWarning();
+                    return false;
+                }
+                
+                // ป้องกัน Ctrl+S
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    showProtectionWarning();
+                    return false;
+                }
+            });
+            
+            // ตรวจจับการเปิด Developer Tools
+            let devToolsOpened = false;
+            const threshold = 160;
+            
+            const checkDevTools = function() {
+                const width = window.outerWidth - window.innerWidth;
+                const height = window.outerHeight - window.innerHeight;
+                
+                if (width > threshold || height > threshold) {
+                    if (!devToolsOpened) {
+                        devToolsOpened = true;
+                        showProtectionWarning();
+                    }
+                } else {
+                    devToolsOpened = false;
+                }
+            };
+            
+            // ตรวจสอบเป็นระยะ
+            setInterval(checkDevTools, 500);
+            
+            // ตรวจสอบเมื่อหน้าต่างเปลี่ยนขนาด
+            window.addEventListener('resize', checkDevTools);
+            
+            // ฟังก์ชันแสดงคำเตือน
+            function showProtectionWarning() {
+                const overlay = document.getElementById('protectionOverlay');
+                if (overlay) {
+                    overlay.style.display = 'flex';
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 3000);
+                }
+                
+                // บันทึกการพยายามเข้าถึง
+                try {
+                    if (typeof addNotification === 'function') {
+                        addNotification('ตรวจพบการพยายามเข้าถึงโค้ดระบบ', 'ระบบตรวจพบการพยายามเข้าถึงโค้ดโปรแกรม กรุณาอย่าทำการ inspect หรือเปิด developer tools', 'error');
+                    }
+                } catch(e) {}
+                
+                // ทำให้หน้าเว็บสับสน
+                document.body.style.transform = 'rotate(0.5deg)';
+                setTimeout(() => {
+                    document.body.style.transform = 'rotate(-0.5deg)';
+                    setTimeout(() => {
+                        document.body.style.transform = 'rotate(0deg)';
+                    }, 100);
+                }, 100);
+            }
+            
+            // ป้องกันการดึงโค้ดผ่าน console
+            Object.defineProperty(window, 'console', {
+                value: console,
+                writable: false,
+                configurable: false
+            });
+            
+            // ซ่อนฟังก์ชันสำคัญ
+            const originalLog = console.log;
+            console.log = function() {
+                // ไม่แสดงข้อมูลสำคัญใน console
+                const args = Array.from(arguments);
+                const sensitiveKeywords = ['password', 'secret', 'key', 'token', 'firebase', 'database'];
+                
+                for (let arg of args) {
+                    if (typeof arg === 'string') {
+                        for (let keyword of sensitiveKeywords) {
+                            if (arg.toLowerCase().includes(keyword)) {
+                                showProtectionWarning();
+                                return;
+                            }
+                        }
+                    }
+                }
+                
+                originalLog.apply(console, args);
+            };
+            
+            // สร้าง overlay สำหรับคำเตือน
+            const overlay = document.createElement('div');
+            overlay.id = 'protectionOverlay';
+            overlay.className = 'protection-overlay';
+            overlay.innerHTML = `
+                <div style="background: linear-gradient(135deg, #dc2626, #991b1b); padding: 40px; border-radius: 20px; max-width: 500px; margin: 20px;">
+                    <i class="fas fa-shield-alt" style="font-size: 60px; margin-bottom: 20px;"></i>
+                    <h2 style="margin-bottom: 20px;">ตรวจพบการพยายามเข้าถึงโค้ดระบบ!</h2>
+                    <p style="font-size: 18px; margin-bottom: 20px;">กรุณาอย่าทำการ inspect หรือเปิด developer tools</p>
+                    <p style="font-size: 16px; opacity: 0.8;">การกระทำนี้อาจทำให้ระบบถูกระงับการใช้งาน</p>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            
+            console.log('ระบบป้องกันโค้ดได้เริ่มทำงานแล้ว');
+        })();
+    </script>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
     <!-- Alert Container -->
@@ -2646,106 +2814,247 @@
             showToast('ยกเลิกการชำระเงินด้วย QR Code แล้ว', 'info');
         }
         
-        // ==================== PRINT SYSTEM ====================
+        // ==================== EXPORT FUNCTIONS ====================
         
-        // พิมพ์ใบเสร็จ
-        function printReceipt() {
-            const receiptContent = document.getElementById('receiptContent');
+        // ส่งออกข้อมูลสินค้าเป็น CSV
+        function exportProducts() {
+            if (products.length === 0) {
+                showAlert('warning', 'ไม่มีข้อมูล', 'ไม่มีข้อมูลสินค้าให้ส่งออก');
+                return;
+            }
             
-            // สร้างหน้าต่างใหม่สำหรับพิมพ์
+            showLoading('กำลังเตรียมข้อมูลสำหรับส่งออก...');
+            
+            // สร้างหัวตาราง CSV
+            let csvContent = "รหัสสินค้า,ชื่อสินค้า,ประเภท,จำนวนคงเหลือ,ราคาต่อหน่วย,มูลค่ารวม,สถานะ,วันที่สร้าง\n";
+            
+            // เพิ่มข้อมูลสินค้า
+            products.forEach(product => {
+                const totalValue = product.quantity * product.price;
+                const isLowStock = product.quantity <= 5 && product.quantity > 0;
+                const isOutOfStock = product.quantity <= 0;
+                
+                let status = 'พร้อมจำหน่าย';
+                if (isLowStock) status = 'เหลือน้อย';
+                if (isOutOfStock) status = 'หมดสต๊อก';
+                
+                const createdDate = product.createdAt ? new Date(product.createdAt).toLocaleDateString('th-TH') : 'ไม่ระบุ';
+                
+                csvContent += `"${product.productCode}","${product.productName}","${product.category}",${product.quantity},${product.price},${totalValue},"${status}","${createdDate}"\n`;
+            });
+            
+            // สร้างไฟล์ CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `สินค้า_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            hideLoading();
+            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกข้อมูลสินค้าเป็นไฟล์ CSV เรียบร้อยแล้ว');
+            addNotification('ส่งออกข้อมูลสำเร็จ', 'ส่งออกข้อมูลสินค้าทั้งหมดเป็นไฟล์ CSV เรียบร้อยแล้ว', 'success');
+        }
+        
+        // ส่งออกรายงานการขาย
+        function exportSalesReport() {
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            
+            if (!startDate || !endDate) {
+                showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด');
+                return;
+            }
+            
+            showLoading('กำลังเตรียมรายงานการขาย...');
+            
+            // กรองข้อมูลการขายตามวันที่
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            
+            const filteredSales = sales.filter(sale => {
+                const saleDate = new Date(sale.saleDate);
+                return saleDate >= start && saleDate <= end;
+            });
+            
+            if (filteredSales.length === 0) {
+                hideLoading();
+                showAlert('warning', 'ไม่มีข้อมูล', 'ไม่มีข้อมูลการขายในช่วงเวลาที่เลือก');
+                return;
+            }
+            
+            // สร้างไฟล์ CSV สำหรับรายงานการขาย
+            let csvContent = "เลขที่ใบเสร็จ,ลูกค้า,วันที่ขาย,จำนวนสินค้า,ยอดรวม,ส่วนลด,ยอดสุทธิ,วิธีการชำระเงิน,ผู้ขาย\n";
+            
+            filteredSales.forEach(sale => {
+                const saleDate = new Date(sale.saleDate);
+                const formattedDate = saleDate.toLocaleDateString('th-TH');
+                
+                csvContent += `"${sale.saleCode}","${sale.customerName}","${formattedDate}",${sale.items ? Object.keys(sale.items).length : 0},${sale.subtotal},${sale.discount},${sale.totalAmount},"${sale.paymentMethod}","${sale.seller}"\n`;
+            });
+            
+            // สร้างไฟล์ CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `รายงานการขาย_${startDate}_ถึง_${endDate}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            hideLoading();
+            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกรายงานการขายเป็นไฟล์ CSV เรียบร้อยแล้ว');
+            addNotification('ส่งออกรายงานสำเร็จ', 'ส่งออกรายงานการขายเป็นไฟล์ CSV เรียบร้อยแล้ว', 'success');
+        }
+        
+        // พิมพ์รายงานการขาย
+        function printSalesReport() {
+            const printSection = document.getElementById('printReportSection');
+            const printDate = document.getElementById('printDate');
+            const printUser = document.getElementById('printUser');
+            const printProductSummary = document.getElementById('printProductSummary');
+            const printSalesSummary = document.getElementById('printSalesSummary');
+            const printProductsTable = document.getElementById('printProductsTable');
+            
+            // ตั้งค่าข้อมูล
+            const now = new Date();
+            printDate.textContent = now.toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            printUser.textContent = currentUser.username;
+            
+            // สรุปข้อมูลสินค้า
+            const totalProducts = products.length;
+            const totalValue = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
+            const outOfStock = products.filter(p => p.quantity <= 0).length;
+            const lowStock = products.filter(p => p.quantity > 0 && p.quantity <= 5).length;
+            
+            printProductSummary.innerHTML = `
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="border p-3">
+                        <p class="font-bold">จำนวนสินค้าทั้งหมด</p>
+                        <p class="text-xl">${totalProducts} รายการ</p>
+                    </div>
+                    <div class="border p-3">
+                        <p class="font-bold">มูลค่าสินค้าทั้งหมด</p>
+                        <p class="text-xl">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
+                    </div>
+                    <div class="border p-3">
+                        <p class="font-bold">สินค้าหมดสต๊อก</p>
+                        <p class="text-xl">${outOfStock} รายการ</p>
+                    </div>
+                    <div class="border p-3">
+                        <p class="font-bold">สินค้าใกล้หมด</p>
+                        <p class="text-xl">${lowStock} รายการ</p>
+                    </div>
+                </div>
+            `;
+            
+            // สรุปข้อมูลการขาย
+            const today = new Date().toISOString().split('T')[0];
+            const todaySales = sales.filter(sale => {
+                const saleDate = new Date(sale.saleDate).toISOString().split('T')[0];
+                return saleDate === today;
+            });
+            
+            const todayTotal = todaySales.reduce((sum, sale) => sum + sale.totalAmount, 0);
+            const totalSales = sales.length;
+            const totalSalesAmount = sales.reduce((sum, sale) => sum + sale.totalAmount, 0);
+            
+            printSalesSummary.innerHTML = `
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="border p-3">
+                        <p class="font-bold">ยอดขายวันนี้</p>
+                        <p class="text-xl">฿${todayTotal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
+                    </div>
+                    <div class="border p-3">
+                        <p class="font-bold">จำนวนการขายวันนี้</p>
+                        <p class="text-xl">${todaySales.length} ครั้ง</p>
+                    </div>
+                    <div class="border p-3">
+                        <p class="font-bold">ยอดขายรวมทั้งหมด</p>
+                        <p class="text-xl">฿${totalSalesAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p>
+                    </div>
+                    <div class="border p-3">
+                        <p class="font-bold">จำนวนการขายทั้งหมด</p>
+                        <p class="text-xl">${totalSales} ครั้ง</p>
+                    </div>
+                </div>
+            `;
+            
+            // ตารางสินค้า
+            let productsTableHTML = `
+                <table class="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border p-2">รหัสสินค้า</th>
+                            <th class="border p-2">ชื่อสินค้า</th>
+                            <th class="border p-2">ประเภท</th>
+                            <th class="border p-2">จำนวน</th>
+                            <th class="border p-2">ราคา/หน่วย</th>
+                            <th class="border p-2">มูลค่ารวม</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            products.forEach(product => {
+                const totalValue = product.quantity * product.price;
+                productsTableHTML += `
+                    <tr>
+                        <td class="border p-2">${product.productCode}</td>
+                        <td class="border p-2">${product.productName}</td>
+                        <td class="border p-2">${product.category}</td>
+                        <td class="border p-2 text-right">${product.quantity}</td>
+                        <td class="border p-2 text-right">฿${product.price.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                        <td class="border p-2 text-right">฿${totalValue.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+            
+            productsTableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            printProductsTable.innerHTML = productsTableHTML;
+            
+            // พิมพ์
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>ใบเสร็จรับเงิน</title>
+                    <title>รายงานระบบจัดการสินค้าและขาย</title>
                     <style>
-                        body {
-                            font-family: 'Courier New', monospace;
-                            margin: 0;
-                            padding: 20px;
-                            color: #000;
-                        }
-                        .receipt {
-                            width: 80mm;
-                            margin: 0 auto;
-                        }
-                        .header {
-                            text-align: center;
-                            margin-bottom: 20px;
-                        }
-                        .header h2 {
-                            margin: 0;
-                            font-size: 18px;
-                        }
-                        .header p {
-                            margin: 5px 0;
-                            font-size: 12px;
-                        }
-                        .info {
-                            margin-bottom: 15px;
-                        }
-                        .info div {
-                            display: flex;
-                            justify-content: space-between;
-                            margin-bottom: 5px;
-                        }
-                        .items {
-                            margin: 15px 0;
-                        }
-                        .items-header {
-                            display: flex;
-                            justify-content: space-between;
-                            font-weight: bold;
-                            border-bottom: 1px dashed #000;
-                            padding-bottom: 5px;
-                            margin-bottom: 10px;
-                        }
-                        .item {
-                            display: flex;
-                            justify-content: space-between;
-                            margin-bottom: 5px;
-                            font-size: 14px;
-                        }
-                        .item-name {
-                            flex: 2;
-                        }
-                        .item-qty, .item-price {
-                            flex: 1;
-                            text-align: right;
-                        }
-                        .summary {
-                            border-top: 1px dashed #000;
-                            padding-top: 10px;
-                            margin-top: 15px;
-                        }
-                        .summary div {
-                            display: flex;
-                            justify-content: space-between;
-                            margin-bottom: 5px;
-                        }
-                        .total {
-                            font-weight: bold;
-                            font-size: 16px;
-                        }
-                        .footer {
-                            text-align: center;
-                            margin-top: 20px;
-                            padding-top: 10px;
-                            border-top: 1px dashed #000;
-                            font-size: 12px;
-                        }
+                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; color: #333; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .section { margin-bottom: 30px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; }
                         @media print {
-                            body {
-                                width: 80mm;
-                            }
+                            body { padding: 0; }
                         }
                     </style>
                 </head>
                 <body>
-                    <div class="receipt">
-                        ${receiptContent.innerHTML}
-                    </div>
+                    ${printSection.innerHTML}
                     <script>
                         window.onload = function() {
                             window.print();
@@ -2758,6 +3067,64 @@
                 </html>
             `);
             printWindow.document.close();
+            
+            showToast('กำลังพิมพ์รายงาน...', 'info');
+        }
+        
+        // สำรองข้อมูลทั้งหมด
+        function backupData() {
+            if (!checkPermission('canManageSettings')) {
+                showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์สำรองข้อมูล');
+                return;
+            }
+            
+            showConfirmation(
+                'สำรองข้อมูลระบบ',
+                'คุณแน่ใจหรือไม่ว่าต้องการสำรองข้อมูลทั้งหมดของระบบ? การสำรองข้อมูลจะรวมข้อมูลสินค้า ผู้ใช้ และการขายทั้งหมด',
+                'info',
+                'สำรองข้อมูล',
+                'ยกเลิก'
+            ).then(confirmed => {
+                if (confirmed) {
+                    showLoading('กำลังสำรองข้อมูลระบบ...');
+                    
+                    // รวบรวมข้อมูลทั้งหมด
+                    const backupData = {
+                        timestamp: new Date().toISOString(),
+                        exportedBy: currentUser.username,
+                        products: products,
+                        users: users,
+                        sales: sales,
+                        statistics: {
+                            totalProducts: products.length,
+                            totalUsers: users.length,
+                            totalSales: sales.length,
+                            totalSalesAmount: sales.reduce((sum, sale) => sum + sale.totalAmount, 0)
+                        }
+                    };
+                    
+                    // แปลงเป็น JSON string
+                    const jsonString = JSON.stringify(backupData, null, 2);
+                    
+                    // สร้างไฟล์ JSON
+                    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", `ระบบจัดการสินค้าและขาย_สำรองข้อมูล_${timestamp}.json`);
+                    link.style.visibility = 'hidden';
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    hideLoading();
+                    showAlert('success', 'สำรองข้อมูลสำเร็จ', 'สำรองข้อมูลระบบทั้งหมดเรียบร้อยแล้ว');
+                    addNotification('สำรองข้อมูลสำเร็จ', 'สำรองข้อมูลระบบทั้งหมดเรียบร้อยแล้ว', 'success');
+                }
+            });
         }
         
         // ==================== CORE FUNCTIONS ====================
@@ -5074,22 +5441,11 @@
             
             // ========== SALES REPORT PAGE EVENT LISTENERS ==========
             document.getElementById('generateReportBtn')?.addEventListener('click', generateSalesReport);
-            
-            // ========== QR PAYMENT EVENT LISTENERS ==========
-            document.getElementById('cancelQrPaymentBtn')?.addEventListener('click', cancelQRPayment);
-            document.getElementById('confirmQrPaymentBtn')?.addEventListener('click', confirmQRPayment);
-            
-            // ========== RECEIPT EVENT LISTENERS ==========
-            document.getElementById('closeReceiptBtn')?.addEventListener('click', () => {
-                document.getElementById('receiptModal').classList.add('hidden');
-            });
-            
-            document.getElementById('printReceiptBtn')?.addEventListener('click', printReceipt);
+            document.getElementById('exportSalesReportBtn')?.addEventListener('click', exportSalesReport);
+            document.getElementById('printSalesReportBtn')?.addEventListener('click', printSalesReport);
             
             // ========== SETTINGS PAGE EVENT LISTENERS ==========
-            document.getElementById('backupDataBtn')?.addEventListener('click', () => {
-                showAlert('info', 'สำรองข้อมูล', 'ฟังก์ชันสำรองข้อมูลอยู่ระหว่างการพัฒนา');
-            });
+            document.getElementById('backupDataBtn')?.addEventListener('click', backupData);
             
             document.getElementById('resetDemoDataBtn')?.addEventListener('click', () => {
                 if (checkPermission('canManageSettings')) {
@@ -5200,6 +5556,19 @@
                 saveSettingsToLocalStorage();
             });
             
+            // ========== QR PAYMENT EVENT LISTENERS ==========
+            document.getElementById('cancelQrPaymentBtn')?.addEventListener('click', cancelQRPayment);
+            document.getElementById('confirmQrPaymentBtn')?.addEventListener('click', confirmQRPayment);
+            
+            // ========== RECEIPT EVENT LISTENERS ==========
+            document.getElementById('closeReceiptBtn')?.addEventListener('click', () => {
+                document.getElementById('receiptModal').classList.add('hidden');
+            });
+            
+            document.getElementById('printReceiptBtn')?.addEventListener('click', () => {
+                printReceipt();
+            });
+            
             // ========== GENERAL EVENT LISTENERS ==========
             document.getElementById('logoutBtn')?.addEventListener('click', logout);
             document.getElementById('closeProfileBtn')?.addEventListener('click', () => {
@@ -5246,6 +5615,7 @@
             console.log('ระบบพร้อมใช้งานแล้ว!');
             console.log('ระบบขายสินค้าและรายงานการขายพร้อมใช้งาน');
             console.log('ระบบแจ้งเตือนและ QR Code Payment พร้อมใช้งาน');
+            console.log('ระบบป้องกันการ inspect และ console พร้อมใช้งาน');
             console.log('บัญชีทดสอบ:');
             console.log('- ผู้ใช้ทั่วไป: user / user123');
             console.log('- ผู้จัดการ: manager / manager123');
@@ -5263,42 +5633,6 @@
         window.removeFromCart = removeFromCart;
         window.closeAlert = closeAlert;
         window.viewReceipt = viewReceipt;
-        
-        // ฟังก์ชันส่งออกข้อมูลสินค้า
-        function exportProducts() {
-            showLoading('กำลังเตรียมข้อมูลสำหรับส่งออก...');
-            
-            let csvContent = "รหัสสินค้า,ชื่อสินค้า,ประเภท,จำนวน,ราคาต่อหน่วย,มูลค่ารวม,สถานะ,วันที่สร้าง\n";
-            
-            products.forEach(product => {
-                const totalValue = product.quantity * product.price;
-                const isLowStock = product.quantity <= 5 && product.quantity > 0;
-                const isOutOfStock = product.quantity <= 0;
-                
-                let status = 'พร้อมจำหน่าย';
-                if (isLowStock) status = 'เหลือน้อย';
-                if (isOutOfStock) status = 'หมดสต๊อก';
-                
-                const createdDate = product.createdAt ? new Date(product.createdAt).toLocaleDateString('th-TH') : '';
-                
-                csvContent += `"${product.productCode}","${product.productName}","${product.category}",${product.quantity},${product.price},${totalValue},"${status}","${createdDate}"\n`;
-            });
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute("href", url);
-            link.setAttribute("download", `สินค้า_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            hideLoading();
-            showAlert('success', 'ส่งออกสำเร็จ', 'ส่งออกข้อมูลสินค้าเป็นไฟล์ CSV เรียบร้อยแล้ว');
-        }
         
         // ออกจากระบบ
         function logout() {
@@ -5386,6 +5720,118 @@
                 case 'user': return 'ผู้ใช้ทั่วไป';
                 default: return 'ไม่ระบุ';
             }
+        }
+        
+        // พิมพ์ใบเสร็จ
+        function printReceipt() {
+            const receiptContent = document.getElementById('receiptContent');
+            
+            // สร้างหน้าต่างใหม่สำหรับพิมพ์
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>ใบเสร็จรับเงิน</title>
+                    <style>
+                        body {
+                            font-family: 'Courier New', monospace;
+                            margin: 0;
+                            padding: 20px;
+                            color: #000;
+                        }
+                        .receipt {
+                            width: 80mm;
+                            margin: 0 auto;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        .header h2 {
+                            margin: 0;
+                            font-size: 18px;
+                        }
+                        .header p {
+                            margin: 5px 0;
+                            font-size: 12px;
+                        }
+                        .info {
+                            margin-bottom: 15px;
+                        }
+                        .info div {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-bottom: 5px;
+                        }
+                        .items {
+                            margin: 15px 0;
+                        }
+                        .items-header {
+                            display: flex;
+                            justify-content: space-between;
+                            font-weight: bold;
+                            border-bottom: 1px dashed #000;
+                            padding-bottom: 5px;
+                            margin-bottom: 10px;
+                        }
+                        .item {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-bottom: 5px;
+                            font-size: 14px;
+                        }
+                        .item-name {
+                            flex: 2;
+                        }
+                        .item-qty, .item-price {
+                            flex: 1;
+                            text-align: right;
+                        }
+                        .summary {
+                            border-top: 1px dashed #000;
+                            padding-top: 10px;
+                            margin-top: 15px;
+                        }
+                        .summary div {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-bottom: 5px;
+                        }
+                        .total {
+                            font-weight: bold;
+                            font-size: 16px;
+                        }
+                        .footer {
+                            text-align: center;
+                            margin-top: 20px;
+                            padding-top: 10px;
+                            border-top: 1px dashed #000;
+                            font-size: 12px;
+                        }
+                        @media print {
+                            body {
+                                width: 80mm;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt">
+                        ${receiptContent.innerHTML}
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() {
+                                window.close();
+                            }, 500);
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
         }
     </script>
 </body>
