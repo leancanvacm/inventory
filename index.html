@@ -5035,209 +5035,393 @@
                 });
         }
         
-        // ==================== USER MANAGEMENT ====================
+       // ==================== USER MANAGEMENT ====================
+
+// แสดง Modal สำหรับเพิ่ม/แก้ไขผู้ใช้
+function showUserModal(user = null) {
+    if (!checkPermission('canManageUsers')) {
+        showAlert('error', 'ไม่มีสิทธิ์', 'ขออภัย คุณไม่มีสิทธิ์จัดการผู้ใช้');
+        return;
+    }
+    
+    const modal = document.getElementById('userModal');
+    const modalTitle = document.getElementById('modalUserTitle');
+    const userId = document.getElementById('userId');
+    const newUsername = document.getElementById('newUsername');
+    const newPassword = document.getElementById('newPassword');
+    const fullName = document.getElementById('fullName');
+    const userRole = document.getElementById('userRole');
+    
+    if (user) {
+        modalTitle.textContent = 'แก้ไขข้อมูลผู้ใช้';
+        userId.value = user.id; // user.id คือ Firebase key
+        newUsername.value = user.username;
+        newPassword.required = false;
+        newPassword.placeholder = 'เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน';
+        fullName.value = user.fullName || '';
+        userRole.value = user.role || 'user';
+    } else {
+        modalTitle.textContent = 'เพิ่มผู้ใช้ใหม่';
+        userId.value = '';
+        newUsername.value = '';
+        newPassword.required = true;
+        newPassword.placeholder = 'กรอกรหัสผ่าน';
+        fullName.value = '';
+        userRole.value = 'user';
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+// ซ่อน User Modal
+function hideUserModal() {
+    document.getElementById('userModal').classList.add('hidden');
+}
+
+// บันทึกผู้ใช้
+function saveUser(e) {
+    e.preventDefault();
+    
+    if (!checkPermission('canManageUsers')) {
+        showAlert('error', 'ไม่มีสิทธิ์', 'ขออภัย คุณไม่มีสิทธิ์จัดการผู้ใช้');
+        return;
+    }
+    
+    const userId = document.getElementById('userId').value;
+    const username = document.getElementById('newUsername').value.trim();
+    const password = document.getElementById('newPassword').value;
+    const fullName = document.getElementById('fullName').value.trim();
+    const role = document.getElementById('userRole').value;
+    
+    if (!username || !role) {
+        showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกชื่อผู้ใช้และบทบาท');
+        return;
+    }
+    
+    if (!userId && !password) {
+        showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกรหัสผ่านสำหรับผู้ใช้ใหม่');
+        return;
+    }
+    
+    const userData = {
+        username: username,
+        fullName: fullName,
+        role: role,
+        updatedBy: currentUser.username,
+        updatedAt: new Date().toISOString(),
+        isActive: true
+    };
+    
+    if (password) {
+        userData.password = password;
+    }
+    
+    // ตรวจสอบชื่อผู้ใช้ซ้ำ (ตรวจสอบทั้งกรณีเพิ่มและแก้ไข)
+    const existingUser = users.find(user => user.username === username);
+    const isEditing = userId && existingUser && existingUser.id === userId;
+    
+    // ถ้าเพิ่มผู้ใช้ใหม่หรือแก้ไขเป็นชื่ออื่น ให้ตรวจสอบชื่อซ้ำ
+    if ((!userId || !isEditing) && existingUser) {
+        showAlert('error', 'ข้อมูลซ้ำ', 'ชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว กรุณาใช้ชื่ออื่น');
+        return;
+    }
+    
+    if (userId) {
+        // แก้ไขผู้ใช้ที่มีอยู่
+        showLoading('กำลังอัพเดทข้อมูลผู้ใช้...');
         
-        // แสดง Modal สำหรับเพิ่ม/แก้ไขผู้ใช้
-        function showUserModal(user = null) {
-            if (!checkPermission('canManageUsers')) {
-                showAlert('error', 'ไม่มีสิทธิ์', 'ขออภัย คุณไม่มีสิทธิ์จัดการผู้ใช้');
-                return;
-            }
-            
-            const modal = document.getElementById('userModal');
-            const modalTitle = document.getElementById('modalUserTitle');
-            const userId = document.getElementById('userId');
-            const newUsername = document.getElementById('newUsername');
-            const newPassword = document.getElementById('newPassword');
-            const fullName = document.getElementById('fullName');
-            const userRole = document.getElementById('userRole');
-            
-            if (user) {
-                modalTitle.textContent = 'แก้ไขข้อมูลผู้ใช้';
-                userId.value = user.id;
-                newUsername.value = user.username;
-                newPassword.required = false;
-                newPassword.placeholder = 'เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน';
-                fullName.value = user.fullName || '';
-                userRole.value = user.role || 'user';
-            } else {
-                modalTitle.textContent = 'เพิ่มผู้ใช้ใหม่';
-                userId.value = '';
-                newUsername.value = '';
-                newPassword.required = true;
-                newPassword.placeholder = 'กรอกรหัสผ่าน';
-                fullName.value = '';
-                userRole.value = 'user';
-            }
-            
-            modal.classList.remove('hidden');
-        }
-        
-        // ซ่อน User Modal
-        function hideUserModal() {
-            document.getElementById('userModal').classList.add('hidden');
-        }
-        
-        // บันทึกผู้ใช้
-        function saveUser(e) {
-            e.preventDefault();
-            
-            if (!checkPermission('canManageUsers')) {
-                showAlert('error', 'ไม่มีสิทธิ์', 'ขออภัย คุณไม่มีสิทธิ์จัดการผู้ใช้');
-                return;
-            }
-            
-            const userId = document.getElementById('userId').value;
-            const username = document.getElementById('newUsername').value.trim();
-            const password = document.getElementById('newPassword').value;
-            const fullName = document.getElementById('fullName').value.trim();
-            const role = document.getElementById('userRole').value;
-            
-            if (!username || !role) {
-                showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกชื่อผู้ใช้และบทบาท');
-                return;
-            }
-            
-            if (!userId && !password) {
-                showAlert('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกรหัสผ่านสำหรับผู้ใช้ใหม่');
-                return;
-            }
-            
-            const userData = {
-                username: username,
-                fullName: fullName,
-                role: role,
-                updatedBy: currentUser.username,
-                updatedAt: new Date().toISOString(),
-                isActive: true
-            };
-            
-            if (password) {
-                userData.password = password;
-            }
-            
-            if (userId) {
-                // แก้ไขผู้ใช้ที่มีอยู่ - ใช้ key ของ Firebase เป็น reference
-                database.ref('users/' + userId).update(userData)
-                    .then(() => {
-                        hideUserModal();
-                        
-                        // เพิ่มการแจ้งเตือน
-                        addNotification('แก้ไขผู้ใช้สำเร็จ', `แก้ไขข้อมูลผู้ใช้ ${username} เรียบร้อยแล้ว`, 'success');
-                        
-                        showAlert('success', 'อัพเดทสำเร็จ', 'อัพเดทข้อมูลผู้ใช้เรียบร้อยแล้ว');
-                        
-                        // โหลดข้อมูลผู้ใช้ใหม่
-                        loadUsers();
-                    })
-                    .catch(error => {
-                        console.error('Error updating user:', error);
-                        showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการอัพเดทข้อมูลผู้ใช้');
-                    });
-            } else {
-                // ตรวจสอบชื่อผู้ใช้ซ้ำก่อนเพิ่ม
-                const isDuplicate = users.some(user => user.username === username);
-                if (isDuplicate) {
-                    showAlert('error', 'ข้อมูลซ้ำ', 'ชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว กรุณาใช้ชื่ออื่น');
-                    return;
-                }
+        database.ref('users/' + userId).update(userData)
+            .then(() => {
+                hideUserModal();
+                hideLoading();
                 
-                // เพิ่มผู้ใช้ใหม่
-                userData.createdAt = new Date().toISOString();
-                userData.createdBy = currentUser.username;
+                // เพิ่มการแจ้งเตือน
+                addNotification('แก้ไขผู้ใช้สำเร็จ', `แก้ไขข้อมูลผู้ใช้ ${username} เรียบร้อยแล้ว`, 'success');
                 
-                database.ref('users').push(userData)
-                    .then((ref) => {
-                        hideUserModal();
-                        
-                        // เพิ่มการแจ้งเตือน
-                        addNotification('เพิ่มผู้ใช้สำเร็จ', `เพิ่มผู้ใช้ ${username} เรียบร้อยแล้ว`, 'success');
-                        
-                        showAlert('success', 'เพิ่มสำเร็จ', 'เพิ่มผู้ใช้ใหม่เรียบร้อยแล้ว');
-                        
-                        // โหลดข้อมูลผู้ใช้ใหม่
-                        loadUsers();
-                    })
-                    .catch(error => {
-                        console.error('Error adding user:', error);
-                        showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการเพิ่มผู้ใช้');
-                    });
-            }
-        }
+                showAlert('success', 'อัพเดทสำเร็จ', 'อัพเดทข้อมูลผู้ใช้เรียบร้อยแล้ว');
+                
+                // โหลดข้อมูลผู้ใช้ใหม่
+                loadUsers();
+            })
+            .catch(error => {
+                console.error('Error updating user:', error);
+                hideLoading();
+                showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการอัพเดทข้อมูลผู้ใช้');
+            });
+    } else {
+        // เพิ่มผู้ใช้ใหม่
+        showLoading('กำลังเพิ่มผู้ใช้ใหม่...');
         
-        // แก้ไขผู้ใช้
-        function editUser(userId) {
-            const user = users.find(u => u.id === userId);
+        userData.createdAt = new Date().toISOString();
+        userData.createdBy = currentUser.username;
+        userData.lastLogin = null;
+        
+        database.ref('users').push(userData)
+            .then((ref) => {
+                hideUserModal();
+                hideLoading();
+                
+                // เพิ่มการแจ้งเตือน
+                addNotification('เพิ่มผู้ใช้สำเร็จ', `เพิ่มผู้ใช้ ${username} เรียบร้อยแล้ว`, 'success');
+                
+                showAlert('success', 'เพิ่มสำเร็จ', 'เพิ่มผู้ใช้ใหม่เรียบร้อยแล้ว');
+                
+                // โหลดข้อมูลผู้ใช้ใหม่
+                loadUsers();
+            })
+            .catch(error => {
+                console.error('Error adding user:', error);
+                hideLoading();
+                showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการเพิ่มผู้ใช้');
+            });
+    }
+}
+
+// แก้ไขผู้ใช้
+function editUser(userId) {
+    const user = users.find(u => u.id === userId);
+    if (user) {
+        showUserModal(user);
+    } else {
+        showAlert('error', 'ไม่พบข้อมูล', 'ไม่พบข้อมูลผู้ใช้ที่ต้องการแก้ไข');
+    }
+}
+
+// แสดง Confirmation สำหรับลบผู้ใช้
+function showDeleteUserConfirm(userId, userName) {
+    if (!checkPermission('canManageUsers')) {
+        showAlert('error', 'ไม่มีสิทธิ์', 'ขออภัย คุณไม่มีสิทธิ์จัดการผู้ใช้');
+        return;
+    }
+    
+    // ตรวจสอบว่าผู้ใช้กำลังลบบัญชีตัวเองหรือไม่
+    const userToCheck = users.find(u => u.id === userId);
+    if (userToCheck && userToCheck.username === currentUser.username) {
+        showAlert('error', 'ไม่สามารถดำเนินการได้', 'ไม่สามารถลบบัญชีผู้ใช้ปัจจุบันได้');
+        return;
+    }
+    
+    userToDelete = userId;
+    
+    showConfirmation(
+        'ยืนยันการลบข้อมูลผู้ใช้',
+        `คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้ "${userName}"? การกระทำนี้ไม่สามารถย้อนกลับได้`,
+        'warning',
+        'ลบข้อมูล',
+        'ยกเลิก'
+    ).then(confirmed => {
+        if (confirmed) {
+            deleteUser();
+        } else {
+            userToDelete = null;
+        }
+    });
+}
+
+// ลบผู้ใช้
+function deleteUser() {
+    if (!userToDelete || !checkPermission('canManageUsers')) {
+        showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์ลบข้อมูลผู้ใช้');
+        return;
+    }
+    
+    showLoading('กำลังลบข้อมูลผู้ใช้...');
+    
+    database.ref('users/' + userToDelete).remove()
+        .then(() => {
+            hideLoading();
+            
+            // หาชื่อผู้ใช้จาก users array ก่อนที่จะถูกลบ
+            const user = users.find(u => u.id === userToDelete);
             if (user) {
-                showUserModal(user);
-            } else {
-                showAlert('error', 'ไม่พบข้อมูล', 'ไม่พบข้อมูลผู้ใช้ที่ต้องการแก้ไข');
+                addNotification('ลบผู้ใช้สำเร็จ', `ลบผู้ใช้ ${user.username} เรียบร้อยแล้ว`, 'info');
             }
-        }
+            
+            showAlert('success', 'ลบสำเร็จ', 'ลบข้อมูลผู้ใช้เรียบร้อยแล้ว');
+            userToDelete = null;
+            
+            // โหลดข้อมูลผู้ใช้ใหม่
+            loadUsers();
+        })
+        .catch(error => {
+            console.error('Error deleting user:', error);
+            hideLoading();
+            showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการลบข้อมูลผู้ใช้');
+            userToDelete = null;
+        });
+}
+
+// ==================== AUTHENTICATION FIXES ====================
+
+// ในฟังก์ชัน loginUser ต้องใช้ Firebase key ให้ถูกต้อง
+function loginUser(username, password) {
+    showLoading('กำลังตรวจสอบข้อมูลผู้ใช้...');
+    
+    const userRef = database.ref('users');
+    userRef.once('value').then(snapshot => {
+        const usersData = snapshot.val();
+        let userFound = null;
+        let firebaseKey = null;
         
-        // แสดง Confirmation สำหรับลบผู้ใช้
-        function showDeleteUserConfirm(userId, userName) {
-            if (!checkPermission('canManageUsers')) {
-                showAlert('error', 'ไม่มีสิทธิ์', 'ขออภัย คุณไม่มีสิทธิ์จัดการผู้ใช้');
-                return;
-            }
-            
-            // ตรวจสอบว่าผู้ใช้กำลังลบบัญชีตัวเองหรือไม่
-            const userToCheck = users.find(u => u.id === userId);
-            if (userToCheck && userToCheck.username === currentUser.username) {
-                showAlert('error', 'ไม่สามารถดำเนินการได้', 'ไม่สามารถลบบัญชีผู้ใช้ปัจจุบันได้');
-                return;
-            }
-            
-            userToDelete = userId;
-            
-            showConfirmation(
-                'ยืนยันการลบข้อมูลผู้ใช้',
-                `คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้ "${userName}"? การกระทำนี้ไม่สามารถย้อนกลับได้`,
-                'warning',
-                'ลบข้อมูล',
-                'ยกเลิก'
-            ).then(confirmed => {
-                if (confirmed) {
-                    deleteUser();
-                } else {
-                    userToDelete = null;
+        if (usersData) {
+            Object.keys(usersData).forEach(key => {
+                const user = usersData[key];
+                if (user.username === username && user.password === password) {
+                    userFound = user;
+                    firebaseKey = key; // เก็บ Firebase key
                 }
             });
         }
         
-        // ลบผู้ใช้
-        function deleteUser() {
-            if (!userToDelete || !checkPermission('canDelete')) {
-                showAlert('error', 'ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์ลบข้อมูลผู้ใช้');
-                return;
+        if (userFound) {
+            currentUser = {
+                id: firebaseKey, // ใช้ Firebase key ไม่ใช่ username
+                username: username,
+                role: userFound.role || 'user',
+                fullName: userFound.fullName || username
+            };
+            
+            console.log('Login successful for user:', currentUser);
+            
+            localStorage.setItem('inventoryUser', JSON.stringify(currentUser));
+            
+            database.ref('users/' + firebaseKey).update({
+                lastLogin: new Date().toISOString()
+            }).then(() => {
+                console.log('User login time updated:', username);
+            }).catch(error => {
+                console.error('Error updating user login time:', error);
+            });
+            
+            setTimeout(() => {
+                hideLoading();
+                showApp();
+                showAlert('success', 'ล็อกอินสำเร็จ', `ยินดีต้อนรับ ${username}!`);
+            }, 1000);
+            
+        } else {
+            hideLoading();
+            showAlert('error', 'ล็อกอินไม่สำเร็จ', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+        }
+    }).catch(error => {
+        console.error('Error checking user:', error);
+        hideLoading();
+        showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการตรวจสอบข้อมูลผู้ใช้');
+    });
+}
+
+// อัพเดทฟังก์ชัน showUserProfile
+function showUserProfile() {
+    if (!currentUser) return;
+    
+    const modal = document.getElementById('userProfileModal');
+    const profileUsername = document.getElementById('profileUsername');
+    const profileRoleBadge = document.getElementById('profileRoleBadge');
+    const profileFullName = document.getElementById('profileFullName');
+    const profileRole = document.getElementById('profileRole');
+    const profileEmail = document.getElementById('profileEmail');
+    const profileLastLogin = document.getElementById('profileLastLogin');
+    const profileCreatedAt = document.getElementById('profileCreatedAt');
+    
+    // หาข้อมูลผู้ใช้จาก users array
+    const userData = users.find(u => u.id === currentUser.id);
+    
+    if (userData) {
+        profileUsername.textContent = userData.username;
+        profileFullName.textContent = userData.fullName || 'ไม่ระบุ';
+        profileRole.textContent = getRoleDisplay(userData.role);
+        profileEmail.textContent = userData.email || 'ไม่ระบุ';
+        profileLastLogin.textContent = userData.lastLogin ? 
+            new Date(userData.lastLogin).toLocaleString('th-TH') : 'ไม่เคยล็อกอิน';
+        profileCreatedAt.textContent = userData.createdAt ? 
+            new Date(userData.createdAt).toLocaleDateString('th-TH') : 'ไม่ระบุ';
+        
+        let badgeClass = '';
+        let roleDisplay = '';
+        
+        switch(userData.role) {
+            case 'admin':
+                badgeClass = 'role-admin';
+                roleDisplay = 'ผู้ดูแลระบบ';
+                break;
+            case 'manager':
+                badgeClass = 'role-manager';
+                roleDisplay = 'ผู้จัดการ';
+                break;
+            case 'user':
+                badgeClass = 'role-user';
+                roleDisplay = 'ผู้ใช้ทั่วไป';
+                break;
+        }
+        
+        profileRoleBadge.innerHTML = `<span class="role-badge ${badgeClass}">${roleDisplay}</span>`;
+    } else {
+        // ถ้าไม่พบใน array แสดงข้อมูลจาก currentUser
+        profileUsername.textContent = currentUser.username;
+        profileFullName.textContent = currentUser.fullName || 'ไม่ระบุ';
+        profileRole.textContent = getRoleDisplay(currentUser.role);
+        profileEmail.textContent = 'ไม่ระบุ';
+        profileLastLogin.textContent = 'ไม่ระบุ';
+        profileCreatedAt.textContent = 'ไม่ระบุ';
+        
+        let badgeClass = '';
+        let roleDisplay = '';
+        
+        switch(currentUser.role) {
+            case 'admin':
+                badgeClass = 'role-admin';
+                roleDisplay = 'ผู้ดูแลระบบ';
+                break;
+            case 'manager':
+                badgeClass = 'role-manager';
+                roleDisplay = 'ผู้จัดการ';
+                break;
+            case 'user':
+                badgeClass = 'role-user';
+                roleDisplay = 'ผู้ใช้ทั่วไป';
+                break;
+        }
+        
+        profileRoleBadge.innerHTML = `<span class="role-badge ${badgeClass}">${roleDisplay}</span>`;
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+// เพิ่มฟังก์ชันสำหรับโหลดข้อมูลผู้ใช้ (เสริม)
+function loadUsers() {
+    return new Promise((resolve, reject) => {
+        const usersRef = database.ref('users');
+        
+        usersRef.on('value', (snapshot) => {
+            users = [];
+            const data = snapshot.val();
+            
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    const userData = data[key];
+                    if (userData && userData.username && userData.role) {
+                        users.push({
+                            id: key, // เก็บ Firebase key
+                            ...userData
+                        });
+                    }
+                });
             }
             
-            showLoading('กำลังลบข้อมูลผู้ใช้...');
-            
-            database.ref('users/' + userToDelete).remove()
-                .then(() => {
-                    hideLoading();
-                    
-                    // หาชื่อผู้ใช้จาก users array ก่อนที่จะถูกลบ
-                    const user = users.find(u => u.id === userToDelete);
-                    if (user) {
-                        addNotification('ลบผู้ใช้สำเร็จ', `ลบผู้ใช้ ${user.username} เรียบร้อยแล้ว`, 'info');
-                    }
-                    
-                    showAlert('success', 'ลบสำเร็จ', 'ลบข้อมูลผู้ใช้เรียบร้อยแล้ว');
-                    userToDelete = null;
-                    
-                    // โหลดข้อมูลผู้ใช้ใหม่
-                    loadUsers();
-                })
-                .catch(error => {
-                    console.error('Error deleting user:', error);
-                    hideLoading();
-                    showAlert('error', 'ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการลบข้อมูลผู้ใช้');
-                    userToDelete = null;
-                });
-        }
+            ensureDefaultUsers();
+            updateUsersTable();
+            resolve();
+        }, (error) => {
+            console.error('Error loading users:', error);
+            reject(error);
+        });
+    });
+}
+
+// ทำให้ฟังก์ชันสามารถเรียกใช้จาก onclick ใน HTML ได้
+window.editUser = editUser;
+window.showDeleteUserConfirm = showDeleteUserConfirm;
         
         // ==================== SETTINGS FUNCTIONS ====================
         
