@@ -524,20 +524,231 @@
             font-size: 24px;
             font-weight: bold;
             text-align: center;
-            display: none;
+        }
+        
+        /* Protection Warning */
+        .protection-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000000, #1a0000);
+            z-index: 9999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .protection-content {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            margin: 20px;
+            box-shadow: 0 0 50px rgba(220, 38, 38, 0.5);
         }
     </style>
     
-    <!-- Protection Script (ป้องกันการ inspect) -->
+    <!-- Protection Script (ป้องกันการ inspect และปิดหน้าต่างทันที) -->
     <script>
-        // ระบบป้องกันการเปิด Developer Tools และการตรวจสอบโค้ด
+        // ระบบป้องกันการเปิด Developer Tools และการตรวจสอบโค้ดอย่างเข้มงวด
         (function() {
             'use strict';
+            
+            // ตัวแปรสำหรับตรวจจับ Developer Tools
+            let devToolsOpened = false;
+            let detectionInterval = null;
+            let protectionActive = false;
+            
+            // ฟังก์ชันตรวจสอบ Developer Tools
+            function detectDevTools() {
+                if (protectionActive) return;
+                
+                const threshold = 160;
+                
+                // ตรวจสอบโดยใช้ความแตกต่างของขนาดหน้าต่าง
+                const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+                const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+                
+                // ตรวจสอบโดยใช้เวลาในการ execute script
+                const startTime = performance.now();
+                try {
+                    eval("debugger");
+                } catch(e) {}
+                const endTime = performance.now();
+                
+                const debuggerThreshold = endTime - startTime > 100;
+                
+                // ตรวจสอบ console object
+                const consoleThreshold = !!console.profile || !!console.memory;
+                
+                // ตรวจสอบโดยใช้ function constructor
+                const evalThreshold = eval.toString().length < 10 || 
+                                     Function.toString().length < 10;
+                
+                // ตรวจสอบ DevTools โดยใช้ error stack
+                let stackThreshold = false;
+                try {
+                    throw new Error();
+                } catch(e) {
+                    stackThreshold = e.stack && e.stack.includes("chrome-devtools") || 
+                                    e.stack && e.stack.includes("devtools");
+                }
+                
+                // หากตรวจพบเครื่องหมายใด ๆ ให้ถือว่าเปิด DevTools
+                if (widthThreshold || heightThreshold || debuggerThreshold || 
+                    consoleThreshold || evalThreshold || stackThreshold) {
+                    
+                    if (!devToolsOpened) {
+                        devToolsOpened = true;
+                        triggerProtection();
+                    }
+                }
+            }
+            
+            // ฟังก์ชันกระตุ้นการป้องกัน
+            function triggerProtection() {
+                if (protectionActive) return;
+                protectionActive = true;
+                
+                // ล้างการตรวจจับ
+                if (detectionInterval) {
+                    clearInterval(detectionInterval);
+                }
+                
+                // แสดงข้อความเตือน
+                showProtectionWarning();
+                
+                // ปิดหน้าต่างหลังจาก 2 วินาที
+                setTimeout(() => {
+                    try {
+                        // พยายามปิดหน้าต่าง
+                        if (window.close && !window.closed) {
+                            window.close();
+                        }
+                        
+                        // หากปิดไม่ได้ ให้ redirect ไปที่ about:blank
+                        if (!window.closed) {
+                            window.location.href = 'about:blank';
+                        }
+                        
+                        // พยายามปิดแท็บ
+                        if (document.body) {
+                            document.body.innerHTML = '';
+                        }
+                        if (document.head) {
+                            document.head.innerHTML = '';
+                        }
+                        
+                        // ลบข้อมูลทั้งหมด
+                        try {
+                            localStorage.clear();
+                            sessionStorage.clear();
+                            indexedDB.deleteDatabase('firebaseLocalStorageDb');
+                        } catch(e) {}
+                        
+                    } catch(e) {
+                        // หากไม่สามารถปิดได้ ให้ทำลายหน้าเว็บ
+                        try {
+                            if (document.documentElement) {
+                                document.documentElement.innerHTML = '';
+                                document.documentElement.style.display = 'none';
+                            }
+                            
+                            // พยายามเปิดหน้าต่างใหม่แล้วปิดตัวเอง
+                            try {
+                                const newWindow = window.open('', '_self', '');
+                                if (newWindow) {
+                                    newWindow.close();
+                                }
+                            } catch(e2) {
+                                // แสดงหน้าจอดำ
+                                if (document.body) {
+                                    document.body.innerHTML = `
+                                        <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:9999999;">
+                                            <div style="text-align:center;">
+                                                <div style="font-size:60px;margin-bottom:20px;">⚠️</div>
+                                                <div style="font-weight:bold;margin-bottom:10px;">ตรวจพบการเข้าถึงโค้ดระบบ!</div>
+                                                <div style="opacity:0.8;">หน้านี้ถูกปิดเนื่องจากความปลอดภัย</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        } catch(e3) {}
+                    }
+                }, 2000);
+            }
+            
+            // ฟังก์ชันแสดงคำเตือน
+            function showProtectionWarning() {
+                // ล้าง overlay เก่าถ้ามี
+                const oldOverlay = document.getElementById('protectionWarningOverlay');
+                if (oldOverlay) {
+                    oldOverlay.remove();
+                }
+                
+                // สร้าง overlay สำหรับคำเตือน
+                const overlay = document.createElement('div');
+                overlay.id = 'protectionWarningOverlay';
+                overlay.className = 'protection-warning';
+                
+                overlay.innerHTML = `
+                    <div class="protection-content">
+                        <div style="font-size: 60px; margin-bottom: 20px;">🚫</div>
+                        <h2 style="margin-bottom: 20px; font-size: 28px;">ตรวจพบการพยายามเข้าถึงโค้ดระบบ!</h2>
+                        <p style="font-size: 18px; margin-bottom: 20px;">การกระทำนี้ละเมิดนโยบายความปลอดภัยของระบบ</p>
+                        <p style="font-size: 16px; opacity: 0.8; margin-bottom: 30px;">หน้าต่างจะถูกปิดอัตโนมัติใน 2 วินาที</p>
+                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; font-family: monospace;">
+                            ERROR: SECURITY_VIOLATION_DETECTED
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(overlay);
+                
+                // เพิ่มเอฟเฟกต์กระพริบ
+                let blinkCount = 0;
+                const blinkInterval = setInterval(() => {
+                    overlay.style.opacity = overlay.style.opacity === '0.9' ? '1' : '0.9';
+                    blinkCount++;
+                    if (blinkCount > 10) {
+                        clearInterval(blinkInterval);
+                    }
+                }, 100);
+                
+                // เพิ่มเสียงเตือน (ถ้าเบราว์เซอร์อนุญาต)
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(100, audioContext.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(150, audioContext.currentTime + 0.2);
+                    
+                    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch(e) {
+                    // หากไม่สามารถเล่นเสียงได้ ให้ข้ามไป
+                }
+            }
             
             // ป้องกันการคลิกขวา
             document.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
-                showProtectionWarning();
+                triggerProtection();
                 return false;
             });
             
@@ -546,89 +757,81 @@
                 // ป้องกัน F12
                 if (e.key === 'F12' || e.keyCode === 123) {
                     e.preventDefault();
-                    showProtectionWarning();
+                    triggerProtection();
                     return false;
                 }
                 
                 // ป้องกัน Ctrl+Shift+I
                 if (e.ctrlKey && e.shiftKey && e.key === 'I') {
                     e.preventDefault();
-                    showProtectionWarning();
+                    triggerProtection();
                     return false;
                 }
                 
                 // ป้องกัน Ctrl+Shift+J
                 if (e.ctrlKey && e.shiftKey && e.key === 'J') {
                     e.preventDefault();
-                    showProtectionWarning();
+                    triggerProtection();
+                    return false;
+                }
+                
+                // ป้องกัน Ctrl+Shift+C
+                if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                    e.preventDefault();
+                    triggerProtection();
                     return false;
                 }
                 
                 // ป้องกัน Ctrl+U
                 if (e.ctrlKey && e.key === 'u') {
                     e.preventDefault();
-                    showProtectionWarning();
+                    triggerProtection();
                     return false;
                 }
                 
                 // ป้องกัน Ctrl+S
                 if (e.ctrlKey && e.key === 's') {
                     e.preventDefault();
-                    showProtectionWarning();
+                    triggerProtection();
+                    return false;
+                }
+                
+                // ป้องกัน Ctrl+W (ปิดแท็บ)
+                if (e.ctrlKey && e.key === 'w') {
+                    e.preventDefault();
+                    triggerProtection();
+                    return false;
+                }
+                
+                // ป้องกัน Alt+F4
+                if (e.altKey && e.key === 'F4') {
+                    e.preventDefault();
+                    triggerProtection();
+                    return false;
+                }
+                
+                // ป้องกัน Alt+Tab
+                if (e.altKey && e.key === 'Tab') {
+                    e.preventDefault();
+                    triggerProtection();
                     return false;
                 }
             });
             
-            // ตรวจจับการเปิด Developer Tools
-            let devToolsOpened = false;
-            const threshold = 160;
+            // ตรวจจับการเปิด Developer Tools โดยใช้ interval
+            detectionInterval = setInterval(detectDevTools, 100);
             
-            const checkDevTools = function() {
-                const width = window.outerWidth - window.innerWidth;
-                const height = window.outerHeight - window.innerHeight;
-                
-                if (width > threshold || height > threshold) {
-                    if (!devToolsOpened) {
-                        devToolsOpened = true;
-                        showProtectionWarning();
-                    }
-                } else {
-                    devToolsOpened = false;
-                }
-            };
+            // ตรวจจับเมื่อหน้าต่างเปลี่ยนขนาด
+            window.addEventListener('resize', detectDevTools);
             
-            // ตรวจสอบเป็นระยะ
-            setInterval(checkDevTools, 500);
-            
-            // ตรวจสอบเมื่อหน้าต่างเปลี่ยนขนาด
-            window.addEventListener('resize', checkDevTools);
-            
-            // ฟังก์ชันแสดงคำเตือน
-            function showProtectionWarning() {
-                const overlay = document.getElementById('protectionOverlay');
-                if (overlay) {
-                    overlay.style.display = 'flex';
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                    }, 3000);
-                }
-                
-                // บันทึกการพยายามเข้าถึง
-                try {
-                    if (typeof addNotification === 'function') {
-                        addNotification('ตรวจพบการพยายามเข้าถึงโค้ดระบบ', 'ระบบตรวจพบการพยายามเข้าถึงโค้ดโปรแกรม กรุณาอย่าทำการ inspect หรือเปิด developer tools', 'error');
-                    }
-                } catch(e) {}
-                
-                // ทำให้หน้าเว็บสับสน
-                document.body.style.transform = 'rotate(0.5deg)';
+            // ตรวจจับเมื่อ focus เปลี่ยน (บางเบราว์เซอร์เปิด DevTools ในหน้าต่างแยก)
+            window.addEventListener('blur', function() {
                 setTimeout(() => {
-                    document.body.style.transform = 'rotate(-0.5deg)';
-                    setTimeout(() => {
-                        document.body.style.transform = 'rotate(0deg)';
-                    }, 100);
+                    if (document.hidden || document.visibilityState === 'hidden') {
+                        detectDevTools();
+                    }
                 }, 100);
-            }
+            });
             
             // ป้องกันการดึงโค้ดผ่าน console
             Object.defineProperty(window, 'console', {
@@ -637,42 +840,90 @@
                 configurable: false
             });
             
-            // ซ่อนฟังก์ชันสำคัญ
-            const originalLog = console.log;
-            console.log = function() {
-                // ไม่แสดงข้อมูลสำคัญใน console
-                const args = Array.from(arguments);
-                const sensitiveKeywords = ['password', 'secret', 'key', 'token', 'firebase', 'database'];
-                
-                for (let arg of args) {
-                    if (typeof arg === 'string') {
-                        for (let keyword of sensitiveKeywords) {
-                            if (arg.toLowerCase().includes(keyword)) {
-                                showProtectionWarning();
-                                return;
-                            }
-                        }
-                    }
-                }
-                
-                originalLog.apply(console, args);
+            // ซ่อนฟังก์ชัน console สำคัญ
+            const originalConsole = {
+                log: console.log,
+                warn: console.warn,
+                error: console.error,
+                info: console.info,
+                debug: console.debug
             };
             
-            // สร้าง overlay สำหรับคำเตือน
-            const overlay = document.createElement('div');
-            overlay.id = 'protectionOverlay';
-            overlay.className = 'protection-overlay';
-            overlay.innerHTML = `
-                <div style="background: linear-gradient(135deg, #dc2626, #991b1b); padding: 40px; border-radius: 20px; max-width: 500px; margin: 20px;">
-                    <i class="fas fa-shield-alt" style="font-size: 60px; margin-bottom: 20px;"></i>
-                    <h2 style="margin-bottom: 20px;">ตรวจพบการพยายามเข้าถึงโค้ดระบบ!</h2>
-                    <p style="font-size: 18px; margin-bottom: 20px;">กรุณาอย่าทำการ inspect หรือเปิด developer tools</p>
-                    <p style="font-size: 16px; opacity: 0.8;">การกระทำนี้อาจทำให้ระบบถูกระงับการใช้งาน</p>
-                </div>
-            `;
-            document.body.appendChild(overlay);
+            console.log = function() {
+                triggerProtection();
+                return originalConsole.log.apply(console, arguments);
+            };
             
-            console.log('ระบบป้องกันโค้ดได้เริ่มทำงานแล้ว');
+            console.warn = function() {
+                triggerProtection();
+                return originalConsole.warn.apply(console, arguments);
+            };
+            
+            console.error = function() {
+                triggerProtection();
+                return originalConsole.error.apply(console, arguments);
+            };
+            
+            console.info = function() {
+                triggerProtection();
+                return originalConsole.info.apply(console, arguments);
+            };
+            
+            console.debug = function() {
+                triggerProtection();
+                return originalConsole.debug.apply(console, arguments);
+            };
+            
+            // ป้องกันการเข้าถึง document.write
+            const originalWrite = document.write;
+            document.write = function() {
+                triggerProtection();
+                return originalWrite.apply(this, arguments);
+            };
+            
+            // ป้องกันการเข้าถึง document.writeln
+            const originalWriteLn = document.writeln;
+            document.writeln = function() {
+                triggerProtection();
+                return originalWriteLn.apply(this, arguments);
+            };
+            
+            // แสดงข้อความเมื่อระบบป้องกันทำงาน
+            originalConsole.log('🔒 ระบบป้องกันความปลอดภัยได้เริ่มทำงานแล้ว');
+            originalConsole.log('⚠️ คำเตือน: การเปิด Developer Tools จะทำให้หน้าต่างถูกปิดทันที');
+            originalConsole.log('👤 บัญชีทดสอบ: admin / admin123, manager / manager123, user / user123');
+            
+            // จับข้อผิดพลาดทั้งหมด
+            window.onerror = function(message, source, lineno, colno, error) {
+                if (message && (
+                    message.includes('debugger') || 
+                    message.includes('DevTools') || 
+                    message.includes('inspect') ||
+                    message.includes('chrome-devtools')
+                )) {
+                    triggerProtection();
+                }
+                return false;
+            };
+            
+            // ป้องกันการ inspect element โดยตรง
+            document.addEventListener('DOMContentLoaded', function() {
+                // เพิ่มการป้องกันเพิ่มเติมหลังจากหน้าโหลดเสร็จ
+                Object.defineProperty(document, 'hidden', {
+                    get: function() {
+                        detectDevTools();
+                        return false;
+                    }
+                });
+                
+                Object.defineProperty(document, 'visibilityState', {
+                    get: function() {
+                        detectDevTools();
+                        return 'visible';
+                    }
+                });
+            });
+            
         })();
     </script>
 </head>
@@ -759,7 +1010,7 @@
                 </form>
                 
                 <!-- Demo Accounts -->
-                <!-- <div class="mt-8 pt-6 border-t border-gray-700 animate__animated animate__fadeIn animate__delay-5s">
+                <div class="mt-8 pt-6 border-t border-gray-700 animate__animated animate__fadeIn animate__delay-5s">
                     <h3 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
                         <i class="fas fa-info-circle mr-2 text-yellow-400"></i> บัญชีสำหรับทดสอบระบบ:
                     </h3>
@@ -777,7 +1028,7 @@
                             <p class="text-gray-400 text-xs mt-1">สามารถใช้งานได้ทุกฟังก์ชัน รวมถึงการลบข้อมูลและจัดการผู้ใช้</p>
                         </div>
                     </div>
-                </div> -->
+                </div>
                 
                 <!-- System Status -->
                 <div class="mt-6 p-3 bg-gray-900/30 rounded-lg animate__animated animate__fadeIn animate__delay-6s">
